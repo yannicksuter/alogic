@@ -1,9 +1,132 @@
 package ch.archilogic.render;
 
-import ch.archilogic.object.ObjectGraph;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.GraphicsConfiguration;
 
-public class GraphRenderer {
-	public void draw(ObjectGraph objTree) {
+import javax.media.j3d.*;
+import javax.vecmath.*;
+
+import com.sun.j3d.utils.behaviors.mouse.*;
+import com.sun.j3d.utils.geometry.*;
+import com.sun.j3d.utils.universe.*;
+
+import ch.archilogic.object.ObjectGraph;
+import ch.archilogic.solver.Solver;
+
+public class GraphRenderer extends Canvas3D {
+	private Solver solver = null;
+
+	ObjectGraph graph = new ObjectGraph();
+
+	private static final long serialVersionUID = 1091353214144552939L;
+
+	public void setSolver(Solver solver) {
+		this.solver = solver;
+	}
+
+	public GraphRenderer(GraphicsConfiguration config) {
+		super(config);
+		// new SimpleUniverse(this);
+
+		// Create the content branch and add it to the universe
+		// graph.create();
+
+		BranchGroup bg = createSceneGraph(this);
+		bg.compile();
+		SimpleUniverse su = new SimpleUniverse(this);
+		su.getViewingPlatform().setNominalViewingTransform();
+		su.addBranchGraph(bg);
+	}
+
+	@Override
+	public void preRender() {
+		super.preRender();
+
+		J3DGraphics2D g2D = getGraphics2D();
+		Dimension d = getSize();
 		
+		GradientPaint gp = new GradientPaint(0, 0, new Color(192, 192, 172),
+				d.width, d.height, new Color(113, 113, 100), true);
+		g2D.setPaint(gp);
+		g2D.fillRect(0, 0, d.width, d.height);
+
+		if (solver != null) {
+			g2D.setColor(Color.WHITE);
+			int l = g2D.getFontMetrics().charWidth('-');
+			int h = g2D.getFontMetrics().getHeight();
+			g2D.drawString("ArchLogic::" + solver.getDescription(), l, h);
+			g2D.drawString(solver.getStatus().getDescription(), l, h * 2 - 2);
+		}
+
+//		g2D.flush(true);
+	}
+
+	private BranchGroup createSceneGraph(Canvas3D cv) {
+		BranchGroup root = new BranchGroup();
+		TransformGroup spin = new TransformGroup();
+		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		root.addChild(spin);
+
+		// appearance
+		Appearance ap = new Appearance();
+		ap.setMaterial(new Material());
+
+//		for (int i = 0; i < 1; i++) {
+//			double x = 0.1 * i;
+//			double y = -0.05 * i;
+//
+//			Transform3D tr = new Transform3D();
+//			tr.setTranslation(new Vector3d(x, y, 0));
+//			tr.setScale(0.03);
+//
+//			Box box = new Box();
+//			box.setAppearance(ap);
+//			TransformGroup Tg = new TransformGroup(tr);
+//			Tg.addChild(box);
+//			spin.addChild(Tg);
+//		}
+		
+		spin.addChild(graph.getShape());
+
+		// rotation
+		MouseRotate rotator = new MouseRotate(spin);
+		BoundingSphere bounds = new BoundingSphere();
+		rotator.setSchedulingBounds(bounds);
+		spin.addChild(rotator);
+
+		// translation
+		MouseTranslate translator = new MouseTranslate(spin);
+		translator.setSchedulingBounds(bounds);
+		spin.addChild(translator);
+
+		// zoom
+		MouseZoom zoom = new MouseZoom(spin);
+		zoom.setSchedulingBounds(bounds);
+		spin.addChild(zoom);
+
+		// <background and light>
+		BoundingSphere bound = new BoundingSphere();
+		Background background = new Background(0.0f, 0.0f, 0.0f);
+		background.setApplicationBounds(bound);
+		root.addChild(background);
+		AmbientLight light = new AmbientLight(true, new Color3f(Color.cyan));
+
+		light.setInfluencingBounds(bound);
+		root.addChild(light);
+		PointLight ptlight = new PointLight(new Color3f(Color.green),
+				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
+		ptlight.setInfluencingBounds(bound);
+		root.addChild(ptlight);
+
+		PointLight ptlight2 = new PointLight(new Color3f(Color.yellow),
+				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
+		ptlight2.setInfluencingBounds(bound);
+		root.addChild(ptlight2);
+		// </background and light>
+
+		return root;
 	}
 }
