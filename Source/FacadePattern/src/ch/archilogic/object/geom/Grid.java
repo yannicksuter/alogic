@@ -16,6 +16,11 @@ public class Grid extends ObjectDef {
 	public Grid() {
 		setType(ObjectType.OBJ_GRID);
 	}
+
+	public float getJitter(float base) {
+		float b2 = base*0.1f;
+		return ((float)Math.random()-0.5f)*b2;
+	}
 	
 	@Override
 	public void create() {
@@ -24,7 +29,10 @@ public class Grid extends ObjectDef {
 		points = new Point3f[nbSegments+1][nbSegments+1];
 		for (int u=0; u<=nbSegments;u++) {
 			for (int v=0; v<=nbSegments;v++) {
-				points[u][v] = new Point3f(u*segSize-segHalf, v*segSize-segHalf, (float)(Math.sin((u*0.05)*Math.PI)*Math.cos((v*0.05)*Math.PI))*0.1f);
+				points[u][v] = new Point3f(
+						u*segSize-segHalf+getJitter(segSize), 
+						v*segSize-segHalf+getJitter(segSize), 
+						(float)(Math.sin((u*0.05)*Math.PI)*Math.cos((v*0.05)*Math.PI))*0.1f+getJitter(segSize));
 			}
 		}
 	}
@@ -46,11 +54,6 @@ public class Grid extends ObjectDef {
 				grid.setCoordinate(pointCnt++, points[u][v]);
 			}
 		}
-		
-//	        Color3f c = new Color3f(0.1f, 0.8f, 0.1f);
-//	        for (int i = 0; i < 44; i++)
-//	          landGeom.setColor(i, c);
-		
 		return grid;
 	}
 
