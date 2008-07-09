@@ -73,23 +73,8 @@ public class GraphRenderer extends Canvas3D {
 		// appearance
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
-
-//		for (int i = 0; i < 1; i++) {
-//			double x = 0.1 * i;
-//			double y = -0.05 * i;
-//
-//			Transform3D tr = new Transform3D();
-//			tr.setTranslation(new Vector3d(x, y, 0));
-//			tr.setScale(0.03);
-//
-//			Box box = new Box();
-//			box.setAppearance(ap);
-//			TransformGroup Tg = new TransformGroup(tr);
-//			Tg.addChild(box);
-//			spin.addChild(Tg);
-//		}
 		
-		spin.addChild(graph.getShape());
+//		spin.addChild(graph.getShape());
 
 		// rotation
 		MouseRotate rotator = new MouseRotate(spin);

@@ -1,11 +1,9 @@
 package ch.archilogic.solver;
 
 import ch.archilogic.export.Exporter;
-import ch.archilogic.object.Frame;
 import ch.archilogic.object.ObjectGraph;
 
 public class SimpleRandomPatternSolver implements Solver {
-	private Frame base;
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objTree = null;
 	
@@ -16,11 +14,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	public ObjectGraph getObjectGraph() {
 		return objTree;
 	}
-	
-	public void setFrame(Frame base) {
-		this.base = base;
-	}
-	
+		
 	public SolverState getStatus() {
 		return status;
 	}

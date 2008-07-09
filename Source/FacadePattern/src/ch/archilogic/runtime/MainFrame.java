@@ -9,9 +9,7 @@ package ch.archilogic.runtime;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.vecmath.Point2f;
 
-import ch.archilogic.object.geom.Rect;
 import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.solver.SimpleRandomPatternSolver;
 import ch.archilogic.solver.Solver;

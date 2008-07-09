@@ -8,5 +8,6 @@ public enum ObjectType {
 	OBJ_TRISTRIP,
 	OBJ_QUAD,
 	OBJ_QUADSTRIP,
-	OBJ_POLY
+	OBJ_POLY,
+	OBJ_GRID
 }
