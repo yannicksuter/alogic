@@ -12,6 +12,7 @@ import com.sun.j3d.utils.behaviors.mouse.*;
 import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.universe.*;
 
+import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
 import ch.archilogic.solver.Solver;
 
@@ -25,13 +26,12 @@ public class GraphRenderer extends Canvas3D {
 	public void setSolver(Solver solver) {
 		this.solver = solver;
 	}
-
+	
 	public GraphRenderer(GraphicsConfiguration config) {
 		super(config);
-		// new SimpleUniverse(this);
 
-		// Create the content branch and add it to the universe
-		// graph.create();
+		// Initialize the graph
+		graph.create();
 
 		BranchGroup bg = createSceneGraph(this);
 		bg.compile();
@@ -74,7 +74,10 @@ public class GraphRenderer extends Canvas3D {
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
 		
-//		spin.addChild(graph.getShape());
+		ObjectDef obj = graph.getObject(0);
+		if (obj != null) {
+			spin.addChild(obj.getShape(true, false));
+		}
 
 		// rotation
 		MouseRotate rotator = new MouseRotate(spin);

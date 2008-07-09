@@ -9,6 +9,16 @@ public class ObjectGraph {
 	List<ObjectDef> childs = new ArrayList<ObjectDef>();
 
 	public void create() {
+		Grid grid = new Grid();
+		grid.create();
+		
 		childs.add(new Grid());
+	}
+	
+	public ObjectDef getObject(int i) {
+		if (i < childs.size()) {
+			return childs.get(i);
+		}
+		return null;
 	}
 }

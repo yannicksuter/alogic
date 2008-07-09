@@ -14,6 +14,9 @@ public class ObjectDef {
 		this.type = type;
 	}
 	
+	public void create() {
+	}
+	
 	public Geometry createWireframe() {
 		return null;
 	}
