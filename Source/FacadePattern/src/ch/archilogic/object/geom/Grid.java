@@ -19,7 +19,7 @@ public class Grid extends ObjectDef {
 
 	public float getJitter(float base) {
 		float b2 = base*0.1f;
-		return ((float)Math.random()-0.5f)*b2;
+		return ((float)Math.random()-0.55f)*b2;
 	}
 	
 	@Override
