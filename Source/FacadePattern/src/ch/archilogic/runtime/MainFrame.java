@@ -1,12 +1,5 @@
 package ch.archilogic.runtime;
 
-/*
- * HelloUniverse.java
- * Copyright (c) 2006 Sun Microsystems, Inc.
-
- * Simple Java 3D example program to display a spinning cube.
- */
-
 import java.awt.*;
 import javax.swing.*;
 
