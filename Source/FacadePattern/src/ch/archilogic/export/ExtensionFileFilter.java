@@ -31,7 +31,7 @@ public class ExtensionFileFilter extends FileFilter {
 		String[] extensions = new String[] { extension };
 		String filename = getFileName(initialDirectory, description,
 				extensions, mode);
-		if (!filename.endsWith(extension)) {
+		if (filename!=null && !filename.endsWith(extension)) {
 			filename += ("." + extension);
 		}
 		return filename;

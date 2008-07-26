@@ -29,6 +29,7 @@ public class MainFrame extends JFrame {
     	    	// export object to DXF
     	    	DXFExporter exporter = new DXFExporter();
     	    	String fileName = ExtensionFileFilter.getFileName("c:\\", "Save object to DXF", exporter.getFileSuffix(), ExtensionFileFilter.SAVE);
+    	    	if (fileName!=null)
     	    	solver.export(exporter, fileName);
     	    }
     	    else if (keyCode == KeyEvent.VK_F2) {
