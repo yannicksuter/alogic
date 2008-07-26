@@ -7,7 +7,7 @@ import java.awt.event.KeyListener;
 import javax.swing.*;
 
 import ch.archilogic.export.ConsoleExporter;
-import ch.archilogic.export.DXFExporter;
+import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
 import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.solver.SimpleRandomPatternSolver;
@@ -27,7 +27,7 @@ public class MainFrame extends JFrame {
     		int keyCode = keyEvent.getKeyCode();
     	    if (keyCode == KeyEvent.VK_F1) {
     	    	// export object to DXF
-    	    	DXFExporter exporter = new DXFExporter();
+    	    	ObjExporter exporter = new ObjExporter();
     	    	String fileName = ExtensionFileFilter.getFileName("c:\\", "Save object to DXF", exporter.getFileSuffix(), ExtensionFileFilter.SAVE);
     	    	if (fileName!=null)
     	    	solver.export(exporter, fileName);
@@ -47,6 +47,7 @@ public class MainFrame extends JFrame {
 		this.solver = solver;
 		if (renderer != null) {
 			renderer.setSolver(solver);
+			renderer.initialize();
 		}
 	}
 
@@ -74,40 +75,19 @@ public class MainFrame extends JFrame {
 
 		pack();
 	}
-/*
-	@Override
-	public void keyPressed(KeyEvent evt) {
-		int keyCode = evt.getKeyCode();
-	    if (keyCode == KeyEvent.VK_F1) {
-	    	// export object to DXF
-	    	DXFExporter exporter = new DXFExporter();
-	    	String fileName = ExtensionFileFilter.getFileName("c:\\", "Save object to DXF", exporter.getFileSuffix(), ExtensionFileFilter.SAVE);
-	    	exporter.write(fileName, null);
-	    }
-	    else if (keyCode == KeyEvent.VK_F2) {
-	    	// export object to console (debugging)
-	    	ConsoleExporter exporter = new ConsoleExporter();
-	    	exporter.write(null, null);
-	    }
-	}
 
-	@Override
-	public void keyReleased(KeyEvent arg0) {
-	}
-
-	@Override
-	public void keyTyped(KeyEvent arg0) {
-	}
-*/
 	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				// initialize the solver
 				Solver solver = new SimpleRandomPatternSolver();
+				solver.initialize();
+				solver.think();
 				
-				MainFrame window = new MainFrame();
-				window.setVisible(true);
+				MainFrame window = new MainFrame();				
 				window.setSolver(solver);
+				
+				window.setVisible(true);
 			}
 		});
 	}

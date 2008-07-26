@@ -1,31 +1,44 @@
 package ch.archilogic.solver;
 
+import com.sun.j3d.loaders.objectfile.ObjectFile;
+
 import ch.archilogic.export.Exporter;
 import ch.archilogic.object.ObjectGraph;
+import ch.archilogic.object.geom.Grid;
 
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
-	private ObjectGraph objTree = null;
+	private ObjectGraph objGraph = null;
 	
 	public String getDescription() {
 		return String.format("Simple Random Pattern Solver");
 	}
 
 	public ObjectGraph getObjectGraph() {
-		return objTree;
+		return objGraph;
 	}
 		
 	public SolverState getStatus() {
 		return status;
 	}
+
+	public void addReference(ObjectFile obj) {
+	}
+	
+	public void initialize() {
+		objGraph = new ObjectGraph();
+
+		// test
+		objGraph.addChild(new Grid());
+	}
 	
 	public void think() {
 		status = SolverState.THINKING;
-		
+				
 		status = SolverState.IDLE;
 	}
 
 	public void export(Exporter exporter, String filename) {
-		exporter.write(filename, objTree);
+		exporter.write(filename, objGraph);
 	}
 }

@@ -2,6 +2,7 @@ package ch.archilogic.object;
 
 import javax.media.j3d.Geometry;
 import javax.media.j3d.Shape3D;
+import javax.vecmath.Point3f;
 
 public class ObjectDef {
 	private ObjectType type;
@@ -15,6 +16,22 @@ public class ObjectDef {
 	}
 	
 	public void create() {
+	}
+
+	public int getVerticeNb() {
+		return 0;
+	}
+	
+	public Point3f getVertice(int i) {
+		return null;
+	}
+	
+	public int getFaceNb() {
+		return 0;
+	}
+
+	public int [] getFace(int i) {
+		return null;
 	}
 	
 	public Geometry createWireframe() {

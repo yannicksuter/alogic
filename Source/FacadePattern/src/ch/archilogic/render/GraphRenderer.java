@@ -9,7 +9,6 @@ import javax.media.j3d.*;
 import javax.vecmath.*;
 
 import com.sun.j3d.utils.behaviors.mouse.*;
-import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.universe.*;
 
 import ch.archilogic.object.ObjectDef;
@@ -19,8 +18,6 @@ import ch.archilogic.solver.Solver;
 public class GraphRenderer extends Canvas3D {
 	private Solver solver = null;
 
-	ObjectGraph graph = new ObjectGraph();
-
 	private static final long serialVersionUID = 1091353214144552939L;
 
 	public void setSolver(Solver solver) {
@@ -29,17 +26,16 @@ public class GraphRenderer extends Canvas3D {
 	
 	public GraphRenderer(GraphicsConfiguration config) {
 		super(config);
+	}
 
-		// Initialize the graph
-		graph.create();
-
+	public void initialize() {
 		BranchGroup bg = createSceneGraph(this);
 		bg.compile();
 		SimpleUniverse su = new SimpleUniverse(this);
 		su.getViewingPlatform().setNominalViewingTransform();
 		su.addBranchGraph(bg);
 	}
-
+	
 	@Override
 	public void preRender() {
 		super.preRender();
@@ -74,6 +70,7 @@ public class GraphRenderer extends Canvas3D {
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
 		
+		ObjectGraph graph = solver.getObjectGraph();
 		ObjectDef obj = graph.getObject(0);
 		if (obj != null) {
 			spin.addChild(obj.getShape(true, false));

@@ -38,6 +38,42 @@ public class Grid extends ObjectDef {
 	}
 
 	@Override
+	public int getVerticeNb() {
+		return points.length*points.length;
+	}
+
+	@Override
+	public Point3f getVertice(int i) {
+		int v = i % (nbSegments+1);
+		int u = (i-v) / (nbSegments+1);
+		if ((u >= 0 && u <= nbSegments) && (v >= 0 && v <= nbSegments)) {
+			return points[v][u];			
+		}
+		return null;
+	}
+	
+	@Override
+	public int getFaceNb() {
+		return nbSegments*nbSegments;
+	}
+
+	@Override
+	public int [] getFace(int i) {
+		if (i>=0 && i<=getFaceNb()+1) {
+			int v = i % (nbSegments);
+			int u = (i-v) / (nbSegments);
+						
+			int [] faces = new int[4];
+			faces[0] = (u)*(nbSegments+1)+(v);
+			faces[1] = (u)*(nbSegments+1)+(v+1);
+			faces[2] = (u+1)*(nbSegments+1)+(v+1);
+			faces[3] = (u+1)*(nbSegments+1)+(v);
+			return faces;
+		}
+		return null;
+	}
+	
+	@Override
 	public Geometry createWireframe() {
 		create();
 		LineArray grid = new LineArray(nbSegments*nbSegments*4*2, GeometryArray.COORDINATES /*| GeometryArray.COLOR_3*/);

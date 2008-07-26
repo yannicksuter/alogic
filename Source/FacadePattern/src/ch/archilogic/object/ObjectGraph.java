@@ -7,12 +7,9 @@ import ch.archilogic.object.geom.Grid;
 
 public class ObjectGraph {
 	List<ObjectDef> childs = new ArrayList<ObjectDef>();
-
-	public void create() {
-		Grid grid = new Grid();
-		grid.create();
-		
-		childs.add(new Grid());
+	
+	public void addChild(ObjectDef obj) {
+		childs.add(new Grid());		
 	}
 	
 	public ObjectDef getObject(int i) {

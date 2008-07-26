@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 
 import ch.archilogic.object.ObjectGraph;
 
-public class DXFExporter implements Exporter {
+public class ObjExporter implements Exporter {
 	public String getFileSuffix() {
 		return "dxf";
 	}
