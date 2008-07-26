@@ -4,5 +4,5 @@ import ch.archilogic.object.ObjectGraph;
 
 public interface Exporter {
 	public String getFileSuffix();
-	public void write(String filename, ObjectGraph objTree);
+	public void write(String filename, ObjectGraph objGraph);
 }

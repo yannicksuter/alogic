@@ -5,18 +5,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
-/**
- * A FileFilter that lets you specify which file extensions will be displayed.
- * Also includes a static getFileName method that users can call to pop up a
- * JFileChooser for a set of file extensions.
- * <P>
- * Adapted from Sun SwingSet demo.
- * 
- * Taken from Core Web Programming from Prentice Hall and Sun Microsystems
- * Press, http://www.corewebprogramming.com/. &copy; 2001 Marty Hall and Larry
- * Brown; may be freely used or adapted.
- */
-
 public class ExtensionFileFilter extends FileFilter {
 	public static final int LOAD = 0;
 	public static final int SAVE = 1;
@@ -39,12 +27,12 @@ public class ExtensionFileFilter extends FileFilter {
 		return (getFileName(initialDirectory, description, extensions, LOAD));
 	}
 
-	public static String getFileName(String initialDirectory,
-			String description, String extension, int mode) {
+	public static String getFileName(String initialDirectory, String description, String extension, int mode) {
 		String[] extensions = new String[] { extension };
-		String filename = getFileName(initialDirectory, description, extensions, mode);
-		if ( !filename.endsWith(extension) ) {
-			filename += ("."+extension);
+		String filename = getFileName(initialDirectory, description,
+				extensions, mode);
+		if (!filename.endsWith(extension)) {
+			filename += ("." + extension);
 		}
 		return filename;
 	}
@@ -63,7 +51,8 @@ public class ExtensionFileFilter extends FileFilter {
 		}
 		JFileChooser chooser = new JFileChooser(initialDirectory);
 		chooser.setFileFilter(filter);
-		int selectVal = (mode == SAVE) ? chooser.showSaveDialog(null) : chooser.showOpenDialog(null);
+		int selectVal = (mode == SAVE) ? chooser.showSaveDialog(null) : chooser
+				.showOpenDialog(null);
 		if (selectVal == JFileChooser.APPROVE_OPTION) {
 			String path = chooser.getSelectedFile().getAbsolutePath();
 			return (path);
@@ -79,7 +68,8 @@ public class ExtensionFileFilter extends FileFilter {
 		}
 		if (!extensionsTable.containsKey(extension)) {
 			extensionsTable.put(extension, new Boolean(caseInsensitive));
-			if (extension.equals("*") || extension.equals("*.*") || extension.equals(".*")) {
+			if (extension.equals("*") || extension.equals("*.*")
+					|| extension.equals(".*")) {
 				allowAll = true;
 			}
 		}
