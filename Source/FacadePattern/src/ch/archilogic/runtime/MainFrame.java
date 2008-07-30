@@ -28,7 +28,7 @@ public class MainFrame extends JFrame {
     	    if (keyCode == KeyEvent.VK_F1) {
     	    	// export object to DXF
     	    	ObjExporter exporter = new ObjExporter();
-    	    	String fileName = ExtensionFileFilter.getFileName("c:\\", "Save object to DXF", exporter.getFileSuffix(), ExtensionFileFilter.SAVE);
+    	    	String fileName = ExtensionFileFilter.getFileName("c:\\", "Save object to OBJ", exporter.getFileSuffix(), ExtensionFileFilter.SAVE);
     	    	if (fileName!=null)
     	    	solver.export(exporter, fileName);
     	    }

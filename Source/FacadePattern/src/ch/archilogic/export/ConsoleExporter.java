@@ -26,7 +26,7 @@ public class ConsoleExporter implements Exporter {
 		// export faces
 		for (int i=0; i<obj.getFaceNb();i++) {
 			int [] faceList = obj.getFace(i);
-			System.out.println(String.format("f: %d %d %d %d", faceList[0], faceList[1], faceList[2], faceList[3]));
+			System.out.println(String.format("f: %d %d %d %d", faceList[0]+1, faceList[1]+1, faceList[2]+1, faceList[3]+1));
 		}
 	}
 }
