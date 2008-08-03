@@ -4,8 +4,10 @@ import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
 import ch.archilogic.object.ObjectGraph;
+import ch.archilogic.object.geom.BoundingBox;
 import ch.archilogic.object.geom.BoxObj;
 import ch.archilogic.object.geom.GridObj;
+import ch.archilogic.runtime.exception.FaceException;
 
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
@@ -29,6 +31,13 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void initialize() {
 		objGraph = new ObjectGraph();
 
+		BoundingBox box = new BoundingBox();
+		try {
+			box.create();
+		} catch (FaceException e) {
+			e.printStackTrace();
+		}
+		
 		// test
 //		objGraph.addChild(new GridObj());
 		objGraph.addChild(new BoxObj());
