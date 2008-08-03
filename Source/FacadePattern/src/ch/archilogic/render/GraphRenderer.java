@@ -13,6 +13,7 @@ import com.sun.j3d.utils.universe.*;
 
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
+import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.Solver;
 
 public class GraphRenderer extends Canvas3D {
@@ -69,11 +70,15 @@ public class GraphRenderer extends Canvas3D {
 		// appearance
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
-		
-		ObjectGraph graph = solver.getObjectGraph();
-		ObjectDef obj = graph.getObject(0);
-		if (obj != null) {
-			spin.addChild(obj.getShape(true, false));
+			
+		try {
+			ObjectGraph graph = solver.getObjectGraph();
+			ObjectDef obj = graph.getObject(0);
+			if (obj != null) {
+				spin.addChild(obj.getShape(true, false));
+			}
+		} catch (FaceException e) {
+			e.printStackTrace();
 		}
 
 		// rotation

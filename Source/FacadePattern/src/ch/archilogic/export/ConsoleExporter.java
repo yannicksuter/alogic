@@ -1,7 +1,10 @@
 package ch.archilogic.export;
 
+import java.util.List;
+
 import javax.vecmath.Point3f;
 
+import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
 
@@ -25,8 +28,9 @@ public class ConsoleExporter implements Exporter {
 
 		// export faces
 		for (int i=0; i<obj.getFaceNb();i++) {
-			int [] faceList = obj.getFace(i);
-			System.out.println(String.format("f: %d %d %d %d", faceList[0]+1, faceList[1]+1, faceList[2]+1, faceList[3]+1));
+			Face face = obj.getFace(i);		
+			List<Integer> faceList = face.getIndices();
+			System.out.println(String.format("f: %d %d %d %d", faceList.get(0)+1, faceList.get(1)+1, faceList.get(2)+1, faceList.get(3)+1));
 		}
 	}
 }

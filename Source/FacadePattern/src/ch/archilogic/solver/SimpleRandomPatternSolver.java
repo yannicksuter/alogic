@@ -4,7 +4,7 @@ import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
 import ch.archilogic.object.ObjectGraph;
-import ch.archilogic.object.geom.Grid;
+import ch.archilogic.object.geom.GridObj;
 
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
@@ -29,7 +29,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		objGraph = new ObjectGraph();
 
 		// test
-		objGraph.addChild(new Grid());
+		objGraph.addChild(new GridObj());
 	}
 	
 	public void think() {

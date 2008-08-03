@@ -3,13 +3,13 @@ package ch.archilogic.object;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.archilogic.object.geom.Grid;
+import ch.archilogic.object.geom.GridObj;
 
 public class ObjectGraph {
 	List<ObjectDef> childs = new ArrayList<ObjectDef>();
 	
 	public void addChild(ObjectDef obj) {
-		childs.add(new Grid());		
+		childs.add(new GridObj());		
 	}
 	
 	public ObjectDef getObject(int i) {
