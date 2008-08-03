@@ -3,20 +3,14 @@ package ch.archilogic.object.geom;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Geometry;
-import javax.media.j3d.GeometryArray;
-import javax.media.j3d.LineArray;
-import javax.media.j3d.LineStripArray;
 import javax.vecmath.Point3f;
-
-import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectType;
 import ch.archilogic.runtime.exception.FaceException;
 
 public class GridObj extends ObjectDef {	
 	private float size = 1.0f;
-	private int nbSegments = 2;
+	private int nbSegments = 50;
 	
 	public GridObj() {
 		setType(ObjectType.OBJ_GRID);

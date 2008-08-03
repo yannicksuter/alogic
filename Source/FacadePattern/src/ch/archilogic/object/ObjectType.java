@@ -9,5 +9,6 @@ public enum ObjectType {
 	OBJ_QUAD,
 	OBJ_QUADSTRIP,
 	OBJ_POLY,
-	OBJ_GRID
+	OBJ_GRID,
+	OBJ_BOX
 }

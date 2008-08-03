@@ -9,7 +9,7 @@ public class ObjectGraph {
 	List<ObjectDef> childs = new ArrayList<ObjectDef>();
 	
 	public void addChild(ObjectDef obj) {
-		childs.add(new GridObj());		
+		childs.add(obj);		
 	}
 	
 	public ObjectDef getObject(int i) {
