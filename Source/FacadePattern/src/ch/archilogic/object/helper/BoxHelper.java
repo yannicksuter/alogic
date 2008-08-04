@@ -6,15 +6,13 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
-public class BoxBuilder {
-	public static enum FACE {
-		FRONT,
-		BACK,
-		RIGHT,
-		LEFT,
-		TOP,
-		BOTTOM
-	};
+public class BoxHelper {
+	public static final int FRONT = 1;
+	public static final int BACK = 2;
+	public static final int RIGHT = 4;
+	public static final int LEFT = 8;
+	public static final int TOP = 16;
+	public static final int BOTTOM = 32;
 	
 	private static final float[] verts = {
 		// front face
@@ -39,7 +37,7 @@ public class BoxBuilder {
 		return l;
 	}
 
-	public static List<Point3f> getFace(FACE face, Point3d upper, Point3d lower) {
+	public static List<Point3f> getFace(int face, Point3d upper, Point3d lower) {
 		List<Point3f> l = new ArrayList<Point3f>();
 		switch (face) {
 		case FRONT:

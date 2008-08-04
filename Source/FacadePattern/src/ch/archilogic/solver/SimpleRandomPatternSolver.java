@@ -10,10 +10,11 @@ import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
 import ch.archilogic.object.ObjectGraph;
-import ch.archilogic.object.geom.BoundingBox;
+import ch.archilogic.object.geom.BBoxObj;
 import ch.archilogic.object.geom.BoxObj;
 import ch.archilogic.object.geom.GridObj;
 import ch.archilogic.object.geom.ModelObj;
+import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
 
@@ -42,7 +43,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		objGraph = new ObjectGraph();
 
 		ModelObj object = null;
-		BoundingBox box = new BoundingBox();
+		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
 		Scene s = null;
 		try {
 			try {
@@ -78,13 +79,13 @@ public class SimpleRandomPatternSolver implements Solver {
 			objGraph.addChild(object);
 			objGraph.addChild(box);
 		}
-		// test
- 		//objGraph.addChild(new BoxObj());
 	}
 	
 	public void think() {
 		status = SolverState.THINKING;
-				
+
+		// todo: first subdivision
+		
 		status = SolverState.IDLE;
 	}
 

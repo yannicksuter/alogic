@@ -6,7 +6,7 @@ import java.util.List;
 import javax.vecmath.Point3f;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectType;
-import ch.archilogic.object.helper.BoxBuilder;
+import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.runtime.exception.FaceException;
 
 public final class BoxObj extends ObjectDef {
@@ -20,11 +20,11 @@ public final class BoxObj extends ObjectDef {
 	}
 	
 	private void createCube(float scale) throws FaceException {
-		createFace(BoxBuilder.getFace(0, scale));
-		createFace(BoxBuilder.getFace(12, scale));
-		createFace(BoxBuilder.getFace(24, scale));
-		createFace(BoxBuilder.getFace(36, scale));
-		createFace(BoxBuilder.getFace(48, scale));
-		createFace(BoxBuilder.getFace(60, scale));
+		createFace(BoxHelper.getFace(0, scale));
+		createFace(BoxHelper.getFace(12, scale));
+		createFace(BoxHelper.getFace(24, scale));
+		createFace(BoxHelper.getFace(36, scale));
+		createFace(BoxHelper.getFace(48, scale));
+		createFace(BoxHelper.getFace(60, scale));
 	}
 }
