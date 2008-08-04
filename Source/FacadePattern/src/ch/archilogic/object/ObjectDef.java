@@ -46,6 +46,10 @@ public class ObjectDef {
 	}
 
 	public void createFace(List<Point3f> points) throws FaceException {
+		if (points == null) {
+			throw new FaceException("no points to define a face.");
+		}
+		
 		Face face = new Face();
 		for (Point3f p : points) {
 			if (!vertices.contains(p)) {

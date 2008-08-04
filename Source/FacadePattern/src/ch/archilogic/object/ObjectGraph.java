@@ -18,4 +18,8 @@ public class ObjectGraph {
 		}
 		return null;
 	}
+
+	public List<ObjectDef> getObjects() {
+		return childs;
+	}
 }

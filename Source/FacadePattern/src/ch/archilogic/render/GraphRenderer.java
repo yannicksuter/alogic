@@ -73,9 +73,8 @@ public class GraphRenderer extends Canvas3D {
 			
 		try {
 			ObjectGraph graph = solver.getObjectGraph();
-			ObjectDef obj = graph.getObject(0);
-			if (obj != null) {
-				spin.addChild(obj.getShape(true, false));
+			for (ObjectDef obj : graph.getObjects()) {
+				spin.addChild(obj.getShape(true, false).cloneTree());
 			}
 		} catch (FaceException e) {
 			e.printStackTrace();

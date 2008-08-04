@@ -3,9 +3,19 @@ package ch.archilogic.object.helper;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
 public class BoxBuilder {
+	public static enum FACE {
+		FRONT,
+		BACK,
+		RIGHT,
+		LEFT,
+		TOP,
+		BOTTOM
+	};
+	
 	private static final float[] verts = {
 		// front face
 		1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
@@ -27,5 +37,9 @@ public class BoxBuilder {
 			l.add(new Point3f(verts[i + (u * 3)] * scale, verts[i + (u * 3) + 1] * scale, verts[i + (u * 3) + 2] * scale));
 		}
 		return l;
+	}
+
+	public static List<Point3f> getFace(FACE front, Point3d upper, Point3d lower) {
+		return null;
 	}
 }

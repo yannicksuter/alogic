@@ -19,42 +19,25 @@ import ch.archilogic.runtime.exception.FaceException;
 
 import com.sun.j3d.loaders.Scene;
 
-public class BoundingBox extends ObjectDef  {
-	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
-			
+public class BoundingBox extends ObjectDef  {			
+	private Point3d upper;
+	private Point3d lower;
+	
 	@Override
 	public void create() throws FaceException {
-		
-		try {
-			Point3d lower = new Point3d(); 
-			Point3d upper = new Point3d();
-			Scene s = ObjHelper.loadRefObject(refObjPath);
-			Hashtable<String,Shape3D> table = s.getNamedObjects();
-			for (String key : table.keySet()) {
-				Shape3D object = table.get(key);
-				ObjHelper.printInfo(object);
-
-				System.out.println("Bounds : " + object.getBounds());	
-				if (object.getBounds() instanceof javax.media.j3d.BoundingBox) {
-					javax.media.j3d.BoundingBox b = (javax.media.j3d.BoundingBox) object.getBounds();
-					b.getUpper(upper);
-					b.getLower(lower);
-				}
-				System.out.println("Bounds U: " + upper + " L: " + lower);	
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		createCube(0.5f);
+//		createFace(BoxBuilder.getFace(BoxBuilder.FACE.FRONT, upper, lower));
+//		createFace(BoxBuilder.getFace(BoxBuilder.FACE.BACK, upper, lower));
+//		createFace(BoxBuilder.getFace(BoxBuilder.FACE.LEFT, upper, lower));
+//		createFace(BoxBuilder.getFace(BoxBuilder.FACE.RIGHT, upper, lower));
+//		createFace(BoxBuilder.getFace(BoxBuilder.FACE.TOP, upper, lower));
+//		createFace(BoxBuilder.getFace(BoxBuilder.FACE.BOTTOM, upper, lower));
 	}
 	
-	private void createCube(float scale) throws FaceException {
-		createFace(BoxBuilder.getFace(0, scale));
-		createFace(BoxBuilder.getFace(12, scale));
-		createFace(BoxBuilder.getFace(24, scale));
-		createFace(BoxBuilder.getFace(36, scale));
-		createFace(BoxBuilder.getFace(48, scale));
-		createFace(BoxBuilder.getFace(60, scale));
+	public void setUpper(Point3d upper) {
+		this.upper = upper;
+	}
+
+	public void setLower(Point3d lower) {
+		this.lower = lower;
 	}
 }
