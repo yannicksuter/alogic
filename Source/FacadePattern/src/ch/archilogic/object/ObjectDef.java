@@ -45,6 +45,10 @@ public class ObjectDef {
 		return faces.get(i);
 	}
 
+	public List<Face> getFaces() {
+		return faces;
+	}
+
 	public void createFace(List<Point3f> points) throws FaceException {
 		if (points == null) {
 			throw new FaceException("no points to define a face.");
@@ -67,6 +71,21 @@ public class ObjectDef {
 		// add face 
 		faces.add(face);
 	}
+
+	public void deleteFace(Face face) throws FaceException {
+		if (faces.contains(face)) {
+			faces.remove(face);
+		} else {
+			throw new FaceException("face could not be deleted.");
+		}
+	}
+
+	public void subdivide(Face face) throws FaceException {
+		List<Face> newFaces = face.subdivide();
+		for (Face f : newFaces) {
+			createFace(f.getVertices());
+		}
+	}
 	
 	public Geometry createWireframe() throws FaceException {
 		int stripLen = 0; 
@@ -76,15 +95,18 @@ public class ObjectDef {
 			stripLen += counts[i];
 		}
 		
-		LineStripArray grid = new LineStripArray(stripLen, GeometryArray.COORDINATES, counts);
-		int t = 0;
-		for (Face face : faces) {
-			for (Point3f p : face.getVertices()) {
-				grid.setCoordinate(t++, p);				
+		if (stripLen > 0) {
+			LineStripArray grid = new LineStripArray(stripLen, GeometryArray.COORDINATES, counts);
+			int t = 0;
+			for (Face face : faces) {
+				for (Point3f p : face.getVertices()) {
+					grid.setCoordinate(t++, p);				
+				}
+				grid.setCoordinate(t++, face.getVertices().get(0));
 			}
-			grid.setCoordinate(t++, face.getVertices().get(0));
+			return grid;
 		}
-		return grid;
+		return null;
 	}
 	
 	public Geometry createSolid() throws FaceException {
@@ -92,7 +114,6 @@ public class ObjectDef {
 	}
 	
 	public Shape3D getShape(boolean asWireframe, boolean asSolid) throws FaceException {
-		create();
 		Shape3D shape = new Shape3D();
 		if (asWireframe) {
 			Geometry obj = createWireframe();

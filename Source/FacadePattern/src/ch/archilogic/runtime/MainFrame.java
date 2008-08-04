@@ -10,6 +10,7 @@ import ch.archilogic.export.ConsoleExporter;
 import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
 import ch.archilogic.render.GraphRenderer;
+import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.SimpleRandomPatternSolver;
 import ch.archilogic.solver.Solver;
 
@@ -82,7 +83,12 @@ public class MainFrame extends JFrame {
 				// initialize the solver
 				Solver solver = new SimpleRandomPatternSolver();
 				solver.initialize();
-				solver.think();
+				
+				try {
+					solver.think();
+				} catch (FaceException e) {
+					e.printStackTrace();
+				}
 				
 				MainFrame window = new MainFrame();				
 				window.setSolver(solver);

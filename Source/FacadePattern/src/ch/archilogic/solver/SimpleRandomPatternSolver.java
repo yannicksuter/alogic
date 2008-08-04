@@ -1,6 +1,8 @@
 package ch.archilogic.solver;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Point3d;
@@ -9,6 +11,8 @@ import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
+import ch.archilogic.object.Face;
+import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
 import ch.archilogic.object.geom.BBoxObj;
 import ch.archilogic.object.geom.BoxObj;
@@ -23,7 +27,12 @@ public class SimpleRandomPatternSolver implements Solver {
 	private ObjectGraph objGraph = null;
 
 	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
+	private ObjectDef objEnvelope;
 	
+	public ObjectDef getObjEnvelope() {
+		return objEnvelope;
+	}
+
 	public String getDescription() {
 		return String.format("Simple Random Pattern Solver");
 	}
@@ -43,6 +52,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		objGraph = new ObjectGraph();
 
 		ModelObj object = null;
+//		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
 		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
 		Scene s = null;
 		try {
@@ -66,6 +76,7 @@ public class SimpleRandomPatternSolver implements Solver {
 					}
 					// create new model to be shown
 					object = new ModelObj((Shape3D)o.cloneTree());
+					objEnvelope = box;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -81,15 +92,23 @@ public class SimpleRandomPatternSolver implements Solver {
 		}
 	}
 	
-	public void think() {
+	public void think() throws FaceException {
 		status = SolverState.THINKING;
 
-		// todo: first subdivision
+		for (int i=0; i < 1; i++) {
+			List<Face> oldFaces = new ArrayList<Face>();
+			oldFaces.addAll(objEnvelope.getFaces());
+			
+			for (Face f : oldFaces) {
+				objEnvelope.subdivide(f);
+				objEnvelope.deleteFace(f);
+			}
+		}
 		
 		status = SolverState.IDLE;
 	}
 
 	public void export(Exporter exporter, String filename) {
-		exporter.write(filename, objGraph);
+		exporter.write(filename, objEnvelope);
 	}
 }
