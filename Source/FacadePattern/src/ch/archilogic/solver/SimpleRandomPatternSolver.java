@@ -64,7 +64,7 @@ public class SimpleRandomPatternSolver implements Solver {
 						box.setLower(lower);
 					}
 					// create new model to be shown
-					object = new ModelObj(o);
+					object = new ModelObj((Shape3D)o.cloneTree());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -74,11 +74,12 @@ public class SimpleRandomPatternSolver implements Solver {
 			e.printStackTrace();
 		}
 		
-		// test
 		if (object != null) {
 			objGraph.addChild(object);
+			objGraph.addChild(box);
 		}
-		objGraph.addChild(new BoxObj());
+		// test
+ 		//objGraph.addChild(new BoxObj());
 	}
 	
 	public void think() {

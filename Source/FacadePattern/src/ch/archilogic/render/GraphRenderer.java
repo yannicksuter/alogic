@@ -20,7 +20,9 @@ public class GraphRenderer extends Canvas3D {
 	private Solver solver = null;
 
 	private static final long serialVersionUID = 1091353214144552939L;
-
+	
+    private Transform3D scale = new Transform3D();             
+	
 	public void setSolver(Solver solver) {
 		this.solver = solver;
 	}
@@ -66,7 +68,7 @@ public class GraphRenderer extends Canvas3D {
 		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		root.addChild(spin);
-
+		
 		// appearance
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
@@ -74,7 +76,7 @@ public class GraphRenderer extends Canvas3D {
 		try {
 			ObjectGraph graph = solver.getObjectGraph();
 			for (ObjectDef obj : graph.getObjects()) {
-				spin.addChild(obj.getShape(true, false).cloneTree());
+				spin.addChild(obj.getShape(true, false));
 			}
 		} catch (FaceException e) {
 			e.printStackTrace();
@@ -96,6 +98,9 @@ public class GraphRenderer extends Canvas3D {
 		zoom.setSchedulingBounds(bounds);
 		spin.addChild(zoom);
 
+		scale.setScale(0.5);
+		spin.setTransform(scale);
+
 		// <background and light>
 		BoundingSphere bound = new BoundingSphere();
 		Background background = new Background(0.0f, 0.0f, 0.0f);
@@ -105,7 +110,7 @@ public class GraphRenderer extends Canvas3D {
 
 		light.setInfluencingBounds(bound);
 		root.addChild(light);
-		PointLight ptlight = new PointLight(new Color3f(Color.green),
+		PointLight ptlight = new PointLight(new Color3f(Color.blue),
 				new Point3f(3f, 3f, 3f), new Point3f(1f, 0f, 0f));
 		ptlight.setInfluencingBounds(bound);
 		root.addChild(ptlight);
