@@ -21,8 +21,20 @@ public class GraphRenderer extends Canvas3D {
 
 	private static final long serialVersionUID = 1091353214144552939L;
 	
+	SimpleUniverse su = null;
     private Transform3D scale = new Transform3D();             
 	
+    private boolean optionAntialiasing = false;
+    
+	public boolean isOptionAntialiasing() {
+		return optionAntialiasing;
+	}
+
+	public void setOptionAntialiasing(boolean optionAntialiasing) {
+		this.optionAntialiasing = optionAntialiasing;
+		su.getViewer().getView().setSceneAntialiasingEnable(optionAntialiasing);	
+	}
+
 	public void setSolver(Solver solver) {
 		this.solver = solver;
 	}
@@ -32,10 +44,15 @@ public class GraphRenderer extends Canvas3D {
 	}
 
 	public void initialize() {
+		su = new SimpleUniverse(this);
+		su.getViewingPlatform().setNominalViewingTransform();
+		
+		// set option configurations
+		setOptionAntialiasing(optionAntialiasing);
+
 		BranchGroup bg = createSceneGraph(this);
 		bg.compile();
-		SimpleUniverse su = new SimpleUniverse(this);
-		su.getViewingPlatform().setNominalViewingTransform();
+		
 		su.addBranchGraph(bg);
 	}
 	

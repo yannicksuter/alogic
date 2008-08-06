@@ -51,7 +51,8 @@ public class ObjectDef {
 
 	public Point3f containsEqual(Point3f ref) {
 		for (Point3f p : vertices) {
-			if (p.epsilonEquals(ref, 0.0001f)) {
+//			if (p.epsilonEquals(ref, 0.0001f)) {
+			if (p.equals(ref)) {
 				return p;
 			}
 		}
@@ -59,12 +60,11 @@ public class ObjectDef {
 	}
 	
 	public int getIndexOf(Point3f ref) {
-		int index = vertices.indexOf(ref);
-		if (index < 0) {
-			Point3f p = containsEqual(ref);
-			index = vertices.indexOf(p);
+		Point3f p = containsEqual(ref);
+		if (p != null) {
+			return vertices.indexOf(p);
 		}
-		return index;
+		return -1;
 	}
 	
 	public void createFace(List<Point3f> points) throws FaceException {
@@ -74,12 +74,12 @@ public class ObjectDef {
 		
 		Face face = new Face();
 		for (Point3f p : points) {
-			if (!vertices.contains(p) || containsEqual(p) == null) {
-				vertices.add(p);
+			if (containsEqual(p) == null) {
+				vertices.add(new Point3f(p));
 			}
 			int index = getIndexOf(p);
 			if (index > -1) {
-				face.addVertice(p);
+				face.addVertice(vertices.get(index));
 				face.addIndex(new Integer(index));
 			} else {
 				throw new FaceException("point not indexed.");

@@ -19,6 +19,9 @@ import com.sun.j3d.utils.universe.*;
 public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
+	static final int windowWidth = 80;
+	static final int windowHeight = 60;
+	
 	private JPanel drawingPanel;
 	private GraphRenderer renderer;
 	private Solver solver;
@@ -36,6 +39,9 @@ public class MainFrame extends JFrame {
     	    else if (keyCode == KeyEvent.VK_F2) {
     	    	// export object to console (debugging)
     	    	solver.export(new ConsoleExporter(), null);
+    	    }
+    	    else if (keyCode == KeyEvent.VK_A) {
+    	    	renderer.setOptionAntialiasing(!renderer.isOptionAntialiasing());
     	    }
         }
 
@@ -71,7 +77,7 @@ public class MainFrame extends JFrame {
 		setTitle("Facade Pattern Solver");
 		drawingPanel.setLayout(new java.awt.BorderLayout());
 
-		drawingPanel.setPreferredSize(new Dimension(800, 600));
+		drawingPanel.setPreferredSize(new Dimension(windowWidth, windowHeight));
 		getContentPane().add(drawingPanel, BorderLayout.CENTER);
 
 		pack();

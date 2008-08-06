@@ -18,6 +18,7 @@ import ch.archilogic.object.geom.BBoxObj;
 import ch.archilogic.object.geom.BoxObj;
 import ch.archilogic.object.geom.GridObj;
 import ch.archilogic.object.geom.ModelObj;
+import ch.archilogic.object.geom.RefModelObj;
 import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
@@ -52,7 +53,8 @@ public class SimpleRandomPatternSolver implements Solver {
 		objGraph = new ObjectGraph();
 
 		ModelObj object = null;
-//		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
+		RefModelObj refObject = null;
+		
 		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
 		Scene s = null;
 		try {
@@ -76,6 +78,7 @@ public class SimpleRandomPatternSolver implements Solver {
 					}
 					// create new model to be shown
 					object = new ModelObj((Shape3D)o.cloneTree());
+					refObject = new RefModelObj((Shape3D)o.cloneTree());
 					objEnvelope = box;
 				}
 			} catch (Exception e) {
@@ -86,8 +89,9 @@ public class SimpleRandomPatternSolver implements Solver {
 			e.printStackTrace();
 		}
 		
-		if (object != null) {
+		if (refObject != null) {			
 			objGraph.addChild(object);
+			objGraph.addChild(refObject);
 			objGraph.addChild(box);
 		}
 	}

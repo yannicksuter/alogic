@@ -12,6 +12,8 @@ import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
+import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.geometry.NormalGenerator;
 
 public class ObjHelper {
 	private static boolean bInA(int b, int a) {
@@ -30,6 +32,36 @@ public class ObjHelper {
 		return s; 
 	}
 	
+	/**
+	* convert Shape3D's geometryArrays  using GeometryInfo. 
+	* @param shp - the Shape3D target
+	* @param indexed - creates a indexed GeometryArray
+	* @param compact - compact, if indexed.
+	* @param byRef - create a BY_REFERENCE geometry
+	* @param interleaved -  create a INTERLEAVED geometry
+	* @param useCoordIndexOnly - force USE_COORD_INDEX_ONLY in indexed Geometries
+	* @param nio - Use NIO buffers
+	*/	
+	@SuppressWarnings("unchecked")
+	public static void convert(Shape3D shp, boolean indexed, boolean compact, boolean byRef, boolean interleaved, boolean useCoordIndexOnly, boolean nio) {
+		Enumeration en = shp.getAllGeometries();
+		while (en.hasMoreElements()) {
+			GeometryArray geo = (GeometryArray) en.nextElement();
+			shp.removeGeometry(geo);
+			GeometryInfo gi = new GeometryInfo(geo);
+			NormalGenerator ng = new NormalGenerator();
+			ng.generateNormals(gi);
+			GeometryArray ga;
+			if (indexed) {
+				ga = gi.getIndexedGeometryArray(compact, byRef, interleaved, useCoordIndexOnly, nio);
+			} else {
+				ga = gi.getGeometryArray(byRef, interleaved, nio);
+			}
+			shp.addGeometry(ga);
+		}
+	}	
+	
+	@SuppressWarnings("unchecked")
 	public static void printInfo(Shape3D shp) {
 		Enumeration en = shp.getAllGeometries();
 		while (en.hasMoreElements()) {
