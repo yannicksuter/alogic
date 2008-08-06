@@ -95,6 +95,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
 
+		System.out.println(objEnvelope.toString());
 		for (int i=0; i < 1; i++) {
 			List<Face> oldFaces = new ArrayList<Face>();
 			oldFaces.addAll(objEnvelope.getFaces());
@@ -104,6 +105,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				objEnvelope.deleteFace(f);
 			}
 		}
+		System.out.println(objEnvelope.toString());
 		
 		status = SolverState.IDLE;
 	}

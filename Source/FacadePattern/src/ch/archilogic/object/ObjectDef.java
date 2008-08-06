@@ -49,6 +49,24 @@ public class ObjectDef {
 		return faces;
 	}
 
+	public Point3f containsEqual(Point3f ref) {
+		for (Point3f p : vertices) {
+			if (p.epsilonEquals(ref, 0.0001f)) {
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	public int getIndexOf(Point3f ref) {
+		int index = vertices.indexOf(ref);
+		if (index < 0) {
+			Point3f p = containsEqual(ref);
+			index = vertices.indexOf(p);
+		}
+		return index;
+	}
+	
 	public void createFace(List<Point3f> points) throws FaceException {
 		if (points == null) {
 			throw new FaceException("no points to define a face.");
@@ -56,10 +74,10 @@ public class ObjectDef {
 		
 		Face face = new Face();
 		for (Point3f p : points) {
-			if (!vertices.contains(p)) {
+			if (!vertices.contains(p) || containsEqual(p) == null) {
 				vertices.add(p);
 			}
-			int index = vertices.indexOf(p);
+			int index = getIndexOf(p);
 			if (index > -1) {
 				face.addVertice(p);
 				face.addIndex(new Integer(index));
@@ -128,5 +146,10 @@ public class ObjectDef {
 			}
 		}
 		return shape;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("v: %d f: %d", vertices.size(), faces.size());
 	}
 }
