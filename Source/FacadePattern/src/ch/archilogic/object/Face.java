@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3f;
 
 import ch.archilogic.math.vector.VecHelper;
 
 public class Face {
 	private List<Point3f> vertices = new ArrayList<Point3f>();
+	private List<Vector3f> normals = new ArrayList<Vector3f>();
 	private List<Integer> indices = new ArrayList<Integer>();
 	private Face [] neighbours = null;
 
@@ -29,7 +31,11 @@ public class Face {
 	public void addIndex(Integer index) {
 		indices.add(index);
 	}
-	
+
+	public void addNormal(Vector3f n) {
+		normals.add(n);
+	}
+
 	public List<Point3f> getVertices() {
 		return vertices;
 	}
@@ -45,9 +51,21 @@ public class Face {
 	public void setIndices(List<Integer> indices) {
 		this.indices = indices;
 	}
+
+	public List<Vector3f> getNormals() {
+		return normals;
+	}
+
+	public void setNormals(List<Vector3f> normals) {
+		this.normals = normals;
+	}
 	
 	public int getEdgeCount() {
 		return vertices.size();
+	}
+
+	public Face[] getNeighbours() {
+		return neighbours;
 	}
 
 	public int isNeighbour(Face refFace) {
@@ -83,6 +101,19 @@ public class Face {
 		return false;
 	}
 
+	public int getEdge(int idx) {
+		int edgeIdx = 0;
+		for (int i=0;i<neighbours.length; i++) {
+			if (neighbours[i] == null) {
+				if (edgeIdx == idx) {
+					return i;
+				}
+				edgeIdx++;
+			}
+		}
+		return -1;
+	}
+	
 	public void detectNeighbours(List<Face> faces) {
 		neighbours = new Face[getEdgeCount()];
 		for (Face face : faces) {
@@ -91,6 +122,16 @@ public class Face {
 				neighbours[neighbourIdx] = face;
 			}
 		}
+	}
+
+	public Vector3f getEdgeVec(int idx) {
+		if (vertices == null || vertices.size() == 0) {
+			return null;
+		}
+		
+		Point3f u0 = vertices.get(idx % vertices.size());
+		Point3f u1 = vertices.get((idx+1) % vertices.size());
+		return new Vector3f(u1.x-u0.x, u1.y-u0.y, u1.z-u0.z);
 	}
 	
 	public List<Face> subdivide() {

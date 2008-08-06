@@ -11,11 +11,13 @@ import javax.media.j3d.Shape3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3f;
 
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
+import ch.archilogic.log.Logger;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
@@ -31,10 +33,12 @@ public class SimpleRandomPatternSolver implements Solver {
 	private ObjectGraph objGraph = null;
 
 	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
+	private ObjectDef objReference;
+	private ObjectDef objBoundingBox;
 	private ObjectDef objEnvelope;
 	
 	public ObjectDef getObjEnvelope() {
-		return objEnvelope;
+		return objBoundingBox;
 	}
 
 	public String getDescription() {
@@ -57,8 +61,8 @@ public class SimpleRandomPatternSolver implements Solver {
 		objGraph = new ObjectGraph();
 
 		ModelObj object = null;
-		RefModelObj refObject = null;
 		
+		Logger.info("load reference object");
 		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
 		Scene s = null;
 		try {
@@ -82,8 +86,8 @@ public class SimpleRandomPatternSolver implements Solver {
 					}
 					// create new model to be shown
 					object = new ModelObj((Shape3D)o.cloneTree());
-					refObject = new RefModelObj((Shape3D)o.cloneTree());
-					objEnvelope = box;
+					objReference = new RefModelObj((Shape3D)o.cloneTree());
+					objBoundingBox = box;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -94,12 +98,12 @@ public class SimpleRandomPatternSolver implements Solver {
 		}
 		
 		// initialize reference object
-		System.out.println(String.format(".. neighbour & edges detection (can take some seconds)"));
-		refObject.detectEdges();
+		Logger.info("neighbour & edges detection (can take some seconds)");
+		objReference.detectEdges();
 		
 		// visualize edges
 		ObjectDef edgeObj = new ObjectDef();		
-		for (Face f : refObject.getFaces()) {
+		for (Face f : objReference.getFaces()) {
 			if (f.hasEdges()) {
 				edgeObj.addFace(f);
 			}
@@ -112,7 +116,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		edgeObj.addAppearance(app);
 		
 		// add to scene graph
-		if (refObject != null) {			
+		if (objReference != null) {			
 			objGraph.addChild(object);
 //			objGraph.addChild(refObject);
 			objGraph.addChild(edgeObj);
@@ -123,20 +127,44 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
 
-		for (int i=0; i < 1; i++) {
-			List<Face> oldFaces = new ArrayList<Face>();
-			oldFaces.addAll(objEnvelope.getFaces());
-			
-			for (Face f : oldFaces) {
-				objEnvelope.subdivide(f);
-				objEnvelope.deleteFace(f);
+		// subdivision example
+//		for (int i=0; i < 1; i++) {
+//			List<Face> oldFaces = new ArrayList<Face>();
+//			oldFaces.addAll(objEnvelope.getFaces());
+//			
+//			for (Face f : oldFaces) {
+//				objEnvelope.subdivide(f);
+//				objEnvelope.deleteFace(f);
+//			}
+//		}
+		
+		Logger.info("searching for the reference point, normal and edge");
+		Vector3f refPoint, refNormal, refEdgeVec;
+		for (Face face : objReference.getFaces()) {
+			if (face.hasEdges()) {
+				int idx = face.getEdge(0);
+				refPoint = new Vector3f(face.getVertices().get(idx));
+				refNormal = face.getNormals().get(idx);
+				refEdgeVec = face.getEdgeVec(idx);
+				break;
 			}
 		}
+		
+		Logger.info("creating new envelop");	
+		objEnvelope = new ObjectDef();
+
+		Logger.err("head banging..");	
+		
+		// create envelop
+		createSegment(objReference.getFaces().get(0));
 		
 		status = SolverState.IDLE;
 	}
 
+	private void createSegment(Face face) {
+	}
+
 	public void export(Exporter exporter, String filename) {
-		exporter.write(filename, objEnvelope);
+		exporter.write(filename, objBoundingBox);
 	}
 }

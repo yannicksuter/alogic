@@ -7,6 +7,7 @@ import java.util.List;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TriangleArray;
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3f;
 
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.helper.ObjHelper;
@@ -26,19 +27,28 @@ public class RefModelObj extends ObjectDef {
 			Object obj = en.nextElement();		
 			if (obj instanceof TriangleArray) {
 				TriangleArray a = (TriangleArray)obj;
-				List<Point3f> l = new ArrayList<Point3f>();
+				List<Point3f> p = new ArrayList<Point3f>();
 				Point3f p1 = new Point3f();
 				Point3f p2 = new Point3f();
 				Point3f p3 = new Point3f();
+				List<Vector3f> n = new ArrayList<Vector3f>();
+				Vector3f n1 = new Vector3f();
+				Vector3f n2 = new Vector3f();
+				Vector3f n3 = new Vector3f();
 				for (int i = 0; i < a.getVertexCount()/3; i++) {
-					l.clear();
+					p.clear();
+					n.clear();
 					a.getCoordinate(i*3+0, p1);
-					l.add(p1);
+					a.getNormal(i*3+0, n1);
+					p.add(p1);
+					n.add(n1);
 					a.getCoordinate(i*3+1, p2);
-					l.add(p2);
+					p.add(p2);
+					n.add(n2);
 					a.getCoordinate(i*3+2, p3);
-					l.add(p3);
-					createFace(l);
+					p.add(p3);
+					n.add(n3);
+					createFace(p, n);
 				}
 			} else {
 				throw new ObjectException("object could not be parsed.");

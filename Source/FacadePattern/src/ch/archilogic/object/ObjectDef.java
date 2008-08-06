@@ -9,6 +9,7 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineStripArray;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3f;
 
 import ch.archilogic.runtime.exception.FaceException;
 
@@ -70,20 +71,30 @@ public class ObjectDef {
 		createFace(f.getVertices());
 	}
 	
-	public void createFace(List<Point3f> points) throws FaceException {
-		if (points == null) {
+	public void createFace(List<Point3f> pointList) throws FaceException {
+		createFace(pointList, null);
+	}
+	
+	public void createFace(List<Point3f> pointList, List<Vector3f> normalList) throws FaceException {
+		if (pointList == null) {
 			throw new FaceException("no points to define a face.");
 		}
 		
 		Face face = new Face();
-		for (Point3f p : points) {
+		for (int i=0; i< pointList.size(); i++) {
+			Point3f p = pointList.get(i);
+
 			if (containsEqual(p) == null) {
 				vertices.add(new Point3f(p));
 			}
+			
 			int index = getIndexOf(p);
 			if (index > -1) {
 				face.addVertice(vertices.get(index));
 				face.addIndex(new Integer(index));
+				if (normalList != null) {
+					face.addNormal(normalList.get(i));					
+				}
 			} else {
 				throw new FaceException("point not indexed.");
 			}
