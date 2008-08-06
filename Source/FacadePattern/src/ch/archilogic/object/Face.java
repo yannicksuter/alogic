@@ -3,7 +3,6 @@ package ch.archilogic.object;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.LineArray;
 import javax.vecmath.Point3f;
 
 import ch.archilogic.math.vector.VecHelper;
@@ -11,6 +10,7 @@ import ch.archilogic.math.vector.VecHelper;
 public class Face {
 	private List<Point3f> vertices = new ArrayList<Point3f>();
 	private List<Integer> indices = new ArrayList<Integer>();
+	private Face [] neighbours = null;
 
 	public Face() {
 	}
@@ -44,6 +44,53 @@ public class Face {
 
 	public void setIndices(List<Integer> indices) {
 		this.indices = indices;
+	}
+	
+	public int getEdgeCount() {
+		return vertices.size();
+	}
+
+	public int isNeighbour(Face refFace) {
+		if (refFace == this) 
+			return -1;
+		
+		Point3f u0, u1;
+		Point3f v0, v1;
+		for (int i=0;i<getEdgeCount(); i++) {
+			u0 = vertices.get(i % vertices.size());
+			u1 = vertices.get((i+1) % vertices.size());
+			
+			for (int j=0;j<refFace.getEdgeCount(); j++) {
+				v0 = refFace.vertices.get(j % refFace.vertices.size());
+				v1 = refFace.vertices.get((j+1) % refFace.vertices.size());
+				
+				if ( (u0.equals(v0) && u1.equals(v1)) || (u0.equals(v1) && u1.equals(v0)) ) {
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+
+	public boolean hasEdges() {
+		if (neighbours != null) {
+			for (int i=0;i<neighbours.length; i++) {
+				if (neighbours[i] == null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void detectNeighbours(List<Face> faces) {
+		neighbours = new Face[getEdgeCount()];
+		for (Face face : faces) {
+			int neighbourIdx = isNeighbour(face);
+			if (neighbourIdx != -1) {
+				neighbours[neighbourIdx] = face;
+			}
+		}
 	}
 	
 	public List<Face> subdivide() {

@@ -1,18 +1,12 @@
 package ch.archilogic.object.geom;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TriangleArray;
-import javax.vecmath.Color3f;
 import javax.vecmath.Point3f;
-
-import org.omg.CORBA.ObjectHelper;
 
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.helper.ObjHelper;
@@ -50,26 +44,5 @@ public class RefModelObj extends ObjectDef {
 				throw new ObjectException("object could not be parsed.");
 			}
 		}
-		System.out.println(toString());
 	}
-
-//	@Override
-//	public Shape3D getShape(boolean asWireframe, boolean asSolid) throws FaceException {
-//        Appearance app = new Appearance();
-//        ColoringAttributes catt = new ColoringAttributes();
-//        catt.setColor(new Color3f(Color.blue));
-//        app.setColoringAttributes(catt);
-//        TriangleArray triangleArray=new TriangleArray(6,TriangleArray.COORDINATES|TriangleArray.COLOR_3);
-//        triangleArray.setCoordinate(0,new Point3f(0.0f,0.0f,0.0f));
-//        triangleArray.setCoordinate(1,new Point3f(2.0f,0.0f,0.0f));
-//        triangleArray.setCoordinate(2,new Point3f(0.0f,0.0f,2.0f));
-//        triangleArray.setCoordinate(3,new Point3f(0.0f,0.0f,2.0f));
-//        triangleArray.setCoordinate(4,new Point3f(2.0f,0.0f,0.0f));
-//        triangleArray.setCoordinate(5,new Point3f(2.0f,0.0f,2.0f));
-//        Color3f red = new Color3f(1.0f, 0.0f, 0.0f);
-//        for (int i=0;i<6;i++)
-//        triangleArray.setColor(i,red);
-//        
-//        return new Shape3D(triangleArray,app);		
-//	}
 }

@@ -15,7 +15,7 @@ public interface Solver {
 	public void addReference(ObjectFile obj);
 	
 	// solve problem
-	public void initialize();
+	public void initialize() throws FaceException;
 	public void think() throws FaceException;
 	
 	// export results

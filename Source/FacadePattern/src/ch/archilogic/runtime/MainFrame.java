@@ -19,8 +19,8 @@ import com.sun.j3d.utils.universe.*;
 public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
-	static final int windowWidth = 80;
-	static final int windowHeight = 60;
+	static final int windowWidth = 800;
+	static final int windowHeight = 600;
 	
 	private JPanel drawingPanel;
 	private GraphRenderer renderer;
@@ -88,9 +88,9 @@ public class MainFrame extends JFrame {
 			public void run() {
 				// initialize the solver
 				Solver solver = new SimpleRandomPatternSolver();
-				solver.initialize();
 				
 				try {
+					solver.initialize();
 					solver.think();
 				} catch (FaceException e) {
 					e.printStackTrace();

@@ -6,7 +6,6 @@ import javax.vecmath.Point3f;
 
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
-import ch.archilogic.object.ObjectGraph;
 
 public class ConsoleExporter implements Exporter {
 	public String getFileSuffix() {

@@ -1,9 +1,5 @@
 package ch.archilogic.object.geom;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.vecmath.Point3f;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectType;
 import ch.archilogic.object.helper.BoxHelper;

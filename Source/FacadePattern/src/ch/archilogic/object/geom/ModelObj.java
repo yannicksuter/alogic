@@ -11,6 +11,7 @@ import ch.archilogic.runtime.exception.FaceException;
 public class ModelObj extends ObjectDef {
 	private Shape3D model;
 	
+	@SuppressWarnings("unchecked")
 	public ModelObj(Scene s, String name) {
 		super();
 		

@@ -10,6 +10,7 @@ public class ExtensionFileFilter extends FileFilter {
 	public static final int SAVE = 1;
 	private String description;
 	private boolean allowDirectories;
+	@SuppressWarnings("unchecked")
 	private Hashtable extensionsTable = new Hashtable();
 	private boolean allowAll = false;
 
@@ -62,6 +63,7 @@ public class ExtensionFileFilter extends FileFilter {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addExtension(String extension, boolean caseInsensitive) {
 		if (caseInsensitive) {
 			extension = extension.toLowerCase();
@@ -75,6 +77,7 @@ public class ExtensionFileFilter extends FileFilter {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean accept(File file) {
 		if (file.isDirectory()) {
 			return (allowDirectories);

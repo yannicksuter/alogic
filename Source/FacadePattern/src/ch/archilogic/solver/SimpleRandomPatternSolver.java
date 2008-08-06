@@ -1,11 +1,16 @@
 package ch.archilogic.solver;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.media.j3d.Appearance;
+import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Shape3D;
+import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
@@ -15,8 +20,6 @@ import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
 import ch.archilogic.object.geom.BBoxObj;
-import ch.archilogic.object.geom.BoxObj;
-import ch.archilogic.object.geom.GridObj;
 import ch.archilogic.object.geom.ModelObj;
 import ch.archilogic.object.geom.RefModelObj;
 import ch.archilogic.object.helper.BoxHelper;
@@ -49,7 +52,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void addReference(ObjectFile obj) {
 	}
 	
-	public void initialize() {
+	@SuppressWarnings("unchecked")
+	public void initialize() throws FaceException {
 		objGraph = new ObjectGraph();
 
 		ModelObj object = null;
@@ -65,14 +69,14 @@ public class SimpleRandomPatternSolver implements Solver {
 				Hashtable<String,Shape3D> table = s.getNamedObjects();
 				for (String key : table.keySet()) {
 					Shape3D o = table.get(key);
-					ObjHelper.printInfo(o);
+//					ObjHelper.printInfo(o);
 
 					if (o.getBounds() instanceof javax.media.j3d.BoundingBox) {
 						javax.media.j3d.BoundingBox b = (javax.media.j3d.BoundingBox) o.getBounds();
 						b.getUpper(upper);
 						b.getLower(lower);
 						
-						System.out.println("Bounds U: " + upper + " L: " + lower);
+//						System.out.println("Bounds U: " + upper + " L: " + lower);
 						box.setUpper(upper);
 						box.setLower(lower);
 					}
@@ -89,9 +93,29 @@ public class SimpleRandomPatternSolver implements Solver {
 			e.printStackTrace();
 		}
 		
+		// initialize reference object
+		System.out.println(String.format(".. neighbour & edges detection (can take some seconds)"));
+		refObject.detectEdges();
+		
+		// visualize edges
+		ObjectDef edgeObj = new ObjectDef();		
+		for (Face f : refObject.getFaces()) {
+			if (f.hasEdges()) {
+				edgeObj.addFace(f);
+			}
+		}
+
+		Appearance app = new Appearance();
+		ColoringAttributes catt = new ColoringAttributes();
+		catt.setColor(new Color3f(Color.yellow));
+		app.setColoringAttributes(catt);		
+		edgeObj.addAppearance(app);
+		
+		// add to scene graph
 		if (refObject != null) {			
 			objGraph.addChild(object);
-			objGraph.addChild(refObject);
+//			objGraph.addChild(refObject);
+			objGraph.addChild(edgeObj);
 			objGraph.addChild(box);
 		}
 	}
@@ -99,7 +123,6 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
 
-		System.out.println(objEnvelope.toString());
 		for (int i=0; i < 1; i++) {
 			List<Face> oldFaces = new ArrayList<Face>();
 			oldFaces.addAll(objEnvelope.getFaces());
@@ -109,7 +132,6 @@ public class SimpleRandomPatternSolver implements Solver {
 				objEnvelope.deleteFace(f);
 			}
 		}
-		System.out.println(objEnvelope.toString());
 		
 		status = SolverState.IDLE;
 	}

@@ -1,12 +1,11 @@
 package ch.archilogic.object;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
-import javax.media.j3d.LineArray;
 import javax.media.j3d.LineStripArray;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Point3f;
@@ -17,6 +16,7 @@ public class ObjectDef {
 	private ObjectType type;
 	private List<Point3f> vertices = new ArrayList<Point3f>();
 	private List<Face> faces = new ArrayList<Face>();
+	private Appearance appearance = null;
 
 	public ObjectType getType() {
 		return type;
@@ -51,7 +51,6 @@ public class ObjectDef {
 
 	public Point3f containsEqual(Point3f ref) {
 		for (Point3f p : vertices) {
-//			if (p.epsilonEquals(ref, 0.0001f)) {
 			if (p.equals(ref)) {
 				return p;
 			}
@@ -65,6 +64,10 @@ public class ObjectDef {
 			return vertices.indexOf(p);
 		}
 		return -1;
+	}
+
+	public void addFace(Face f) throws FaceException {
+		createFace(f.getVertices());
 	}
 	
 	public void createFace(List<Point3f> points) throws FaceException {
@@ -98,6 +101,12 @@ public class ObjectDef {
 		}
 	}
 
+	public void detectEdges() {
+		for (Face f : faces) {
+			f.detectNeighbours(faces);
+		}		
+	}
+	
 	public void subdivide(Face face) throws FaceException {
 		List<Face> newFaces = face.subdivide();
 		for (Face f : newFaces) {
@@ -130,6 +139,10 @@ public class ObjectDef {
 	public Geometry createSolid() throws FaceException {
 		return null;
 	}
+
+	public void addAppearance(Appearance app) {
+		this.appearance = app;
+	}
 	
 	public Shape3D getShape(boolean asWireframe, boolean asSolid) throws FaceException {
 		Shape3D shape = new Shape3D();
@@ -145,6 +158,11 @@ public class ObjectDef {
 				shape.addGeometry(obj);
 			}
 		}
+		
+		if (appearance != null) {
+			shape.setAppearance(appearance);
+		}
+		
 		return shape;
 	}
 
