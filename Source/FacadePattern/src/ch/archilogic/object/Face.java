@@ -13,6 +13,7 @@ public class Face {
 	private List<Vector3f> normals = new ArrayList<Vector3f>();
 	private List<Integer> indices = new ArrayList<Integer>();
 	private Face [] neighbours = null;
+	private Vector3f faceNormal = null;
 
 	public Face() {
 	}
@@ -68,6 +69,22 @@ public class Face {
 		return neighbours;
 	}
 
+	public Vector3f getFaceNormal() {
+		return faceNormal;
+	}
+
+	public void setFaceNormal(Vector3f faceNormal) {
+		this.faceNormal = faceNormal;
+	}
+
+	public void createFaceNormal() {
+		int last = vertices.size()-1;
+		Vector3f a = new Vector3f(vertices.get(1).x - vertices.get(0).x, vertices.get(1).y - vertices.get(0).y, vertices.get(1).z - vertices.get(0).z);
+		Vector3f b = new Vector3f(vertices.get(last).x - vertices.get(0).x, vertices.get(last).y - vertices.get(0).y, vertices.get(last).z - vertices.get(0).z);
+		this.faceNormal = new Vector3f();
+		this.faceNormal.cross(b, a);		
+	}
+	
 	public int isNeighbour(Face refFace) {
 		if (refFace == this) 
 			return -1;

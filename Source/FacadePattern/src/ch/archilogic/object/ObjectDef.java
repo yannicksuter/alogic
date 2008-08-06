@@ -117,6 +117,12 @@ public class ObjectDef {
 			f.detectNeighbours(faces);
 		}		
 	}
+
+	public void createNormals() {
+		for (Face f : faces) {
+			f.createFaceNormal();
+		}		
+	}
 	
 	public void subdivide(Face face) throws FaceException {
 		List<Face> newFaces = face.subdivide();

@@ -1,16 +1,13 @@
 package ch.archilogic.solver;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
 import com.sun.j3d.loaders.Scene;
@@ -98,6 +95,8 @@ public class SimpleRandomPatternSolver implements Solver {
 		}
 		
 		// initialize reference object
+		Logger.info("create face normals");
+		objReference.createNormals();
 		Logger.info("neighbour & edges detection (can take some seconds)");
 		objReference.detectEdges();
 		
@@ -139,7 +138,9 @@ public class SimpleRandomPatternSolver implements Solver {
 //		}
 		
 		Logger.info("searching for the reference point, normal and edge");
-		Vector3f refPoint, refNormal, refEdgeVec;
+		Vector3f refPoint = null; 
+		Vector3f refNormal = null; 
+		Vector3f refEdgeVec = null;
 		for (Face face : objReference.getFaces()) {
 			if (face.hasEdges()) {
 				int idx = face.getEdge(0);
@@ -152,16 +153,14 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		Logger.info("creating new envelop");	
 		objEnvelope = new ObjectDef();
+		createSegment(refPoint, refNormal, refEdgeVec);
 
 		Logger.err("head banging..");	
-		
-		// create envelop
-		createSegment(objReference.getFaces().get(0));
 		
 		status = SolverState.IDLE;
 	}
 
-	private void createSegment(Face face) {
+	private void createSegment(Vector3f refPoint, Vector3f refNormal, Vector3f refEdgeVec) {
 	}
 
 	public void export(Exporter exporter, String filename) {
