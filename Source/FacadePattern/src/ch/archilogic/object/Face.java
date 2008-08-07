@@ -78,11 +78,11 @@ public class Face {
 	}
 
 	public void createFaceNormal() {
-		int last = vertices.size()-1;
 		Vector3f a = new Vector3f(vertices.get(1).x - vertices.get(0).x, vertices.get(1).y - vertices.get(0).y, vertices.get(1).z - vertices.get(0).z);
-		Vector3f b = new Vector3f(vertices.get(last).x - vertices.get(0).x, vertices.get(last).y - vertices.get(0).y, vertices.get(last).z - vertices.get(0).z);
+		Vector3f b = new Vector3f(vertices.get(2).x - vertices.get(0).x, vertices.get(2).y - vertices.get(0).y, vertices.get(2).z - vertices.get(0).z);
 		this.faceNormal = new Vector3f();
-		this.faceNormal.cross(b, a);		
+		this.faceNormal.cross(a, b);
+		this.faceNormal.normalize();
 	}
 	
 	public int isNeighbour(Face refFace) {

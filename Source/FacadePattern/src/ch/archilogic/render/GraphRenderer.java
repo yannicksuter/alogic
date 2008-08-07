@@ -93,7 +93,10 @@ public class GraphRenderer extends Canvas3D {
 		try {
 			ObjectGraph graph = solver.getObjectGraph();
 			for (ObjectDef obj : graph.getObjects()) {
-				spin.addChild(obj.getShape(true, false));
+				Shape3D shp = obj.getShape(true, false);
+				if (shp != null) {
+					spin.addChild(shp);
+				}
 			}
 		} catch (FaceException e) {
 			e.printStackTrace();

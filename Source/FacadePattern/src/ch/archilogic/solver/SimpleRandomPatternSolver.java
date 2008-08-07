@@ -1,13 +1,16 @@
 package ch.archilogic.solver;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
 import com.sun.j3d.loaders.Scene;
@@ -97,6 +100,8 @@ public class SimpleRandomPatternSolver implements Solver {
 		// initialize reference object
 		Logger.info("create face normals");
 		objReference.createNormals();
+
+		// create edge object
 		Logger.info("neighbour & edges detection (can take some seconds)");
 		objReference.detectEdges();
 		
@@ -113,12 +118,23 @@ public class SimpleRandomPatternSolver implements Solver {
 		catt.setColor(new Color3f(Color.yellow));
 		app.setColoringAttributes(catt);		
 		edgeObj.addAppearance(app);
-		
+	
+		Logger.info("creating new envelop");	
+		objEnvelope = new ObjectDef();
+		app = new Appearance();
+		catt = new ColoringAttributes();
+		catt.setColor(new Color3f(Color.red));
+		app.setColoringAttributes(catt);		
+		objEnvelope.addAppearance(app);		
+	
 		// add to scene graph
 		if (objReference != null) {			
-			objGraph.addChild(object);
-//			objGraph.addChild(refObject);
+//			objGraph.addChild(object);
+
+			objGraph.addChild(objReference);					
 			objGraph.addChild(edgeObj);
+			objGraph.addChild(objEnvelope);
+			
 			objGraph.addChild(box);
 		}
 	}
@@ -145,22 +161,42 @@ public class SimpleRandomPatternSolver implements Solver {
 			if (face.hasEdges()) {
 				int idx = face.getEdge(0);
 				refPoint = new Vector3f(face.getVertices().get(idx));
-				refNormal = face.getNormals().get(idx);
+				refNormal = face.getFaceNormal();
 				refEdgeVec = face.getEdgeVec(idx);
 				break;
 			}
 		}
-		
-		Logger.info("creating new envelop");	
-		objEnvelope = new ObjectDef();
-		createSegment(refPoint, refNormal, refEdgeVec);
+				
+		List<Point3f> f1 = createFirstSegment(refPoint, refNormal, refEdgeVec);
+		objEnvelope.createFace(f1);
 
 		Logger.err("head banging..");	
 		
 		status = SolverState.IDLE;
 	}
 
-	private void createSegment(Vector3f refPoint, Vector3f refNormal, Vector3f refEdgeVec) {
+	private List<Point3f> createFirstSegment(Vector3f refPoint, Vector3f refNormal, Vector3f refEdgeVec) {
+		refEdgeVec.normalize();
+		Vector3f v = new Vector3f();
+		v.cross(refNormal, refEdgeVec);
+		
+		float size = 0.1f;
+		
+		List<Point3f> l = new ArrayList<Point3f>();
+		// 1.
+		l.add(new Point3f(refPoint));
+		// 2.
+		l.add(new Point3f(refPoint.x+refEdgeVec.x*size, refPoint.y+refEdgeVec.y*size, refPoint.z+refEdgeVec.z*size));
+		// 3.
+		l.add(new Point3f(
+				refPoint.x + refEdgeVec.x*size + v.x*size, 
+				refPoint.y + refEdgeVec.y*size + v.y*size,
+				refPoint.z + refEdgeVec.z*size + v.z*size
+		));
+		// 4.
+		l.add(new Point3f(refPoint.x+v.x*size, refPoint.y+v.y*size, refPoint.z+v.z*size));
+		
+		return l;
 	}
 
 	public void export(Exporter exporter, String filename) {
