@@ -15,7 +15,7 @@ public class IsPlanarTest extends TestCase {
 		f.addVertice(new Point3f(0, 1, 0));
 
 		boolean planar = f.isPlanar();
-		float dist = f.getDistance(f.getVertices().get(0), f.getVertices().get(1), f.getVertices().get(2), f.getVertices().get(3));
+		float dist = f.getDistance(f.getVertices().get(2));
 		
 		System.out.println(String.format("planar: %s", planar));
 		System.out.println(String.format("dist: %f", dist));
@@ -32,13 +32,13 @@ public class IsPlanarTest extends TestCase {
 		f.addVertice(new Point3f(5, 0, 0));
 
 		boolean planar = f.isPlanar();
-		float dist = f.getDistance(f.getVertices().get(0), f.getVertices().get(1), f.getVertices().get(2), f.getVertices().get(3));
+		float dist = f.getDistance(f.getVertices().get(2));
 		
 		System.out.println(String.format("planar: %s", planar));
 		System.out.println(String.format("dist: %f", dist));
 
-		assertEquals(true, planar);
-		assertEquals(0f, dist);
+		assertEquals(false, planar);
+		assertEquals(2.8867514f, dist, 0.00001);
 	}
 	
 	

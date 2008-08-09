@@ -132,11 +132,11 @@ public class ObjectDef {
 	}
 
 	public Point3f walk(Point3f p, Vector3f dir, Face f) {
-		Vector3f pNew = new Vector3f(p.x + dir.x, p.y + dir.y, p.z + dir.z);
+		Point3f pNew = new Point3f(p.x + dir.x, p.y + dir.y, p.z + dir.z);
 		float dMax = Float.MAX_VALUE;
 		Face nearestFace = null;
 		for (Face face : getFaces()) {
-			float d = face.getDistance(pNew);
+			float d = 0;//face.getDistance(pNew);
 			if (d < dMax) {
 				dMax = d;
 				nearestFace = face;

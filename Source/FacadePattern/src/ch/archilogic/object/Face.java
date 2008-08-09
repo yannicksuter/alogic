@@ -204,7 +204,7 @@ public class Face {
 
 		// testet ob zwei dreiecke auf der gleichen ebene sind oder nicht
 
-		float d = getDistance(vertices.get(0), vertices.get(1), vertices.get(2), vertices.get(3));
+		float d = getDistance(vertices.get(2));
 
 		if (Math.abs(d) > 0.01) {
 			return false;
@@ -213,11 +213,13 @@ public class Face {
 		return true;
 	}
 	
-	public float getDistance(Point3f A, Point3f B, Point3f C, Point3f D) {
-
+	public float getDistance(Point3f P) {
+		Point3f A = vertices.get(0);
+		Point3f B = vertices.get(1);
+		Point3f D = vertices.get(3);
 		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
 		Vector3f vB = new Vector3f(D.x - A.x, D.y - A.y, D.z - A.z);
-		Vector3f vC = new Vector3f(C.x - A.x, C.y - A.y, C.z - A.z);
+		Vector3f vC = new Vector3f(P.x - A.x, P.y - A.y, P.z - A.z);
 		
 		Vector3f CrossC= new Vector3f();
 		CrossC.cross(vA, vB);
@@ -232,5 +234,12 @@ public class Face {
 					-vC.y * ((vA.x * vB.z) - (vA.z * vB.x)))/CrossC.length();
 		
 		return r;
+	}
+	
+	public boolean isPartOff(Point3f P){
+		
+		
+		
+		return false;
 	}
 }
