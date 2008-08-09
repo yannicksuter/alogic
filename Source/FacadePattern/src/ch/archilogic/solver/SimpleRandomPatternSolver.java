@@ -42,7 +42,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 
 	public String getDescription() {
-		return String.format("Simple Random Pattern Solver");
+		return String.format("Simple Random Pattvern Solver");
 	}
 
 	public ObjectGraph getObjectGraph() {

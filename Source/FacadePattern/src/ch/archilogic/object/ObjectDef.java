@@ -130,6 +130,21 @@ public class ObjectDef {
 			createFace(f.getVertices());
 		}
 	}
+
+	public Point3f walk(Point3f p, Vector3f dir, Face f) {
+		Vector3f pNew = new Vector3f(p.x + dir.x, p.y + dir.y, p.z + dir.z);
+		float dMax = Float.MAX_VALUE;
+		Face nearestFace = null;
+		for (Face face : getFaces()) {
+			float d = face.getDistance(pNew);
+			if (d < dMax) {
+				dMax = d;
+				nearestFace = face;
+			}
+		}
+		
+		return null;
+	}
 	
 	public Geometry createWireframe() throws FaceException {
 		int stripLen = 0; 
@@ -187,4 +202,6 @@ public class ObjectDef {
 	public String toString() {
 		return String.format("v: %d f: %d", vertices.size(), faces.size());
 	}
+	
+	
 }

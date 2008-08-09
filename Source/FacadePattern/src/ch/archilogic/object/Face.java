@@ -174,4 +174,9 @@ public class Face {
 		}
 		return newFaces;
 	}
+	
+	public float getDistance(Vector3f p) {
+		Vector3f g = new Vector3f
+		return 0;
+	}
 }
