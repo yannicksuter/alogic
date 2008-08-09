@@ -175,8 +175,42 @@ public class Face {
 		return newFaces;
 	}
 	
+	public float getAreaTriangle(Point3f A, Point3f B, Point3f C) {
+		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
+		Vector3f vB = new Vector3f(C.x - B.x, C.y - B.y, C.z - B.z);
+		Vector3f vC = new Vector3f(A.x - C.x, A.y - C.y, A.z - C.z);
+
+		float a = vA.length();
+		float b = vB.length();
+		float c = vC.length();
+
+		// Heron Formula
+		float f = 2 * (b * b * c * c + c * c * a * a + a * a * b * b)
+				- (a * a * a * a + b * b * b * b + c * c * c * c);
+
+		if (f != 0) {
+			return (float) (0.25f * Math.sqrt(f));
+		}
+		return 0;
+	}
+		
+	public float getArea(){
+		float f1 = getAreaTriangle(vertices.get(0), vertices.get(1), vertices.get(3));		
+		float f2 = getAreaTriangle(vertices.get(1), vertices.get(2), vertices.get(3));
+		return f1+f2;		
+	}
+			
+	public boolean isPlanar(){
+		
+		
+		
+		
+	
+		return true;		
+	}
+	
 	public float getDistance(Vector3f p) {
-		Vector3f g = new Vector3f
+		Vector3f g = new Vector3f();
 		return 0;
 	}
 }

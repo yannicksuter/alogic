@@ -172,6 +172,11 @@ public class SimpleRandomPatternSolver implements Solver {
 
 		Logger.err("head banging..");	
 		
+//		Face f = objEnvelope.getFace(0);
+//		float area = f.getArea();
+//		boolean planar = f.isPlanar();		
+//		System.out.println(String.format("planar: %s area: %f", planar, area));
+		
 		status = SolverState.IDLE;
 	}
 
