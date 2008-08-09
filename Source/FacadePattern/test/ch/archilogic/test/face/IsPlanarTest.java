@@ -6,20 +6,40 @@ import ch.archilogic.object.Face;
 import junit.framework.TestCase;
 
 public class IsPlanarTest extends TestCase {
-	
-	public void testIsPlanar(){
+
+	public void testIsPlanar() {
 		Face f = new Face();
-		f.addVertice(new Point3f(0,0,2.5f));
-		f.addVertice(new Point3f(1,0,2.5f));
-		f.addVertice(new Point3f(1,1,2.5f));
-		f.addVertice(new Point3f(0,1,2.5f));
-		
+		f.addVertice(new Point3f(0, 0, 0));
+		f.addVertice(new Point3f(1, 0, 0));
+		f.addVertice(new Point3f(1, 1, 200));
+		f.addVertice(new Point3f(0, 1, 0));
+
 		boolean planar = f.isPlanar();
-		System.out.println(String.format("planar: %s", planar));
+		float dist = f.getDistance(f.getVertices().get(0), f.getVertices().get(1), f.getVertices().get(2), f.getVertices().get(3));
 		
-		assertEquals(true, planar);		
-				
+		System.out.println(String.format("planar: %s", planar));
+		System.out.println(String.format("dist: %f", dist));
+
+		assertEquals(false, planar);
+		assertEquals(200f, dist);
 	}
 	
+	public void testIsPlanar2() {
+		Face f = new Face();
+		f.addVertice(new Point3f(0, 5, 0));
+		f.addVertice(new Point3f(0, 0, 5));
+		f.addVertice(new Point3f(0, 0, 0));
+		f.addVertice(new Point3f(5, 0, 0));
 
+		boolean planar = f.isPlanar();
+		float dist = f.getDistance(f.getVertices().get(0), f.getVertices().get(1), f.getVertices().get(2), f.getVertices().get(3));
+		
+		System.out.println(String.format("planar: %s", planar));
+		System.out.println(String.format("dist: %f", dist));
+
+		assertEquals(true, planar);
+		assertEquals(0f, dist);
+	}
+	
+	
 }

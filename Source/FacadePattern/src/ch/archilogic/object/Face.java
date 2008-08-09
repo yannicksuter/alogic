@@ -200,17 +200,37 @@ public class Face {
 		return f1+f2;		
 	}
 			
-	public boolean isPlanar(){
+	public boolean isPlanar() {
+
+		// testet ob zwei dreiecke auf der gleichen ebene sind oder nicht
+
+		float d = getDistance(vertices.get(0), vertices.get(1), vertices.get(2), vertices.get(3));
+
+		if (Math.abs(d) > 0.01) {
+			return false;
+		}
 		
-		
-		
-		
-	
-		return true;		
+		return true;
 	}
 	
-	public float getDistance(Vector3f p) {
-		Vector3f g = new Vector3f();
-		return 0;
+	public float getDistance(Point3f A, Point3f B, Point3f C, Point3f D) {
+
+		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
+		Vector3f vB = new Vector3f(D.x - A.x, D.y - A.y, D.z - A.z);
+		Vector3f vC = new Vector3f(C.x - A.x, C.y - A.y, C.z - A.z);
+		
+		Vector3f CrossC= new Vector3f();
+		CrossC.cross(vA, vB);
+		
+		Vector3f c= new Vector3f();
+		c.x = vA.y*vB.z - vA.z*vB.y;
+		c.y = -(vA.x*vB.z - vA.z*vB.x);
+		c.z = vA.x*vB.y - vA.y*vB.x;
+		
+		float r = 	Math.abs(-vA.y * ((vB.x * vC.z) - (vB.z * vC.x)) 
+					+vB.y * ((vA.x * vC.z) - (vA.z * vC.x)) 
+					-vC.y * ((vA.x * vB.z) - (vA.z * vB.x)))/CrossC.length();
+		
+		return r;
 	}
 }
