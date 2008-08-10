@@ -7,18 +7,20 @@ import junit.framework.TestCase;
 
 public class PartOffPolyTest extends TestCase {
 	
-	public void testIsPartOff() {
-		Face f = new Face();
-		f.addVertice(new Point3f(0, 0, 0));
-		f.addVertice(new Point3f(1, 0, 0));
-		f.addVertice(new Point3f(1, 1, 0));
-		f.addVertice(new Point3f(0, 1, 0));
-
-		boolean partOff = f.isPartOff(new Point3f(0.5f,0.5f,0));
-				
-		System.out.println(String.format("part: %s", partOff));
+	public void testIsPartOf() {
 		
-		assertEquals(true, partOff);	
+		Face f = new Face();
+		
+		f.addVertice(new Point3f(0, 0, 10));
+		f.addVertice(new Point3f(100, 0, 10));
+		f.addVertice(new Point3f(100, 100, 10));
+		f.addVertice(new Point3f(0, 100, 10));
+
+		boolean partOf = f.isPartOf(new Point3f(49.22f,49.88f,10));
+	
+		System.out.println(String.format("part: %s", partOf));
+		
+		assertEquals(true, partOf);
 	}
 	
 

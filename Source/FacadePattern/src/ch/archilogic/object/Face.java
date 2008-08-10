@@ -202,8 +202,7 @@ public class Face {
 			
 	public boolean isPlanar() {
 
-		// testet ob zwei dreiecke auf der gleichen ebene sind oder nicht
-
+		// testet ob Punkt C vom Vierreck ABCD auf der Ebene von AB und AD ist
 		float d = getDistance(vertices.get(2));
 
 		if (Math.abs(d) > 0.01) {
@@ -213,33 +212,71 @@ public class Face {
 		return true;
 	}
 	
+	
 	public float getDistance(Point3f P) {
+		
+		// berechnet die Distanz von C zur Ebene von AB und AD 
+		
 		Point3f A = vertices.get(0);
 		Point3f B = vertices.get(1);
 		Point3f D = vertices.get(3);
 		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
 		Vector3f vB = new Vector3f(D.x - A.x, D.y - A.y, D.z - A.z);
 		Vector3f vC = new Vector3f(P.x - A.x, P.y - A.y, P.z - A.z);
-		
-		Vector3f CrossC= new Vector3f();
+
+		Vector3f CrossC = new Vector3f();
 		CrossC.cross(vA, vB);
-		
-		Vector3f c= new Vector3f();
-		c.x = vA.y*vB.z - vA.z*vB.y;
-		c.y = -(vA.x*vB.z - vA.z*vB.x);
-		c.z = vA.x*vB.y - vA.y*vB.x;
-		
-		float r = 	Math.abs(-vA.y * ((vB.x * vC.z) - (vB.z * vC.x)) 
-					+vB.y * ((vA.x * vC.z) - (vA.z * vC.x)) 
-					-vC.y * ((vA.x * vB.z) - (vA.z * vB.x)))/CrossC.length();
-		
+
+		Vector3f c = new Vector3f();
+		c.x = vA.y * vB.z - vA.z * vB.y;
+		c.y = -(vA.x * vB.z - vA.z * vB.x);
+		c.z = vA.x * vB.y - vA.y * vB.x;
+
+		float r = Math.abs(	- vA.y * ((vB.x * vC.z) - (vB.z * vC.x)) 
+							+ vB.y	* ((vA.x * vC.z) - (vA.z * vC.x)) 
+							- vC.y	* ((vA.x * vB.z) - (vA.z * vB.x)))
+				  / CrossC.length();
+
 		return r;
 	}
 	
-	public boolean isPartOff(Point3f P){
+	
+	public boolean isPartOf(Point3f P){
+				
+		// findet heraus ob ein Punkt, wenn er auf der Ebene eines dreicks AB
+		// und AD ist, innerhalb des dreickes liegt
+
+		Point3f A = vertices.get(0);
+		Point3f B = vertices.get(1);
+		Point3f D = vertices.get(3);
+
+		Vector3f vAP = new Vector3f(A.x - P.x, A.y - P.y, A.z - P.z);
+		Vector3f vBP = new Vector3f(B.x - P.x, B.y - P.y, B.z - P.z);
+		Vector3f vDP = new Vector3f(D.x - P.x, D.y - P.y, D.z - P.z);
+
+		float w1 = (float) Math.sqrt(((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z))*((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z)));
+		float w2 = (float) Math.sqrt(((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z))*((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z)));
+		float w3 = (float) Math.sqrt(((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z))*((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z)));
 		
+		// segmente zwischen den Geraden
+		float a1 = (vAP.x * vBP.x + vAP.y * vBP.y + vAP.z * vBP.z)/w1;
+		float a2 = (vBP.x * vDP.x + vBP.y * vDP.y + vBP.z * vDP.z)/w2;
+		float a3 = (vDP.x * vAP.x + vDP.y * vAP.y + vDP.z * vAP.z)/w3;
+
+		// winkelsumme
+		float total = (float) ((Math.acos(a1) + Math.acos(a2) + Math.acos(a3)) * 57.29578);
+		//System.out.println(String.format("winkel: %f", total));
 		
-		
-		return false;
+		// ist die summe nicht 360, dann ist der Punkt ausserhalb des dreiecks
+		if (Math.abs(total - 360) > 0.001)
+			return false;
+		return true;
+
+		// Missing Check für Dreick BCD von Viereck ABCD
+	}
+
+	private void Normalize(Vector3f vap) {
+		// TODO Auto-generated method stub
+
 	}
 }
