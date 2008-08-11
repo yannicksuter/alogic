@@ -1,15 +1,14 @@
 package ch.archilogic.object.geom;
 
-import javax.vecmath.Point3d;
-
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.runtime.exception.FaceException;
 
 public class BBoxObj extends ObjectDef  {		
 	private int flags = 0;
-	private Point3d upper;
-	private Point3d lower;
+	private Vector3D upper;
+	private Vector3D lower;
 	
 	private static boolean bInA(int b, int a) {
 		return (a & b) == b;
@@ -42,11 +41,11 @@ public class BBoxObj extends ObjectDef  {
 		}
 	}
 	
-	public void setUpper(Point3d upper) {
+	public void setUpper(Vector3D upper) {
 		this.upper = upper;
 	}
 
-	public void setLower(Point3d lower) {
+	public void setLower(Vector3D lower) {
 		this.lower = lower;
 	}
 }

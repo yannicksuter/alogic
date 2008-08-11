@@ -3,16 +3,13 @@ package ch.archilogic.object;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
-
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.VecHelper;
 import ch.archilogic.math.vector.Vector3D;
 
 public class Face {
-	private List<Point3f> vertices = new ArrayList<Point3f>();
-	private List<Vector3f> normals = new ArrayList<Vector3f>();
+	private List<Vector3D> vertices = new ArrayList<Vector3D>();
+	private List<Vector3D> normals = new ArrayList<Vector3D>();
 	private List<Integer> indices = new ArrayList<Integer>();
 	private Face [] neighbours = null;
 	private Vector3D faceNormal = null;
@@ -20,14 +17,14 @@ public class Face {
 	public Face() {
 	}
 	
-	public Face(Point3f p0, Point3f p1, Point3f p2, Point3f p3) {
+	public Face(Vector3D p0, Vector3D p1, Vector3D p2, Vector3D p3) {
 		addVertice(p0);
 		addVertice(p1);
 		addVertice(p2);
 		addVertice(p3);
 	}
 	
-	public void addVertice(Point3f p) {
+	public void addVertice(Vector3D p) {
 		vertices.add(p);
 	}
 	
@@ -35,15 +32,15 @@ public class Face {
 		indices.add(index);
 	}
 
-	public void addNormal(Vector3f n) {
+	public void addNormal(Vector3D n) {
 		normals.add(n);
 	}
 
-	public List<Point3f> getVertices() {
+	public List<Vector3D> getVertices() {
 		return vertices;
 	}
 
-	public void setVertices(List<Point3f> vertices) {
+	public void setVertices(List<Vector3D> vertices) {
 		this.vertices = vertices;
 	}
 
@@ -55,11 +52,11 @@ public class Face {
 		this.indices = indices;
 	}
 
-	public List<Vector3f> getNormals() {
+	public List<Vector3D> getNormals() {
 		return normals;
 	}
 
-	public void setNormals(List<Vector3f> normals) {
+	public void setNormals(List<Vector3D> normals) {
 		this.normals = normals;
 	}
 	
@@ -96,8 +93,8 @@ public class Face {
 		if (refFace == this) 
 			return -1;
 		
-		Point3f u0, u1;
-		Point3f v0, v1;
+		Vector3D u0, u1;
+		Vector3D v0, v1;
 		for (int i=0;i<getEdgeCount(); i++) {
 			u0 = vertices.get(i % vertices.size());
 			u1 = vertices.get((i+1) % vertices.size());
@@ -153,15 +150,15 @@ public class Face {
 			return null;
 		}
 		
-		Point3f u0 = vertices.get(idx % vertices.size());
-		Point3f u1 = vertices.get((idx+1) % vertices.size());
-		return new Vector3D(u1.x-u0.x, u1.y-u0.y, u1.z-u0.z);
+		Vector3D u0 = vertices.get(idx % vertices.size());
+		Vector3D u1 = vertices.get((idx+1) % vertices.size());
+		return new Vector3D(u1.getX()-u0.getX(), u1.getY()-u0.getY(), u1.getZ()-u0.getZ());
 	}
 	
 	public List<Face> subdivide() {
 		List<Face> newFaces = new ArrayList<Face>();
 		if (vertices.size() == 4) {
-			Point3f [] m = new Point3f[4];
+			Vector3D [] m = new Vector3D[4];
 			// calc new points on the side
 			m[0] = VecHelper.mid(vertices.get(0),vertices.get(1), 0.5f);
 			m[1] = VecHelper.mid(vertices.get(1),vertices.get(2), 0.5f);
@@ -169,7 +166,7 @@ public class Face {
 			m[3] = VecHelper.mid(vertices.get(3),vertices.get(0), 0.5f);
 
 			// calc center
-			Point3f c = VecHelper.mid(m[0], m[2], 0.5f);
+			Vector3D c = VecHelper.mid(m[0], m[2], 0.5f);
 			
 			// create new faces
 			newFaces.add(new Face(m[0], vertices.get(1), m[1], c));
@@ -182,21 +179,24 @@ public class Face {
 		return newFaces;
 	}
 	
-	public float getAreaTriangle(Point3f A, Point3f B, Point3f C) {
-		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
-		Vector3f vB = new Vector3f(C.x - B.x, C.y - B.y, C.z - B.z);
-		Vector3f vC = new Vector3f(A.x - C.x, A.y - C.y, A.z - C.z);
+	public double getAreaTriangle(Vector3D A, Vector3D B, Vector3D C) {
+//		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
+//		Vector3f vB = new Vector3f(C.x - B.x, C.y - B.y, C.z - B.z);
+//		Vector3f vC = new Vector3f(A.x - C.x, A.y - C.y, A.z - C.z);
+		Vector3D vA = Vector3D.sub(B, A);
+		Vector3D vB = Vector3D.sub(C, B); 
+		Vector3D vC = Vector3D.sub(A, C); 
 
-		float a = vA.length();
-		float b = vB.length();
-		float c = vC.length();
+		double a = vA.length();
+		double b = vB.length();
+		double c = vC.length();
 
 		// Heron Formula
-		float f = 2 * (b * b * c * c + c * c * a * a + a * a * b * b)
+		double f = 2 * (b * b * c * c + c * c * a * a + a * a * b * b)
 				- (a * a * a * a + b * b * b * b + c * c * c * c);
 
 		if (f != 0) {
-			return (float) (0.25f * Math.sqrt(f));
+			return 0.25 * Math.sqrt(f);
 		}
 		return 0;
 	}
@@ -205,9 +205,9 @@ public class Face {
 	 * gibt die Fläche des aufgespannten Vierecks ABCD zurück
 	 * @return
 	 */
-	public float getArea(){
-		float f1 = getAreaTriangle(vertices.get(0), vertices.get(1), vertices.get(3));		
-		float f2 = getAreaTriangle(vertices.get(1), vertices.get(2), vertices.get(3));
+	public double getArea(){
+		double f1 = getAreaTriangle(vertices.get(0), vertices.get(1), vertices.get(3));		
+		double f2 = getAreaTriangle(vertices.get(1), vertices.get(2), vertices.get(3));
 		return f1+f2;		
 	}
 			
@@ -216,7 +216,7 @@ public class Face {
 	 * @return
 	 */
 	public boolean isPlanar() {
-		float d = getDistance(vertices.get(2));
+		double d = getDistance(vertices.get(2));
 
 		if (Math.abs(d) > 0.01) {
 			return false;
@@ -230,23 +230,28 @@ public class Face {
 	 * @param P
 	 * @return
 	 */
-	public float getDistance(Point3f P) {
-		Point3f A = vertices.get(0);
-		Point3f B = vertices.get(1);
-		Point3f D = vertices.get(3);
-		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
-		Vector3f vB = new Vector3f(D.x - A.x, D.y - A.y, D.z - A.z);
-		Vector3f vC = new Vector3f(P.x - A.x, P.y - A.y, P.z - A.z);
+	public double getDistance(Vector3D P) {
+//		Vector3D A = vertices.get(0);
+//		Vector3D B = vertices.get(1);
+//		Vector3D D = vertices.get(3);
+//		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
+//		Vector3f vB = new Vector3f(D.x - A.x, D.y - A.y, D.z - A.z);
+//		Vector3f vC = new Vector3f(P.x - A.x, P.y - A.y, P.z - A.z);
 
-		Vector3f CrossC = new Vector3f();
-		CrossC.cross(vA, vB);
+		Vector3D vA = Vector3D.sub(vertices.get(1), vertices.get(0));
+		Vector3D vB = Vector3D.sub(vertices.get(3), vertices.get(0)); 
+		Vector3D vC = Vector3D.sub(P, vertices.get(0)); 
+		
+		
+		Vector3D CrossC = Vector3D.cross(vA, vB);
+//		CrossC.cross(vA, vB);
 
-		Vector3f c = new Vector3f();
+		Vector3D c = new Vector3D();
 		c.x = vA.y * vB.z - vA.z * vB.y;
 		c.y = -(vA.x * vB.z - vA.z * vB.x);
 		c.z = vA.x * vB.y - vA.y * vB.x;
 
-		float r = Math.abs(	- vA.y * ((vB.x * vC.z) - (vB.z * vC.x)) 
+		double r = Math.abs(- vA.y * ((vB.x * vC.z) - (vB.z * vC.x)) 
 							+ vB.y	* ((vA.x * vC.z) - (vA.z * vC.x)) 
 							- vC.y	* ((vA.x * vB.z) - (vA.z * vB.x)))
 				  / CrossC.length();
@@ -260,22 +265,25 @@ public class Face {
 	 * @param P
 	 * @return
 	 */
-	public boolean insideTriangle(Point3f P, Point3f A, Point3f B, Point3f C){
-		Vector3f vAP = new Vector3f(A.x - P.x, A.y - P.y, A.z - P.z);
-		Vector3f vBP = new Vector3f(B.x - P.x, B.y - P.y, B.z - P.z);
-		Vector3f vDP = new Vector3f(C.x - P.x, C.y - P.y, C.z - P.z);
+	public boolean insideTriangle(Vector3D P, Vector3D A, Vector3D B, Vector3D C){
+//		Vector3D vAP = new Vector3f(A.x - P.x, A.y - P.y, A.z - P.z);
+//		Vector3D vBP = new Vector3f(B.x - P.x, B.y - P.y, B.z - P.z);
+//		Vector3D vDP = new Vector3f(C.x - P.x, C.y - P.y, C.z - P.z);
+		Vector3D vAP = Vector3D.sub(A, P);
+		Vector3D vBP = Vector3D.sub(B, P);
+		Vector3D vDP = Vector3D.sub(C, P);
 
-		float w1 = (float) Math.sqrt(((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z))*((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z)));
-		float w2 = (float) Math.sqrt(((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z))*((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z)));
-		float w3 = (float) Math.sqrt(((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z))*((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z)));
+		double w1 = (float) Math.sqrt(((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z))*((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z)));
+		double w2 = (float) Math.sqrt(((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z))*((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z)));
+		double w3 = (float) Math.sqrt(((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z))*((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z)));
 		
 		// segmente zwischen den Geraden
-		float a1 = (vAP.x * vBP.x + vAP.y * vBP.y + vAP.z * vBP.z)/w1;
-		float a2 = (vBP.x * vDP.x + vBP.y * vDP.y + vBP.z * vDP.z)/w2;
-		float a3 = (vDP.x * vAP.x + vDP.y * vAP.y + vDP.z * vAP.z)/w3;
+		double a1 = (vAP.x * vBP.x + vAP.y * vBP.y + vAP.z * vBP.z)/w1;
+		double a2 = (vBP.x * vDP.x + vBP.y * vDP.y + vBP.z * vDP.z)/w2;
+		double a3 = (vDP.x * vAP.x + vDP.y * vAP.y + vDP.z * vAP.z)/w3;
 
 		// winkelsumme
-		float total = (float) ((Math.acos(a1) + Math.acos(a2) + Math.acos(a3)) * 57.29578);
+		double total = (Math.acos(a1) + Math.acos(a2) + Math.acos(a3)) * 57.29578;
 		//System.out.println(String.format("winkel: %f", total));
 		
 		// ist die summe nicht 360, dann ist der Punkt ausserhalb des dreiecks
@@ -285,7 +293,7 @@ public class Face {
 		return true;
 	}
 	
-	public boolean isPartOf(Point3f P){
+	public boolean isPartOf(Vector3D P){
 		if (vertices.size() == 3) {
 			return insideTriangle(P, vertices.get(0), vertices.get(1), vertices.get(2));
 		} 

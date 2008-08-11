@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import javax.vecmath.Point3f;
-
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 
@@ -27,7 +26,7 @@ public class ObjExporter implements Exporter {
 			
 			// export vertices
 			for (int i=0; i<envelope.getVerticeNb();i++) {
-				Point3f v = envelope.getVertice(i);
+				Vector3D v = envelope.getVertice(i);
 				out.println(String.format("v %f %f %f", v.x, v.y, v.z));
 			}
 

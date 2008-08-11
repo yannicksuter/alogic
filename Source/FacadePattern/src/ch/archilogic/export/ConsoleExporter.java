@@ -2,8 +2,7 @@ package ch.archilogic.export;
 
 import java.util.List;
 
-import javax.vecmath.Point3f;
-
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 
@@ -20,7 +19,7 @@ public class ConsoleExporter implements Exporter {
 		
 		// export vertices
 		for (int i=0; i<envelope.getVerticeNb();i++) {
-			Point3f v = envelope.getVertice(i);
+			Vector3D v = envelope.getVertice(i);
 			System.out.println(String.format("v: %f %f %f", v.x, v.y, v.z));
 		}
 

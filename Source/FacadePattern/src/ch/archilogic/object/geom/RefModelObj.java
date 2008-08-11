@@ -9,6 +9,7 @@ import javax.media.j3d.TriangleArray;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
@@ -27,11 +28,11 @@ public class RefModelObj extends ObjectDef {
 			Object obj = en.nextElement();		
 			if (obj instanceof TriangleArray) {
 				TriangleArray a = (TriangleArray)obj;
-				List<Point3f> p = new ArrayList<Point3f>();
+				List<Vector3D> p = new ArrayList<Vector3D>();
 				Point3f p1 = new Point3f();
 				Point3f p2 = new Point3f();
 				Point3f p3 = new Point3f();
-				List<Vector3f> n = new ArrayList<Vector3f>();
+				List<Vector3D> n = new ArrayList<Vector3D>();
 				Vector3f n1 = new Vector3f();
 				Vector3f n2 = new Vector3f();
 				Vector3f n3 = new Vector3f();
@@ -40,14 +41,14 @@ public class RefModelObj extends ObjectDef {
 					n.clear();
 					a.getCoordinate(i*3+0, p1);
 					a.getNormal(i*3+0, n1);
-					p.add(p1);
-					n.add(n1);
+					p.add(new Vector3D(p1));
+					n.add(new Vector3D(n1));
 					a.getCoordinate(i*3+1, p2);
-					p.add(p2);
-					n.add(n2);
+					p.add(new Vector3D(p2));
+					n.add(new Vector3D(n2));
 					a.getCoordinate(i*3+2, p3);
-					p.add(p3);
-					n.add(n3);
+					p.add(new Vector3D(p3));
+					n.add(new Vector3D(n3));
 					createFace(p, n);
 				}
 			} else {

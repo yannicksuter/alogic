@@ -10,10 +10,17 @@ public class Vector3D {
 	public final static Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
 	public final static Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 	
-	private double x;
-	private double y;
-	private double z;
-	
+	public double x;
+	public double y;
+	public double z;
+
+	public Vector3D() {
+		super();
+		this.x = 0;
+		this.y = 0;
+		this.z = 0;
+	}
+
 	public Vector3D(double x, double y, double z) {
 		super();
 		this.x = x;
@@ -35,6 +42,12 @@ public class Vector3D {
 	
 	public Vector3D(Vector3f vector) {
 		this(vector.x, vector.y, vector.z);
+	}
+	
+	public boolean equals(Vector3D ref) {
+		return (this.x == ref.getX() && 
+				this.y == ref.getY() && 
+				this.z == ref.getZ());
 	}
 	
 	public Vector3D copy() {
@@ -126,5 +139,14 @@ public class Vector3D {
 
 	public Vector3D mult(double scalar) {
 		return new Vector3D(scalar * this.x, scalar * this.y, scalar * this.z);
+	}
+	
+	// converter
+	public Point3f getPoint3f() {
+		return new Point3f((float)x, (float)y, (float)z);
+	}
+
+	public static Point3f getPoint3f(Vector3D v) {
+		return new Point3f((float)v.getX(), (float)v.getY(), (float)v.getZ());
 	}
 }

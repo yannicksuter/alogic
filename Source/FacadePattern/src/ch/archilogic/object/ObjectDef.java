@@ -8,18 +8,17 @@ import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineStripArray;
 import javax.media.j3d.Shape3D;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
 
 import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
+import ch.archilogic.solver.intersection.IFace;
 import ch.archilogic.solver.intersection.ILine;
 
 public class ObjectDef {
 	private ObjectType type;
-	private List<Point3f> vertices = new ArrayList<Point3f>();
+	private List<Vector3D> vertices = new ArrayList<Vector3D>();
 	private List<Face> faces = new ArrayList<Face>();
 	private Appearance appearance = null;
 
@@ -38,7 +37,7 @@ public class ObjectDef {
 		return vertices.size();
 	}
 	
-	public Point3f getVertice(int i) {
+	public Vector3D getVertice(int i) {
 		return vertices.get(i);
 	}
 	
@@ -54,8 +53,8 @@ public class ObjectDef {
 		return faces;
 	}
 
-	public Point3f containsEqual(Point3f ref) {
-		for (Point3f p : vertices) {
+	public Vector3D containsEqual(Vector3D ref) {
+		for (Vector3D p : vertices) {
 			if (p.equals(ref)) {
 				return p;
 			}
@@ -63,8 +62,8 @@ public class ObjectDef {
 		return null;
 	}
 	
-	public int getIndexOf(Point3f ref) {
-		Point3f p = containsEqual(ref);
+	public int getIndexOf(Vector3D ref) {
+		Vector3D p = containsEqual(ref);
 		if (p != null) {
 			return vertices.indexOf(p);
 		}
@@ -72,24 +71,24 @@ public class ObjectDef {
 	}
 
 	public void addFace(Face f) throws FaceException {
-		createFace(f.getVertices());
+		createFace(f.getVertices(), null);
 	}
 	
-	public void createFace(List<Point3f> pointList) throws FaceException {
-		createFace(pointList, null);
+	public void createFace(List<Vector3D> verts) throws FaceException {
+		createFace(verts, null);
 	}
 	
-	public void createFace(List<Point3f> pointList, List<Vector3f> normalList) throws FaceException {
+	public void createFace(List<Vector3D> pointList, List<Vector3D> normalList) throws FaceException {
 		if (pointList == null) {
 			throw new FaceException("no points to define a face.");
 		}
 		
 		Face face = new Face();
 		for (int i=0; i< pointList.size(); i++) {
-			Point3f p = pointList.get(i);
+			Vector3D p = pointList.get(i);
 
 			if (containsEqual(p) == null) {
-				vertices.add(new Point3f(p));
+				vertices.add(new Vector3D(p));
 			}
 			
 			int index = getIndexOf(p);
@@ -131,30 +130,11 @@ public class ObjectDef {
 	public void subdivide(Face face) throws FaceException {
 		List<Face> newFaces = face.subdivide();
 		for (Face f : newFaces) {
-			createFace(f.getVertices());
+			createFace(f.getVertices(), null);
 		}
-	}
-
-	public Point3f walk(Point3f p, Vector3f dir, Face f) {
-		Point3f pNew = new Point3f(p.x + dir.x, p.y + dir.y, p.z + dir.z);
-		float dMax = Float.MAX_VALUE;
-		Face nearestFace = null;
-		for (Face face : getFaces()) {
-			float d = 0;//face.getDistance(pNew);
-			if (d < dMax) {
-				dMax = d;
-				nearestFace = face;
-			}
-		}
-		
-		if (nearestFace != null) {
-			
-		}
-		
-		return null;
 	}
 	
-	public Vector3D w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
+	public IFace w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
 		Plane plane = new Plane(p, dir, currentFace.getFaceNormal());
 		
 		int refIndex = -1;
@@ -165,7 +145,7 @@ public class ObjectDef {
 			ILine r = plane.getIntersect(currentFace.getEdgeLine(i));
 			
 			if (r != null && r.p != null) {
-				if ( currentFace.isPartOf(new Point3f((float)r.p.getX(), (float)r.p.getY(), (float)r.p.getZ()))) {
+				if ( currentFace.isPartOf(r.p) ) {
 					
 					Vector3D newDir = Vector3D.sub(r.p, p);
 					double angle = Vector3D.angle(dir, newDir);
@@ -183,18 +163,20 @@ public class ObjectDef {
 			}
 		}
 		
-		Vector3D endPoint = null;
+		IFace endPoint = new IFace(currentFace);
 		if (refIndex != -1) {
 			Logger.info(String.format("analysing edge[%d]", refIndex));
 			Vector3D newDir = Vector3D.sub(refPoint, p);
 			if (l <= newDir.length()) {
-				// new point is in the face 
-				endPoint = Vector3D.add(p, newDir.normalize().mult(l));
+				// new point is in the face
+				endPoint.point = Vector3D.add(p, newDir.normalize().mult(l));
+				endPoint.dir = newDir;
 			} else {
 				Face nextFace = currentFace.getNeighbours()[refIndex];
 				if (nextFace == null) 
 				{ // intersecting an edge of the triangle
-					endPoint = refPoint;					
+					endPoint.point = refPoint;					
+					endPoint.dir = newDir;
 				} else 
 				{ // look into the next face
 					endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace);
@@ -202,7 +184,8 @@ public class ObjectDef {
 			}			
 		} else {
 			// no solution found
-			endPoint = p;
+			endPoint.point = p;
+			endPoint.dir = dir;
 		}
 		
 		return endPoint;
@@ -220,10 +203,10 @@ public class ObjectDef {
 			LineStripArray grid = new LineStripArray(stripLen, GeometryArray.COORDINATES, counts);
 			int t = 0;
 			for (Face face : faces) {
-				for (Point3f p : face.getVertices()) {
-					grid.setCoordinate(t++, p);				
+				for (Vector3D p : face.getVertices()) {
+					grid.setCoordinate(t++, Vector3D.getPoint3f(p));				
 				}
-				grid.setCoordinate(t++, face.getVertices().get(0));
+				grid.setCoordinate(t++, Vector3D.getPoint3f(face.getVertices().get(0)));
 			}
 			return grid;
 		}
@@ -263,7 +246,5 @@ public class ObjectDef {
 	@Override
 	public String toString() {
 		return String.format("v: %d f: %d", vertices.size(), faces.size());
-	}
-	
-	
+	}	
 }

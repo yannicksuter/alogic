@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point3f;
+
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectType;
 import ch.archilogic.runtime.exception.FaceException;
@@ -42,11 +44,11 @@ public class GridObj extends ObjectDef {
 				
 		for (int u=0; u<nbSegments;u++) {
 			for (int v=0; v<nbSegments;v++) {
-				List<Point3f> l = new ArrayList<Point3f>();
-				l.add(points[u][v]);
-				l.add(points[u][v+1]);
-				l.add(points[u+1][v+1]);
-				l.add(points[u+1][v]);
+				List<Vector3D> l = new ArrayList<Vector3D>();
+				l.add(new Vector3D(points[u][v]));
+				l.add(new Vector3D(points[u][v+1]));
+				l.add(new Vector3D(points[u+1][v+1]));
+				l.add(new Vector3D(points[u+1][v]));
 				createFace(l);
 			}
 		}
