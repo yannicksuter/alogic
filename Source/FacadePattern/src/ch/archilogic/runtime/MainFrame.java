@@ -5,12 +5,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.*;
-import javax.vecmath.Point3f;
 
 import ch.archilogic.export.ConsoleExporter;
 import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
-import ch.archilogic.object.Face;
 import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.SimpleRandomPatternSolver;

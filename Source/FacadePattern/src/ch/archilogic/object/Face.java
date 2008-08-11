@@ -6,14 +6,16 @@ import java.util.List;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.VecHelper;
+import ch.archilogic.math.vector.Vector3D;
 
 public class Face {
 	private List<Point3f> vertices = new ArrayList<Point3f>();
 	private List<Vector3f> normals = new ArrayList<Vector3f>();
 	private List<Integer> indices = new ArrayList<Integer>();
 	private Face [] neighbours = null;
-	private Vector3f faceNormal = null;
+	private Vector3D faceNormal = null;
 
 	public Face() {
 	}
@@ -64,25 +66,30 @@ public class Face {
 	public int getEdgeCount() {
 		return vertices.size();
 	}
+	
+	public Line getEdgeLine(int i) {
+		Vector3D a = new Vector3D(vertices.get((i)%vertices.size()));
+		Vector3D b = new Vector3D(vertices.get((i+1)%vertices.size()));		
+		Vector3D d = Vector3D.sub(b, a);
+		return new Line(a, d);
+	}
 
 	public Face[] getNeighbours() {
 		return neighbours;
 	}
 
-	public Vector3f getFaceNormal() {
+	public Vector3D getFaceNormal() {
 		return faceNormal;
 	}
 
-	public void setFaceNormal(Vector3f faceNormal) {
+	public void setFaceNormal(Vector3D faceNormal) {
 		this.faceNormal = faceNormal;
 	}
 
 	public void createFaceNormal() {
-		Vector3f a = new Vector3f(vertices.get(1).x - vertices.get(0).x, vertices.get(1).y - vertices.get(0).y, vertices.get(1).z - vertices.get(0).z);
-		Vector3f b = new Vector3f(vertices.get(2).x - vertices.get(0).x, vertices.get(2).y - vertices.get(0).y, vertices.get(2).z - vertices.get(0).z);
-		this.faceNormal = new Vector3f();
-		this.faceNormal.cross(a, b);
-		this.faceNormal.normalize();
+		Vector3D a = Vector3D.sub(new Vector3D(vertices.get(1)), new Vector3D(vertices.get(0)));
+		Vector3D b = Vector3D.sub(new Vector3D(vertices.get(2)), new Vector3D(vertices.get(0)));
+		this.faceNormal = Vector3D.cross(a, b).normalize();
 	}
 	
 	public int isNeighbour(Face refFace) {
@@ -141,14 +148,14 @@ public class Face {
 		}
 	}
 
-	public Vector3f getEdgeVec(int idx) {
+	public Vector3D getEdgeVec(int idx) {
 		if (vertices == null || vertices.size() == 0) {
 			return null;
 		}
 		
 		Point3f u0 = vertices.get(idx % vertices.size());
 		Point3f u1 = vertices.get((idx+1) % vertices.size());
-		return new Vector3f(u1.x-u0.x, u1.y-u0.y, u1.z-u0.z);
+		return new Vector3D(u1.x-u0.x, u1.y-u0.y, u1.z-u0.z);
 	}
 	
 	public List<Face> subdivide() {
@@ -194,15 +201,21 @@ public class Face {
 		return 0;
 	}
 		
+	/**
+	 * gibt die Fläche des aufgespannten Vierecks ABCD zurück
+	 * @return
+	 */
 	public float getArea(){
 		float f1 = getAreaTriangle(vertices.get(0), vertices.get(1), vertices.get(3));		
 		float f2 = getAreaTriangle(vertices.get(1), vertices.get(2), vertices.get(3));
 		return f1+f2;		
 	}
 			
+	/**
+	 * testet ob Punkt C vom Vierreck ABCD auf der Ebene von AB und AD ist
+	 * @return
+	 */
 	public boolean isPlanar() {
-
-		// testet ob Punkt C vom Vierreck ABCD auf der Ebene von AB und AD ist
 		float d = getDistance(vertices.get(2));
 
 		if (Math.abs(d) > 0.01) {
@@ -212,11 +225,12 @@ public class Face {
 		return true;
 	}
 	
-	
+	/**
+	 * berechnet die Distanz von C zur Ebene von AB und AD
+	 * @param P
+	 * @return
+	 */
 	public float getDistance(Point3f P) {
-		
-		// berechnet die Distanz von C zur Ebene von AB und AD 
-		
 		Point3f A = vertices.get(0);
 		Point3f B = vertices.get(1);
 		Point3f D = vertices.get(3);
@@ -238,21 +252,18 @@ public class Face {
 				  / CrossC.length();
 
 		return r;
-	}
-	
-	
-	public boolean isPartOf(Point3f P){
-				
-		// findet heraus ob ein Punkt, wenn er auf der Ebene eines dreicks AB
-		// und AD ist, innerhalb des dreickes liegt
+	}	
 
-		Point3f A = vertices.get(0);
-		Point3f B = vertices.get(1);
-		Point3f D = vertices.get(3);
-
+	/**
+	 * findet heraus ob ein Punkt, wenn er auf der Ebene eines dreicks AB
+	 * und AD ist, innerhalb des dreickes liegt
+	 * @param P
+	 * @return
+	 */
+	public boolean insideTriangle(Point3f P, Point3f A, Point3f B, Point3f C){
 		Vector3f vAP = new Vector3f(A.x - P.x, A.y - P.y, A.z - P.z);
 		Vector3f vBP = new Vector3f(B.x - P.x, B.y - P.y, B.z - P.z);
-		Vector3f vDP = new Vector3f(D.x - P.x, D.y - P.y, D.z - P.z);
+		Vector3f vDP = new Vector3f(C.x - P.x, C.y - P.y, C.z - P.z);
 
 		float w1 = (float) Math.sqrt(((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z))*((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z)));
 		float w2 = (float) Math.sqrt(((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z))*((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z)));
@@ -270,13 +281,21 @@ public class Face {
 		// ist die summe nicht 360, dann ist der Punkt ausserhalb des dreiecks
 		if (Math.abs(total - 360) > 0.001)
 			return false;
+		
 		return true;
-
-		// Missing Check für Dreick BCD von Viereck ABCD
 	}
-
-	private void Normalize(Vector3f vap) {
-		// TODO Auto-generated method stub
-
+	
+	public boolean isPartOf(Point3f P){
+		if (vertices.size() == 3) {
+			return insideTriangle(P, vertices.get(0), vertices.get(1), vertices.get(2));
+		} 
+		else if (vertices.size() == 4) {
+			// r1 fuer ABD
+			boolean r1 = insideTriangle(P, vertices.get(0), vertices.get(1), vertices.get(3));
+			// r2 fuer BCD - Missing Check für Dreick BCD von Viereck ABCD
+			boolean r2 = insideTriangle(P, vertices.get(1), vertices.get(2), vertices.get(3));		
+			return r1 || r2;			
+		}
+		return false;
 	}
 }

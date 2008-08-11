@@ -1,7 +1,5 @@
 package ch.archilogic.test.plane;
 
-import javax.vecmath.Vector3f;
-
 import ch.archilogic.math.geom.Isect;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.geom.Plane;
@@ -12,7 +10,7 @@ import junit.framework.TestCase;
 
 public class IntersectionTest extends TestCase {
 	public void testPlaneLineIntersection() {
-		Plane plane = new Plane(new Vector3f(5,0,0), new Vector3f(-1,0,1), new Vector3f(-1,1,0));
+		Plane plane = new Plane(new Vector3D(5,0,0), new Vector3D(-1,0,1), new Vector3D(-1,1,0));
 
 		Vector3D d = new Vector3D(1,1,1);
 		d.normalize();
@@ -26,7 +24,7 @@ public class IntersectionTest extends TestCase {
 	}
 
 	public void testPlaneLineIntersection2() {
-		Plane plane = new Plane(new Vector3f(5,0,0), new Vector3f(0,0,1), new Vector3f(0,1,0));
+		Plane plane = new Plane(new Vector3D(5,0,0), new Vector3D(0,0,1), new Vector3D(0,1,0));
 
 		Vector3D d = new Vector3D(1,1,1);
 		d.normalize();

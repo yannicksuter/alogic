@@ -4,13 +4,12 @@ import javax.vecmath.Vector3f;
 import ch.archilogic.math.vector.*;
 
 public class Plane {
-    private static float EPSILON = 1e-6f;
     Vector3D x;
     Vector3D u;
     Vector3D v;
     Vector3D normal;
     
-	public Plane (Vector3f x, Vector3f u, Vector3f v) {
+	public Plane (Vector3D x, Vector3D u, Vector3D v) {
 		this.x = new Vector3D(x);
 		this.u = new Vector3D(u);
 		this.v = new Vector3D(v);
@@ -33,7 +32,12 @@ public class Plane {
 			return null;
 		} else {
             Isect ip = new Isect();
-            ip.t = (float)((det3 / detN) - Vector3D.EPSILON);
+            
+            ip.t = (det3 / detN) - Vector3D.EPSILON;
+            if (ip.t != -1.0E-11) {
+            	ip.p = l.getPoint(ip.t);
+            }
+            
             return ip;
 		}
 	}    

@@ -11,6 +11,10 @@ import javax.media.j3d.Shape3D;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+import ch.archilogic.log.Logger;
+import ch.archilogic.math.geom.Isect;
+import ch.archilogic.math.geom.Plane;
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
 
 public class ObjectDef {
@@ -148,6 +152,60 @@ public class ObjectDef {
 		}
 		
 		return null;
+	}
+	
+	public Vector3D w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
+		Plane plane = new Plane(p, dir, currentFace.getFaceNormal());
+		
+		int refIndex = -1;
+		double refAngle = 2*Math.PI;
+		Vector3D refPoint = null;
+		
+		for (int i=0; i<currentFace.getEdgeCount(); i++) {
+			Isect r = plane.getIntersect(currentFace.getEdgeLine(i));
+			
+			if (r != null && r.p != null) {
+				if ( currentFace.isPartOf(new Point3f((float)r.p.getX(), (float)r.p.getY(), (float)r.p.getZ()))) {
+					
+					Vector3D newDir = Vector3D.sub(r.p, p);
+					double angle = Vector3D.angle(dir, newDir);
+
+					if (refAngle > angle) {
+						refIndex = i;
+						refAngle = angle;
+						refPoint = r.p;
+					}
+				} else {
+					Logger.info(String.format("edge[%d] intersects outside the face", i));
+				}
+			} else  {
+				Logger.info(String.format("edge[%d] has no intersection", i));
+			}
+		}
+		
+		Vector3D endPoint = null;
+		if (refIndex != -1) {
+			Logger.info(String.format("analysing edge[%d]", refIndex));
+			Vector3D newDir = Vector3D.sub(refPoint, p);
+			if (l <= newDir.length()) {
+				// new point is in the face 
+				endPoint = Vector3D.add(p, newDir.normalize().mult(l));
+			} else {
+				Face nextFace = currentFace.getNeighbours()[refIndex];
+				if (nextFace == null) 
+				{ // intersecting an edge of the triangle
+					endPoint = refPoint;					
+				} else 
+				{ // look into the next face
+					endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace);
+				}
+			}			
+		} else {
+			// no solution found
+			endPoint = p;
+		}
+		
+		return endPoint;
 	}
 	
 	public Geometry createWireframe() throws FaceException {

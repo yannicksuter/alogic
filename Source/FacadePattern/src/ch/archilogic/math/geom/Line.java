@@ -36,7 +36,7 @@ public class Line {
 		return true;
 	}
 
-	public Vector3D getPoint(float t) {
+	public Vector3D getPoint(double t) {
 		return new Vector3D(P.getX()+t*D.getX(), P.getY()+t*D.getY(), P.getZ()+t*D.getZ());
 	}
 }

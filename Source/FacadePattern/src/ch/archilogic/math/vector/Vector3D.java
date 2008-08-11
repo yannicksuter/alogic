@@ -1,5 +1,6 @@
 package ch.archilogic.math.vector;
 
+import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
 public class Vector3D {
@@ -23,11 +24,15 @@ public class Vector3D {
 	public Vector3D(double scalar) {
 		this(scalar, scalar, scalar);
 	}
-	
+
 	public Vector3D(Vector3D vector) {
 		this(vector.x, vector.y, vector.z);
 	}
 
+	public Vector3D(Point3f vector) {
+		this(vector.x, vector.y, vector.z);
+	}
+	
 	public Vector3D(Vector3f vector) {
 		this(vector.x, vector.y, vector.z);
 	}
@@ -51,7 +56,11 @@ public class Vector3D {
 	public double length() {
 		return Math.sqrt(Vector3D.dot(this, this));
 	}
-	
+
+	public double length(Vector3D a, Vector3D b) {
+		return Vector3D.sub(b,a).length();
+	}
+
 	public Vector3D normalize() {
 		double magnitude = this.length();
 		if (magnitude > Vector3D.EPSILON) {
@@ -62,6 +71,10 @@ public class Vector3D {
 		} else {
 			return Vector3D.ZERO;
 		}
+	}
+	
+	public static double angle(Vector3D a, Vector3D b) {
+		return Math.acos(dot(a,b)/(a.length()*b.length()));
 	}
 	
 	public Vector3D getReflectedAt(Vector3D n) {
@@ -109,5 +122,9 @@ public class Vector3D {
 	
 	public static Vector3D mult(Vector3D v1, Vector3D v2) {
 		return new Vector3D(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+	}
+
+	public Vector3D mult(double scalar) {
+		return new Vector3D(scalar * this.x, scalar * this.y, scalar * this.z);
 	}
 }
