@@ -13,12 +13,4 @@ public class VecHelper {
 		
 		return m;
 	}
-
-	public static Point3f intersect(Point3f p0, Point3f p1, Point3f q0, Point3f q1) {
-		Vector3f u = new Vector3f(p1);
-		u.sub(p0);		
-		Vector3f v = new Vector3f(q1);
-		v.sub(q0);
-		return null;
-	}
 }

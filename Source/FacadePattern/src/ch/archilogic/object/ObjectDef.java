@@ -143,6 +143,10 @@ public class ObjectDef {
 			}
 		}
 		
+		if (nearestFace != null) {
+			
+		}
+		
 		return null;
 	}
 	
