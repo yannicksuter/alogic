@@ -7,6 +7,7 @@ public class IFace {
 	public Face face;
 	public Vector3D point;
 	public Vector3D dir;
+	public boolean found;
 	
 	public IFace(Face face) {
 		this.face = face;

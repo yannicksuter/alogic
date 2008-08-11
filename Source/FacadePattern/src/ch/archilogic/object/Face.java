@@ -306,4 +306,13 @@ public class Face {
 		}
 		return false;
 	}
+
+	public boolean hasVertice(Vector3D ref) {
+		for (Vector3D p : vertices) {
+			if (p.equals(ref)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

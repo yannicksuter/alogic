@@ -9,6 +9,8 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineStripArray;
 import javax.media.j3d.Shape3D;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
@@ -152,8 +154,11 @@ public class ObjectDef {
 
 					if (refAngle >= angle || Double.isNaN(angle)) {
 						refIndex = i;
-						refAngle = angle;
+						if (!Double.isNaN(angle)) {
+							refAngle = angle;
+						}
 						refPoint = r.p;
+						break;
 					}
 				} else {
 					Logger.info(String.format("edge[%d] intersects outside the face", i));
@@ -169,21 +174,37 @@ public class ObjectDef {
 			Vector3D newDir = Vector3D.sub(refPoint, p);
 			if (l <= newDir.length()) {
 				// new point is in the face
+				endPoint.found = true;
 				endPoint.point = Vector3D.add(p, newDir.normalize().mult(l));
 				endPoint.dir = newDir;
 			} else {
 				Face nextFace = currentFace.getNeighbours()[refIndex];
 				if (nextFace == null) 
 				{ // intersecting an edge of the triangle
+					endPoint.found = true;
 					endPoint.point = refPoint;					
 					endPoint.dir = newDir;
 				} else 
 				{ // look into the next face
-					endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace);
+					if (currentFace.hasVertice(refPoint)) 
+					{ // point is a corner.. so more than one edge face has to be checked
+						List<Face> shareVertice = getFacesWithVertice(refPoint, currentFace);
+						Logger.info(String.format("number of candidates: %d", shareVertice.size()));
+						for (Face f : shareVertice) {
+							endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, f);
+							if (endPoint.found) {
+								break;
+							}
+						}
+					} else
+					{ // simple edge
+						endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace);
+					}
 				}
 			}			
 		} else {
 			// no solution found
+			endPoint.found = false;
 			endPoint.point = p;
 			endPoint.dir = dir;
 		}
@@ -191,6 +212,16 @@ public class ObjectDef {
 		return endPoint;
 	}
 	
+	private List<Face> getFacesWithVertice(Vector3D refPoint, Face excludeFace) {
+		List<Face> l = new ArrayList<Face>();
+		for (Face f : faces) {
+			if (f.hasVertice(refPoint) && (excludeFace == null || excludeFace != f)) {
+				l.add(f);
+			}
+		}
+		return l;
+	}
+
 	public Geometry createWireframe() throws FaceException {
 		int stripLen = 0; 
 		int[] counts = new int [getFaceNb()];

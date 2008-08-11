@@ -158,7 +158,7 @@ public class SimpleRandomPatternSolver implements Solver {
 //		List<Point3f> f1 = createFirstSegment(refPoint, refNormal, refEdgeVec);
 //		objEnvelope.createFace(f1);
 
-		Logger.err("head banging..");	
+		Logger.info("head banging..");	
 
 		List<Vector3D> f1 = createFirstSegment(refFace, refIndex);
 		objEnvelope.createFace(f1);
