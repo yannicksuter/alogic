@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.ColoringAttributes;
+import javax.media.j3d.LineAttributes;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
@@ -122,7 +123,10 @@ public class SimpleRandomPatternSolver implements Solver {
 		app = new Appearance();
 		catt = new ColoringAttributes();
 		catt.setColor(new Color3f(Color.red));
-		app.setColoringAttributes(catt);		
+		LineAttributes latt = new LineAttributes();
+		latt.setLineWidth(2);
+		app.setColoringAttributes(catt);
+		app.setLineAttributes(latt);
 		objEnvelope.addAppearance(app);		
 	
 		// add to scene graph
@@ -130,7 +134,7 @@ public class SimpleRandomPatternSolver implements Solver {
 //			objGraph.addChild(object);
 
 			objGraph.addChild(objReference);					
-			objGraph.addChild(edgeObj);
+//			objGraph.addChild(edgeObj);
 			objGraph.addChild(objEnvelope);
 			
 			objGraph.addChild(box);
@@ -191,14 +195,23 @@ public class SimpleRandomPatternSolver implements Solver {
 //	}
 
 	private List<Vector3D> createFirstSegment(Face face, int idx) {
-		Vector3D refPoint = new Vector3D(face.getVertices().get(idx));
+		Vector3D p0 = new Vector3D(face.getVertices().get(idx));
 		Vector3D refEdgeVec = face.getEdgeVec(idx);
 
-		IFace refPointEnd = objReference.w(refPoint, refEdgeVec, 0.5, null, face);
+		IFace p1 = objReference.w(p0, refEdgeVec, 1, null, face);
 
 		List<Vector3D> l = new ArrayList<Vector3D>();
-		l.add(refPoint);
-		l.add(refPointEnd.point);
+		l.add(p0);
+		l.add(p1.point);
+
+		// compute downwards vector
+		Vector3D v = Vector3D.cross(face.getFaceNormal(), refEdgeVec.normalize()).normalize();
+		
+//		IFace p2 = objReference.w(p1.point, v, 0.5, null, p1.face);
+//		l.add(p2.point);
+	
+//		IFace p3 = objReference.w(p0, v, 0.5, null, face);
+//		l.add(p3.point);
 		
 		return l;
 	}

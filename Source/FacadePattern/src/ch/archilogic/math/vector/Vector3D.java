@@ -4,7 +4,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
 public class Vector3D {
-	public final static double EPSILON = 0.00000000001;
+	public final static double EPSILON = 0.0000000001;
 	public final static Vector3D ZERO = new Vector3D(0.0);
 	public final static Vector3D X = new Vector3D(1.0, 0.0, 0.0);
 	public final static Vector3D Y = new Vector3D(0.0, 1.0, 0.0);

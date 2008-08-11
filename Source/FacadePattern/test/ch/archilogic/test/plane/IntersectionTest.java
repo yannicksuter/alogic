@@ -34,7 +34,7 @@ public class IntersectionTest extends TestCase {
 		ILine r = plane.getIntersect(line);
 		Vector3D p = line.getPoint(r.t);
 		
-		System.out.println(String.format("t: %f p: %s d: %f", r.t, p,p.length()));
-		assertEquals(Math.sqrt(75), p.length(), Vector3D.EPSILON);
+		System.out.println(String.format("t: %f p: %s d: %f %f", r.t, p,p.length(), Math.sqrt(75)));
+		assertEquals(Math.sqrt(75), p.length(), 0.000001);
 	}
 }

@@ -23,11 +23,10 @@ public class Plane {
     }
 
 	public ILine getIntersect(Line l) {
-		Vector3D c = new Vector3D(l.getDir());
-		Vector3D p = Vector3D.sub(this.x, new Vector3D(l.getAPoint()));
+		Vector3D p = Vector3D.sub(this.x, l.getAPoint());
 
 		double det3 = Vector3D.det(u, v, p);
-		double detN = Vector3D.det(u, v, c);
+		double detN = Vector3D.det(u, v, l.getDir());
 
 		if (detN == 0.0) {
 			return null;
@@ -35,8 +34,10 @@ public class Plane {
             ILine ip = new ILine();
             
             ip.t = (det3 / detN) - Vector3D.EPSILON;
-            if (ip.t != -1.0E-11) {
+            if (ip.t != -Vector3D.EPSILON) {
             	ip.p = l.getPoint(ip.t);
+            } else {
+            	ip.p = l.getPoint(0);            	
             }
             
             return ip;

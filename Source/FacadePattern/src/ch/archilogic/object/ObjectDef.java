@@ -150,7 +150,7 @@ public class ObjectDef {
 					Vector3D newDir = Vector3D.sub(r.p, p);
 					double angle = Vector3D.angle(dir, newDir);
 
-					if (refAngle > angle) {
+					if (refAngle >= angle || Double.isNaN(angle)) {
 						refIndex = i;
 						refAngle = angle;
 						refPoint = r.p;
