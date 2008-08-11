@@ -1,10 +1,10 @@
 package ch.archilogic.test.plane;
 
-import ch.archilogic.math.geom.Isect;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.geom.Plane;
 
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.solver.intersection.ILine;
 
 import junit.framework.TestCase;
 
@@ -17,7 +17,7 @@ public class IntersectionTest extends TestCase {
 		
 		Line line = new Line(Vector3D.ZERO, d);
 		
-		Isect r = plane.getIntersect(line);
+		ILine r = plane.getIntersect(line);
 		Vector3D p = line.getPoint(r.t);
 		
 		System.out.println(String.format("t: %f p: %s d: %f", r.t, p,p.length()));
@@ -31,7 +31,7 @@ public class IntersectionTest extends TestCase {
 		
 		Line line = new Line(Vector3D.ZERO, d);
 		
-		Isect r = plane.getIntersect(line);
+		ILine r = plane.getIntersect(line);
 		Vector3D p = line.getPoint(r.t);
 		
 		System.out.println(String.format("t: %f p: %s d: %f", r.t, p,p.length()));

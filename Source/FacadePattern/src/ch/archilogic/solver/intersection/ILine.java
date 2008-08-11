@@ -1,8 +1,8 @@
-package ch.archilogic.math.geom;
+package ch.archilogic.solver.intersection;
 
 import ch.archilogic.math.vector.Vector3D;
 
-public class Isect {
+public class ILine {
 	public double t = 0f;
 	public Vector3D p = null;
 }

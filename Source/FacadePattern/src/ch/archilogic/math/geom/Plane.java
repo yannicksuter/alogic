@@ -2,6 +2,7 @@ package ch.archilogic.math.geom;
 
 import javax.vecmath.Vector3f;
 import ch.archilogic.math.vector.*;
+import ch.archilogic.solver.intersection.ILine;
 
 public class Plane {
     Vector3D x;
@@ -21,7 +22,7 @@ public class Plane {
         return new Vector3f((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
     }
 
-	public Isect getIntersect(Line l) {
+	public ILine getIntersect(Line l) {
 		Vector3D c = new Vector3D(l.getDir());
 		Vector3D p = Vector3D.sub(this.x, new Vector3D(l.getAPoint()));
 
@@ -31,7 +32,7 @@ public class Plane {
 		if (detN == 0.0) {
 			return null;
 		} else {
-            Isect ip = new Isect();
+            ILine ip = new ILine();
             
             ip.t = (det3 / detN) - Vector3D.EPSILON;
             if (ip.t != -1.0E-11) {

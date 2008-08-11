@@ -12,10 +12,10 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
 import ch.archilogic.log.Logger;
-import ch.archilogic.math.geom.Isect;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
+import ch.archilogic.solver.intersection.ILine;
 
 public class ObjectDef {
 	private ObjectType type;
@@ -162,7 +162,7 @@ public class ObjectDef {
 		Vector3D refPoint = null;
 		
 		for (int i=0; i<currentFace.getEdgeCount(); i++) {
-			Isect r = plane.getIntersect(currentFace.getEdgeLine(i));
+			ILine r = plane.getIntersect(currentFace.getEdgeLine(i));
 			
 			if (r != null && r.p != null) {
 				if ( currentFace.isPartOf(new Point3f((float)r.p.getX(), (float)r.p.getY(), (float)r.p.getZ()))) {
