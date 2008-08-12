@@ -135,10 +135,12 @@ public class ObjectDef {
 			createFace(f.getVertices(), null);
 		}
 	}
-	
-	public IFace w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
+	public IFace catwalk(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
 		Plane plane = new Plane(p, dir, currentFace.getFaceNormal());
-		
+		return w(p, dir, l, previousFace, currentFace, plane);
+	}
+	
+	public IFace w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace, Plane plane) {		
 		int refIndex = -1;
 		double refAngle = 2*Math.PI;
 		Vector3D refPoint = null;
@@ -147,36 +149,40 @@ public class ObjectDef {
 			ILine r = plane.getIntersect(currentFace.getEdgeLine(i));
 			
 			if (r != null && r.p != null) {
-				if ( currentFace.isPartOf(r.p) ) {
-					
-					Vector3D newDir = Vector3D.sub(r.p, p);
-					double angle = Vector3D.angle(dir, newDir);
-
-					if (refAngle >= angle || Double.isNaN(angle)) {
-						refIndex = i;
-						if (!Double.isNaN(angle)) {
-							refAngle = angle;
+				if (currentFace.isPartOf(r.p) || currentFace.hasVertice(r.p)) {
+					if ( !p.epsilonEquals(r.p, Vector3D.EPSILON) ) {
+						Vector3D newDir = Vector3D.sub(r.p, p);
+						double angle = Vector3D.angle(dir, newDir);
+	
+						if (refAngle >= angle || Double.isNaN(angle)) {
+							refIndex = i;
+							if (!Double.isNaN(angle)) {
+								refAngle = 0;
+							}
+							refPoint = r.p;
+							Logger.debug(String.format("edge[%d] a: %f l: %f (t: %f)", i, angle, newDir.length(), r.t));
 						}
-						refPoint = r.p;
-						break;
+					} else {
+						Logger.debug(String.format("edge[%d] intersects equals starting point", i));						
 					}
 				} else {
-					Logger.info(String.format("edge[%d] intersects outside the face", i));
+					Logger.debug(String.format("edge[%d] intersects outside the face", i));
 				}
 			} else  {
-				Logger.info(String.format("edge[%d] has no intersection", i));
+				Logger.debug(String.format("edge[%d] has no intersection", i));
 			}
 		}
 		
 		IFace endPoint = new IFace(currentFace);
 		if (refIndex != -1) {
-			Logger.info(String.format("analysing edge[%d]", refIndex));
+			Logger.debug(String.format("analysing edge[%d]", refIndex));
 			Vector3D newDir = Vector3D.sub(refPoint, p);
 			if (l <= newDir.length()) {
 				// new point is in the face
 				endPoint.found = true;
 				endPoint.point = Vector3D.add(p, newDir.normalize().mult(l));
 				endPoint.dir = newDir;
+				Logger.debug(String.format("*** in-face end"));
 			} else {
 				Face nextFace = currentFace.getNeighbours()[refIndex];
 				if (nextFace == null) 
@@ -184,21 +190,24 @@ public class ObjectDef {
 					endPoint.found = true;
 					endPoint.point = refPoint;					
 					endPoint.dir = newDir;
+					Logger.debug(String.format("*** edge end [%s]", currentFace.hasVertice(refPoint)));
 				} else 
 				{ // look into the next face
 					if (currentFace.hasVertice(refPoint)) 
 					{ // point is a corner.. so more than one edge face has to be checked
 						List<Face> shareVertice = getFacesWithVertice(refPoint, currentFace);
-						Logger.info(String.format("number of candidates: %d", shareVertice.size()));
+						Logger.debug(String.format("number of candidates: %d", shareVertice.size()));
 						for (Face f : shareVertice) {
-							endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, f);
-							if (endPoint.found) {
+							IFace i = w(refPoint, newDir, l-newDir.length(), currentFace, f, plane);
+							if (i.found) {
+								endPoint.set(i);
 								break;
 							}
+							endPoint.visited.addAll(i.visited);
 						}
 					} else
 					{ // simple edge
-						endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace);
+						endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace, plane);
 					}
 				}
 			}			
@@ -207,7 +216,11 @@ public class ObjectDef {
 			endPoint.found = false;
 			endPoint.point = p;
 			endPoint.dir = dir;
+			Logger.debug(String.format("*** dead end"));
 		}
+		
+		// track the faces evaluated
+		endPoint.visited.add(currentFace);
 		
 		return endPoint;
 	}

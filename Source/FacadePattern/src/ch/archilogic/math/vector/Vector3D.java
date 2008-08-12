@@ -43,11 +43,22 @@ public class Vector3D {
 	public Vector3D(Vector3f vector) {
 		this(vector.x, vector.y, vector.z);
 	}
+
+	public Vector3D abs() {
+		return new Vector3D(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));		
+	}
 	
 	public boolean equals(Vector3D ref) {
 		return (this.x == ref.getX() && 
 				this.y == ref.getY() && 
 				this.z == ref.getZ());
+	}
+	
+	public boolean epsilonEquals(Vector3D ref, double epsilon) {
+		Vector3D diff = Vector3D.sub(ref, this).abs();
+		return (diff.getX() <= epsilon && 
+				diff.getY() <= epsilon && 
+				diff.getZ() <= epsilon );
 	}
 	
 	public Vector3D copy() {

@@ -309,7 +309,7 @@ public class Face {
 
 	public boolean hasVertice(Vector3D ref) {
 		for (Vector3D p : vertices) {
-			if (p.equals(ref)) {
+			if (p.epsilonEquals(ref, Vector3D.EPSILON)) {
 				return true;
 			}
 		}

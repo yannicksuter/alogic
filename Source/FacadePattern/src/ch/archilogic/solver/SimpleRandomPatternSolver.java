@@ -37,6 +37,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private ObjectDef objReference;
 	private ObjectDef objBoundingBox;
 	private ObjectDef objEnvelope;
+	private ObjectDef objFaceEvaluated;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -117,7 +118,16 @@ public class SimpleRandomPatternSolver implements Solver {
 		catt.setColor(new Color3f(Color.yellow));
 		app.setColoringAttributes(catt);		
 		edgeObj.addAppearance(app);
-	
+
+		// evaluation vizualizer
+		objFaceEvaluated = new ObjectDef();
+		app = new Appearance();
+		catt = new ColoringAttributes();
+		catt.setColor(new Color3f(Color.green));
+		app.setColoringAttributes(catt);		
+		objFaceEvaluated.addAppearance(app);
+		
+		// create envelop object
 		Logger.info("creating new envelop");	
 		objEnvelope = new ObjectDef();
 		app = new Appearance();
@@ -133,9 +143,10 @@ public class SimpleRandomPatternSolver implements Solver {
 		if (objReference != null) {			
 //			objGraph.addChild(object);
 
-			objGraph.addChild(objReference);					
+//			objGraph.addChild(objReference);					
 //			objGraph.addChild(edgeObj);
 			objGraph.addChild(objEnvelope);
+			objGraph.addChild(objFaceEvaluated);
 			
 			objGraph.addChild(box);
 		}
@@ -194,24 +205,30 @@ public class SimpleRandomPatternSolver implements Solver {
 //		return l;
 //	}
 
-	private List<Vector3D> createFirstSegment(Face face, int idx) {
+	private List<Vector3D> createFirstSegment(Face face, int idx) throws FaceException {
 		Vector3D p0 = new Vector3D(face.getVertices().get(idx));
 		Vector3D refEdgeVec = face.getEdgeVec(idx);
 
-		IFace p1 = objReference.w(p0, refEdgeVec, 1, null, face);
+		IFace p1 = objReference.catwalk(p0, refEdgeVec, 0.75, null, face);
 
 		List<Vector3D> l = new ArrayList<Vector3D>();
 		l.add(p0);
 		l.add(p1.point);
-
+		
 		// compute downwards vector
 		Vector3D v = Vector3D.cross(face.getFaceNormal(), refEdgeVec.normalize()).normalize();
 		
-//		IFace p2 = objReference.w(p1.point, v, 0.5, null, p1.face);
+//		IFace p2 = objReference.catwalk(p1.point, v, 0.5, null, p1.face);
 //		l.add(p2.point);
 	
-//		IFace p3 = objReference.w(p0, v, 0.5, null, face);
-//		l.add(p3.point);
+		Logger.setDebugVerbose(true);
+		IFace p3 = objReference.catwalk(p0, v, 0.5, null, face);
+		l.add(p3.point);
+
+		// visualize visited faces
+		for (Face f : p3.visited) {
+			objFaceEvaluated.addFace(f);
+		}
 		
 		return l;
 	}
