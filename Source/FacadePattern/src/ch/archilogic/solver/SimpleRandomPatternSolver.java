@@ -30,6 +30,7 @@ import ch.archilogic.object.geom.RefModelObj;
 import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
+import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;
 
 public class SimpleRandomPatternSolver implements Solver {
@@ -41,6 +42,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	private ObjectDef objBoundingBox;
 	private ObjectDef objEnvelope;
 	private ObjectDef objFaceEvaluated;
+	
+	private Edge edge;	
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -110,7 +113,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		// visualize edges
 		Logger.info("object: edges detection");
 		ObjectDef objEdge = new ObjectDef();		
-		Edge edge = new Edge();
+		edge = new Edge();
 		for (Face f : objReference.getFaces()) {
 			if (f.hasEdges()) {
 				int id = f.getEdge(0);
@@ -127,7 +130,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		}
 		objEdge.addAppearance(createAppearance(Color.yellow, 3));
 
-		// evaluation vizualizer
+		// evaluation visualizer
 		objFaceEvaluated = new ObjectDef();
 		objFaceEvaluated.addAppearance(createAppearance(Color.green, 2));		
 		
@@ -172,8 +175,16 @@ public class SimpleRandomPatternSolver implements Solver {
 			}
 		}
 				
-		Logger.info("head banging..");	
-
+		Logger.info("head banging..");
+		if (edge != null) {
+			int numSegments = 10;
+			double edgeLen = edge.getLength() / numSegments;
+			IEdgeSegment s0 = edge.getStartPoint();
+			IEdgeSegment s1 = edge.getPoint(s0.endPoint, edgeLen);
+			if (s0 != null && s1 != null) {
+			}
+		}
+		
 		List<Vector3D> f1 = createFirstSegment(refFace, refIndex);
 		objEnvelope.createFace(f1);
 				

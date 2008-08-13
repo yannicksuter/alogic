@@ -58,4 +58,8 @@ public class EdgeSegment {
 		f.addVertice(getEndPoint());
 		return f;
 	}
+
+	public double getLength() {		
+		return this.line.getDir().length();
+	}
 }
