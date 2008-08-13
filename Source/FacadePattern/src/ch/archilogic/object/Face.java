@@ -3,11 +3,17 @@ package ch.archilogic.object;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Line;
+import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.VecHelper;
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.solver.intersection.IFace;
+import ch.archilogic.solver.intersection.ILine;
 
 public class Face {
+	private int id;
+
 	private List<Vector3D> vertices = new ArrayList<Vector3D>();
 	private List<Vector3D> normals = new ArrayList<Vector3D>();
 	private List<Integer> indices = new ArrayList<Integer>();
@@ -22,6 +28,14 @@ public class Face {
 		addVertice(p1);
 		addVertice(p2);
 		addVertice(p3);
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public void addVertice(Vector3D p) {
@@ -314,5 +328,58 @@ public class Face {
 			}
 		}
 		return false;
+	}
+	
+	private boolean validateAngle(double angle) {
+		if ( Double.isNaN(angle) || Math.abs(angle) < Math.PI*0.5 || angle > Math.PI*1.5) {
+			return true;
+		} 
+		return false;
+	}
+	
+	public IFace intersectPlane(Plane plane, Vector3D p, Vector3D dir) {
+		IFace res = new IFace();
+		
+		for (int i=0; i<this.getEdgeCount(); i++) {
+			ILine r = plane.getIntersect(this.getEdgeLine(i));
+			
+			if (r != null && r.p != null) {
+				if (r.t >= 0 && r.t <= 1) 
+				{ // regular intersection
+					if (this.hasVertice(r.p)) 
+					{ // intersection ends in point
+						Logger.debug(String.format("edge[%d] intersection ends in point (t: %f p: %s)", i, r.t, r.p));
+						if (res.type != IFace.IsecType.ON_EDGE) {
+							res.sideIdx = i;
+							res.point = new Vector3D(r.p);
+							if (r.p.epsilonEquals(p, Vector3D.EPSILON)) {
+								res.type = IFace.IsecType.ON_STARTINGCORNER;
+							} else  
+							{ // corner, but not the starting point
+								res.type = IFace.IsecType.ON_CORNER;
+							}
+						}
+					} else
+					{ // intersection on the edge					
+						Vector3D newDir = Vector3D.sub(r.p, p);
+						double angle = Vector3D.angle(dir, newDir);
+						if ( !p.epsilonEquals(r.p, Vector3D.EPSILON) && validateAngle(angle) ) {
+							Logger.debug(String.format("edge[%d] front intersection on edge (t: %f p: %s)", i, r.t, r.p));
+							res.sideIdx = i;
+							res.point = new Vector3D(r.p);
+							res.type = IFace.IsecType.ON_EDGE;
+						} else {
+							Logger.debug(String.format("edge[%d] behind intersection on edge (t: %f p: %s)", i, r.t, r.p));							
+						}
+					}
+				} else 
+				{ // intersection outside edges
+					Logger.debug(String.format("edge[%d] intersects outside the face", i));
+				}				
+			} else  {
+				Logger.debug(String.format("edge[%d] has no intersection", i));
+			}
+		}
+		return res;
 	}
 }

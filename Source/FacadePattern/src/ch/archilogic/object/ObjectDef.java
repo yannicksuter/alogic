@@ -16,6 +16,7 @@ import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IFace;
+import ch.archilogic.solver.intersection.IObject;
 import ch.archilogic.solver.intersection.ILine;
 
 public class ObjectDef {
@@ -105,7 +106,8 @@ public class ObjectDef {
 			}
 		}
 		
-		// add face 
+		// add face
+		face.setId(faces.size());
 		faces.add(face);
 	}
 
@@ -135,48 +137,23 @@ public class ObjectDef {
 			createFace(f.getVertices(), null);
 		}
 	}
-	public IFace catwalk(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
+	public IObject catwalk(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
 		Plane plane = new Plane(p, dir, currentFace.getFaceNormal());
 		return w(p, dir, l, previousFace, currentFace, plane);
 	}
 	
-	public IFace w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace, Plane plane) {		
-		int refIndex = -1;
-		double refAngle = 2*Math.PI;
-		Vector3D refPoint = null;
+	public IObject w(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace, Plane plane) {
+		Logger.debug(String.format("---[l: %f P: %s, D:%s]", l, p, dir));
 		
-		for (int i=0; i<currentFace.getEdgeCount(); i++) {
-			ILine r = plane.getIntersect(currentFace.getEdgeLine(i));
-			
-			if (r != null && r.p != null) {
-				if (currentFace.isPartOf(r.p) || currentFace.hasVertice(r.p)) {
-					if ( !p.epsilonEquals(r.p, Vector3D.EPSILON) ) {
-						Vector3D newDir = Vector3D.sub(r.p, p);
-						double angle = Vector3D.angle(dir, newDir);
-	
-						if (refAngle >= angle || Double.isNaN(angle)) {
-							refIndex = i;
-							if (!Double.isNaN(angle)) {
-								refAngle = 0;
-							}
-							refPoint = r.p;
-							Logger.debug(String.format("edge[%d] a: %f l: %f (t: %f)", i, angle, newDir.length(), r.t));
-						}
-					} else {
-						Logger.debug(String.format("edge[%d] intersects equals starting point", i));						
-					}
-				} else {
-					Logger.debug(String.format("edge[%d] intersects outside the face", i));
-				}
-			} else  {
-				Logger.debug(String.format("edge[%d] has no intersection", i));
-			}
-		}
+		// get intersection data
+		IFace faceIsec = currentFace.intersectPlane(plane, p, dir);
+		Logger.debug(faceIsec.toString());
 		
-		IFace endPoint = new IFace(currentFace);
-		if (refIndex != -1) {
-			Logger.debug(String.format("analysing edge[%d]", refIndex));
-			Vector3D newDir = Vector3D.sub(refPoint, p);
+		// evaluate intersection and do follow up intersections
+		IObject endPoint = new IObject(currentFace);
+		if (faceIsec.sideIdx != -1) {
+			Logger.debug(String.format("analysing edge[%d]", faceIsec.sideIdx));
+			Vector3D newDir = Vector3D.sub(faceIsec.point, p);
 			if (l <= newDir.length()) {
 				// new point is in the face
 				endPoint.found = true;
@@ -184,30 +161,49 @@ public class ObjectDef {
 				endPoint.dir = newDir;
 				Logger.debug(String.format("*** in-face end"));
 			} else {
-				Face nextFace = currentFace.getNeighbours()[refIndex];
-				if (nextFace == null) 
-				{ // intersecting an edge of the triangle
-					endPoint.found = true;
-					endPoint.point = refPoint;					
-					endPoint.dir = newDir;
-					Logger.debug(String.format("*** edge end [%s]", currentFace.hasVertice(refPoint)));
-				} else 
-				{ // look into the next face
-					if (currentFace.hasVertice(refPoint)) 
-					{ // point is a corner.. so more than one edge face has to be checked
-						List<Face> shareVertice = getFacesWithVertice(refPoint, currentFace);
+				if (currentFace.hasVertice(faceIsec.point)) {
+					List<Face> shareVertice = getFacesWithVertice(faceIsec.point, currentFace);
+					if (shareVertice.size() > 0) {
 						Logger.debug(String.format("number of candidates: %d", shareVertice.size()));
 						for (Face f : shareVertice) {
-							IFace i = w(refPoint, newDir, l-newDir.length(), currentFace, f, plane);
-							if (i.found) {
-								endPoint.set(i);
-								break;
+							if (f != previousFace) {
+								IFace faceIsecTemp = f.intersectPlane(plane, faceIsec.point, newDir);
+								if (faceIsecTemp.hasOngoingIntersection()) 
+								{ // only evaluate neighbor faces which have interesting intersections (not resulting in the same point again)
+									IObject i = w(faceIsec.point, newDir, l-newDir.length(), currentFace, f, plane);
+									if (i.found) {
+										endPoint.set(i);
+										break;
+									}
+									endPoint.visited.addAll(i.visited);
+								}
 							}
-							endPoint.visited.addAll(i.visited);
 						}
-					} else
+						if (!endPoint.found)
+						{ // no interesting candidates  
+							endPoint.found = true;
+							endPoint.point = faceIsec.point;					
+							endPoint.dir = newDir;
+							Logger.debug(String.format("*** edge end in corder [%s]", currentFace.hasVertice(faceIsec.point)));						
+						}
+					} else 
+					{ // face has no more neighbours
+						endPoint.found = true;
+						endPoint.point = faceIsec.point;					
+						endPoint.dir = newDir;
+						Logger.debug(String.format("*** edge end in corder [%s]", currentFace.hasVertice(faceIsec.point)));						
+					}
+				} else {
+					Face nextFace = currentFace.getNeighbours()[faceIsec.sideIdx];
+					if (nextFace == null) 
+					{ // intersecting an edge of the triangle
+						endPoint.found = true;
+						endPoint.point = faceIsec.point;					
+						endPoint.dir = newDir;
+						Logger.debug(String.format("*** edge end [%s]", currentFace.hasVertice(faceIsec.point)));
+					} else 
 					{ // simple edge
-						endPoint = w(refPoint, newDir, l-newDir.length(), currentFace, nextFace, plane);
+						endPoint = w(faceIsec.point, newDir, l-newDir.length(), currentFace, nextFace, plane);
 					}
 				}
 			}			

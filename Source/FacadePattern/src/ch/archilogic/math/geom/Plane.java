@@ -22,25 +22,20 @@ public class Plane {
         return new Vector3f((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
     }
 
-	public ILine getIntersect(Line l) {
-		Vector3D p = Vector3D.sub(this.x, l.getAPoint());
-
-		double det3 = Vector3D.det(u, v, p);
-		double detN = Vector3D.det(u, v, l.getDir());
-
-		if (detN == 0.0) {
-			return null;
-		} else {
-            ILine ip = new ILine();
-            
-            ip.t = (det3 / detN) - Vector3D.EPSILON;
-            if (ip.t != -Vector3D.EPSILON) {
-            	ip.p = l.getPoint(ip.t);
-            } else {
-            	ip.p = l.getPoint(0);            	
-            }
-            
-            return ip;
-		}
-	}    
+    public ILine getIntersect(Line l) {
+    	Vector3D p = Vector3D.sub(this.x, l.getAPoint());
+    	
+    	double det3 = Vector3D.det(u, v, p);
+    	double detN = Vector3D.det(u, v, l.getDir());
+    	
+    	if (detN == 0.0) {
+    		// no intersection!
+    		return null;
+    	} else {
+    		ILine ip = new ILine();            
+    		ip.t = (det3 / detN);
+    		ip.p = l.getPoint(ip.t);
+    		return ip;
+    	}
+    }    
 }

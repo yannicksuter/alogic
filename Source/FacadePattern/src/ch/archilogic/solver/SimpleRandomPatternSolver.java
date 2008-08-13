@@ -27,7 +27,7 @@ import ch.archilogic.object.geom.RefModelObj;
 import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
-import ch.archilogic.solver.intersection.IFace;
+import ch.archilogic.solver.intersection.IObject;
 
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
@@ -209,7 +209,8 @@ public class SimpleRandomPatternSolver implements Solver {
 		Vector3D p0 = new Vector3D(face.getVertices().get(idx));
 		Vector3D refEdgeVec = face.getEdgeVec(idx);
 
-		IFace p1 = objReference.catwalk(p0, refEdgeVec, 0.75, null, face);
+		Logger.setDebugVerbose(true);
+		IObject p1 = objReference.catwalk(p0, refEdgeVec, 0.5, null, face);
 
 		List<Vector3D> l = new ArrayList<Vector3D>();
 		l.add(p0);
@@ -222,7 +223,7 @@ public class SimpleRandomPatternSolver implements Solver {
 //		l.add(p2.point);
 	
 		Logger.setDebugVerbose(true);
-		IFace p3 = objReference.catwalk(p0, v, 0.5, null, face);
+		IObject p3 = objReference.catwalk(p0, v, 0.5, null, face);
 		l.add(p3.point);
 
 		// visualize visited faces

@@ -1,28 +1,24 @@
 package ch.archilogic.solver.intersection;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ch.archilogic.math.vector.Vector3D;
-import ch.archilogic.object.Face;
 
-public class IFace {
-	public Face face;
-	public Vector3D point;
-	public Vector3D dir;
-	public boolean found;
+public class IFace extends Object {
+	public enum IsecType {
+		ON_STARTINGCORNER,
+		ON_CORNER,
+		ON_EDGE,
+	};
 	
-	public List<Face> visited = new ArrayList<Face>();
+	public IsecType type = null;
+	public int sideIdx = -1;
+	public Vector3D point = null;
 	
-	public IFace(Face face) {
-		this.face = face;
+	public boolean hasOngoingIntersection() {
+		return (type == IsecType.ON_EDGE || type == IsecType.ON_CORNER);
 	}
 	
-	public void set(IFace i) {
-		this.face = i.face;
-		this.point = i.point;
-		this.dir = i.dir;
-		this.found = i.found;
-		this.visited.addAll(i.visited);
+	@Override
+	public String toString() {
+		return String.format("type: %s idx: %d, p: %s", type.name(), sideIdx, point);		
 	}
 }
