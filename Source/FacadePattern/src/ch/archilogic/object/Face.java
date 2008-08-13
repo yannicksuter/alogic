@@ -74,17 +74,23 @@ public class Face {
 		this.normals = normals;
 	}
 	
-	public int getEdgeCount() {
+	public int getSideCount() {
 		return vertices.size();
 	}
 	
-	public Line getEdgeLine(int i) {
+	public Vector3D getSideVec(int i) {
+		Vector3D a = new Vector3D(vertices.get((i)%vertices.size()));
+		Vector3D b = new Vector3D(vertices.get((i+1)%vertices.size()));		
+		return Vector3D.sub(b, a);
+	}
+
+	public Line getSideLine(int i) {
 		Vector3D a = new Vector3D(vertices.get((i)%vertices.size()));
 		Vector3D b = new Vector3D(vertices.get((i+1)%vertices.size()));		
 		Vector3D d = Vector3D.sub(b, a);
 		return new Line(a, d);
 	}
-
+		
 	public Face[] getNeighbours() {
 		return neighbours;
 	}
@@ -109,11 +115,11 @@ public class Face {
 		
 		Vector3D u0, u1;
 		Vector3D v0, v1;
-		for (int i=0;i<getEdgeCount(); i++) {
+		for (int i=0;i<getSideCount(); i++) {
 			u0 = vertices.get(i % vertices.size());
 			u1 = vertices.get((i+1) % vertices.size());
 			
-			for (int j=0;j<refFace.getEdgeCount(); j++) {
+			for (int j=0;j<refFace.getSideCount(); j++) {
 				v0 = refFace.vertices.get(j % refFace.vertices.size());
 				v1 = refFace.vertices.get((j+1) % refFace.vertices.size());
 				
@@ -136,6 +142,18 @@ public class Face {
 		return false;
 	}
 
+	public int getEdgeCount() {
+		int count = 0;
+		if (neighbours != null) {
+			for (int i=0;i<neighbours.length; i++) {
+				if (neighbours[i] == null) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+	
 	public int getEdge(int idx) {
 		int edgeIdx = 0;
 		for (int i=0;i<neighbours.length; i++) {
@@ -150,23 +168,13 @@ public class Face {
 	}
 	
 	public void detectNeighbours(List<Face> faces) {
-		neighbours = new Face[getEdgeCount()];
+		neighbours = new Face[getSideCount()];
 		for (Face face : faces) {
 			int neighbourIdx = isNeighbour(face);
 			if (neighbourIdx != -1) {
 				neighbours[neighbourIdx] = face;
 			}
 		}
-	}
-
-	public Vector3D getEdgeVec(int idx) {
-		if (vertices == null || vertices.size() == 0) {
-			return null;
-		}
-		
-		Vector3D u0 = vertices.get(idx % vertices.size());
-		Vector3D u1 = vertices.get((idx+1) % vertices.size());
-		return new Vector3D(u1.getX()-u0.getX(), u1.getY()-u0.getY(), u1.getZ()-u0.getZ());
 	}
 	
 	public List<Face> subdivide() {
@@ -340,8 +348,8 @@ public class Face {
 	public IFace intersectPlane(Plane plane, Vector3D p, Vector3D dir) {
 		IFace res = new IFace();
 		
-		for (int i=0; i<this.getEdgeCount(); i++) {
-			ILine r = plane.getIntersect(this.getEdgeLine(i));
+		for (int i=0; i<this.getSideCount(); i++) {
+			ILine r = plane.getIntersect(this.getSideLine(i));
 			
 			if (r != null && r.p != null) {
 				if (r.t >= 0 && r.t <= 1) 

@@ -17,7 +17,10 @@ import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
 import ch.archilogic.log.Logger;
+import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.object.Edge;
+import ch.archilogic.object.EdgeSegment;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
@@ -101,17 +104,28 @@ public class SimpleRandomPatternSolver implements Solver {
 		objReference.createNormals();
 
 		// create edge object
-		Logger.info("neighbour & edges detection (can take some seconds)");
+		Logger.info("face: neighbour & edges detection (can take some seconds)");
 		objReference.detectEdges();
 		
 		// visualize edges
-		ObjectDef edgeObj = new ObjectDef();		
+		Logger.info("object: edges detection");
+		ObjectDef objEdge = new ObjectDef();		
+		Edge edge = new Edge();
 		for (Face f : objReference.getFaces()) {
 			if (f.hasEdges()) {
-				edgeObj.addFace(f);
+				int id = f.getEdge(0);
+				Line l = f.getSideLine(id);
+				edge.createFromObject(objReference, l.getAPoint());		
+				
+				// visualization
+				for (EdgeSegment segment : edge.getSegmentList()) {
+					objEdge.addFace(segment.createFace());
+				}
+				
+				break;
 			}
 		}
-		edgeObj.addAppearance(createAppearance(Color.yellow, 1));
+		objEdge.addAppearance(createAppearance(Color.yellow, 3));
 
 		// evaluation vizualizer
 		objFaceEvaluated = new ObjectDef();
@@ -127,7 +141,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			objGraph.addChild(objFaceEvaluated);
 			objGraph.addChild(objEnvelope);
 			objGraph.addChild(objReference);				
-//			objGraph.addChild(edgeObj);			
+			objGraph.addChild(objEdge);			
 			objGraph.addChild(box);
 		}
 	}
@@ -168,7 +182,7 @@ public class SimpleRandomPatternSolver implements Solver {
 
 	private List<Vector3D> createFirstSegment(Face face, int idx) throws FaceException {
 		Vector3D p0 = new Vector3D(face.getVertices().get(idx));
-		Vector3D refEdgeVec = face.getEdgeVec(idx);
+		Vector3D refEdgeVec = face.getSideVec(idx);
 
 		Logger.setDebugVerbose(false);
 		IObject p1 = objReference.catwalk(p0, refEdgeVec, 0.5, null, face);

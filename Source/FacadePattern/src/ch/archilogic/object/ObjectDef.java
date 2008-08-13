@@ -9,15 +9,12 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineStripArray;
 import javax.media.j3d.Shape3D;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IFace;
 import ch.archilogic.solver.intersection.IObject;
-import ch.archilogic.solver.intersection.ILine;
 
 public class ObjectDef {
 	private ObjectType type;
