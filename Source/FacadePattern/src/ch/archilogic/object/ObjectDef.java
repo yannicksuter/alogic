@@ -13,6 +13,7 @@ import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
+import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IFace;
 import ch.archilogic.solver.intersection.IObject;
 
@@ -21,7 +22,20 @@ public class ObjectDef {
 	private List<Vector3D> vertices = new ArrayList<Vector3D>();
 	private List<Face> faces = new ArrayList<Face>();
 	private Appearance appearance = null;
+	
+	private boolean doCreateNormales;
+	private boolean doDetectNeighbours;
 
+	public ObjectDef() {
+		this.doCreateNormales = false;
+		this.doDetectNeighbours = false;				
+	}
+	
+	public ObjectDef(boolean doCreateNormales, boolean doDetectNeighbours) {
+		this.doCreateNormales = doCreateNormales;
+		this.doDetectNeighbours = doDetectNeighbours;		
+	}
+	
 	public ObjectType getType() {
 		return type;
 	}
@@ -105,6 +119,12 @@ public class ObjectDef {
 		
 		// add face
 		face.setId(faces.size());
+		if (doCreateNormales) {
+			face.createFaceNormal();
+		}
+		if (doDetectNeighbours) {
+			face.detectNeighbours(faces);
+		}
 		faces.add(face);
 	}
 
@@ -283,5 +303,14 @@ public class ObjectDef {
 	@Override
 	public String toString() {
 		return String.format("v: %d f: %d", vertices.size(), faces.size());
+	}
+
+	public IEdgeSegment getFaceWithVertice(Vector3D point, int i) {
+		for (Face face : faces) {
+			if (face.getVertices().get(i).epsilonEquals(point, Vector3D.EPSILON)) {
+				return new IEdgeSegment(face, point.copy());
+			}
+		}
+		return null;
 	}	
 }

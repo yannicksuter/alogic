@@ -17,6 +17,11 @@ public class IObject {
 	public IObject(Face face) {
 		this.face = face;
 	}
+
+	public IObject(Face face, Vector3D point) {
+		this.face = face;
+		this.point = point;
+	}
 	
 	public void set(IObject i) {
 		this.face = i.face;

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.ColoringAttributes;
@@ -26,7 +25,6 @@ import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectGraph;
 import ch.archilogic.object.geom.BBoxObj;
-//import ch.archilogic.object.geom.ModelObj;
 import ch.archilogic.object.geom.RefModelObj;
 import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.ObjHelper;
@@ -63,9 +61,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 
 	public void addReference(ObjectFile obj) {
-	}
-	
-	
+	}	
 	
 	@SuppressWarnings("unchecked")
 	public void initialize() throws FaceException {
@@ -138,7 +134,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		// create envelop object
 		Logger.info("creating new envelop");	
-		objEnvelope = new ObjectDef();
+		objEnvelope = new ObjectDef(true, true);
 		objEnvelope.addAppearance(createAppearance(Color.red, 2, LineAttributes.PATTERN_SOLID));		
 	
 		// add to scene graph
@@ -167,7 +163,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
 				
-		Logger.info("head banging..");
+		Logger.info("head banging..");		
 		if (edge != null) {
 			int numSegments = 50;
 			double edgeLen = edge.getLength() / numSegments;
@@ -178,6 +174,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
 				if (s0 != null && s1 != null) {
 					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
+//					createFirstSegment(objEnvelope, s0, s1, edgeLen);						
 					createSegment(objEnvelope, s0, s1, edgeLen);
 				}
 			}
@@ -186,10 +183,10 @@ public class SimpleRandomPatternSolver implements Solver {
 		status = SolverState.IDLE;
 	}
 
-	private void createSegment(ObjectDef obj, IEdgeSegment s0, IEdgeSegment s1, double edgeLen) throws FaceException {
+	private void createFirstSegment(ObjectDef obj, IEdgeSegment s0, IEdgeSegment s1, double edgeLen) throws FaceException {
 		List<Vector3D> l = new ArrayList<Vector3D>();
 		IObject p0, p1;
-
+		
 		// compute downwards vector
 		Vector3D edgeVec = Vector3D.sub(s1.point, s0.point).normalize();
 		Vector3D v0 = Vector3D.cross(s0.face.getFaceNormal(), edgeVec).normalize();
@@ -197,7 +194,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		do {
 			l.clear();			
-	
+			
 			// find new points
 			p0 = objReference.catwalk(s0.point, v0, edgeLen, null, s0.face);
 			p1 = objReference.catwalk(s1.point, v1, edgeLen, null, s1.face);
@@ -209,11 +206,63 @@ public class SimpleRandomPatternSolver implements Solver {
 				l.add(p1.point);
 				l.add(p0.point);
 				obj.createFace(l);				
-
+				
 				v0 = Vector3D.sub(p0.point, s0.point).normalize();
 				v1 = Vector3D.sub(p1.point, s1.point).normalize();				
 				s0 = new IEdgeSegment(p0.face, p0.point);
 				s1 = new IEdgeSegment(p1.face, p1.point);				
+			}
+		} while(p0.found && p1.found);
+	}
+	
+	private void createSegment(ObjectDef obj, IEdgeSegment s0, IEdgeSegment s1, double edgeLen) throws FaceException {
+		List<Vector3D> l = new ArrayList<Vector3D>();
+		IObject p0, p1;
+		
+		IEdgeSegment fRefFirst = obj.getFaceWithVertice(s0.point, 1);
+		IEdgeSegment fRefSecond = obj.getFaceWithVertice(s1.point, 0);
+		
+		// compute downwards vector
+		Vector3D edgeVec = Vector3D.sub(s1.point, s0.point).normalize();
+		Vector3D v0 = Vector3D.cross(s0.face.getFaceNormal(), edgeVec).normalize();
+		Vector3D v1 = Vector3D.cross(s1.face.getFaceNormal(), edgeVec).normalize();
+		
+		do {
+			l.clear();			
+
+			if (fRefFirst == null) {
+				p0 = objReference.catwalk(s0.point, v0, edgeLen, null, s0.face);
+			} else 
+			{
+				p0 = new IObject(fRefFirst.face, fRefFirst.face.getVertices().get(2));
+				p0.found = true;
+			}
+	
+			if (fRefSecond == null) {
+				p1 = objReference.catwalk(s1.point, v1, edgeLen, null, s1.face);
+			} else 
+			{
+				p1 = new IObject(fRefSecond.face, fRefSecond.face.getVertices().get(3));
+				p1.found = true;
+			}
+			
+			if (p0.found && p1.found) {
+				// create the face
+				l.add(s0.point);
+				l.add(s1.point);
+				l.add(p1.point);
+				l.add(p0.point);
+				obj.createFace(l);				
+				
+				v0 = Vector3D.sub(p0.point, s0.point).normalize();
+				v1 = Vector3D.sub(p1.point, s1.point).normalize();				
+				s0 = new IEdgeSegment(p0.face, p0.point);
+				s1 = new IEdgeSegment(p1.face, p1.point);
+
+				fRefFirst = obj.getFaceWithVertice(p0.point, 1);
+				fRefSecond = obj.getFaceWithVertice(p1.point, 0);
+			} else {
+				break;
 			}
 		} while(p0.found && p1.found);
 	}

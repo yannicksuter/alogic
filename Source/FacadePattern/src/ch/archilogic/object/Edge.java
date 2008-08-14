@@ -3,7 +3,6 @@ package ch.archilogic.object;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.solver.intersection.IEdgeSegment;

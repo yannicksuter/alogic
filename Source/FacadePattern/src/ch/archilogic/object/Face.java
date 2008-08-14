@@ -104,9 +104,11 @@ public class Face {
 	}
 
 	public void createFaceNormal() {
-		Vector3D a = Vector3D.sub(new Vector3D(vertices.get(1)), new Vector3D(vertices.get(0)));
-		Vector3D b = Vector3D.sub(new Vector3D(vertices.get(2)), new Vector3D(vertices.get(0)));
-		this.faceNormal = Vector3D.cross(a, b).normalize();
+		if (vertices.size() >= 3) {
+			Vector3D a = Vector3D.sub(new Vector3D(vertices.get(1)), new Vector3D(vertices.get(0)));
+			Vector3D b = Vector3D.sub(new Vector3D(vertices.get(2)), new Vector3D(vertices.get(0)));
+			this.faceNormal = Vector3D.cross(a, b).normalize();
+		}
 	}
 	
 	public int isNeighbour(Face refFace) {
@@ -167,12 +169,27 @@ public class Face {
 		return -1;
 	}
 	
+	public void setNeighbour(Face face) {
+		if (neighbours == null)  {
+			neighbours = new Face[getSideCount()];
+		}
+		
+		int idx = isNeighbour(face);
+		if (idx != -1){
+			neighbours[idx] = face;
+		}
+	}
+	
 	public void detectNeighbours(List<Face> faces) {
-		neighbours = new Face[getSideCount()];
+		if (neighbours == null)  {
+			neighbours = new Face[getSideCount()];
+		}
+		
 		for (Face face : faces) {
 			int neighbourIdx = isNeighbour(face);
 			if (neighbourIdx != -1) {
 				neighbours[neighbourIdx] = face;
+				face.setNeighbour(this);
 			}
 		}
 	}
@@ -253,20 +270,12 @@ public class Face {
 	 * @return
 	 */
 	public double getDistance(Vector3D P) {
-//		Vector3D A = vertices.get(0);
-//		Vector3D B = vertices.get(1);
-//		Vector3D D = vertices.get(3);
-//		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
-//		Vector3f vB = new Vector3f(D.x - A.x, D.y - A.y, D.z - A.z);
-//		Vector3f vC = new Vector3f(P.x - A.x, P.y - A.y, P.z - A.z);
-
 		Vector3D vA = Vector3D.sub(vertices.get(1), vertices.get(0));
 		Vector3D vB = Vector3D.sub(vertices.get(3), vertices.get(0)); 
 		Vector3D vC = Vector3D.sub(P, vertices.get(0)); 
 		
 		
 		Vector3D CrossC = Vector3D.cross(vA, vB);
-//		CrossC.cross(vA, vB);
 
 		Vector3D c = new Vector3D();
 		c.x = vA.y * vB.z - vA.z * vB.y;
@@ -288,9 +297,6 @@ public class Face {
 	 * @return
 	 */
 	public boolean insideTriangle(Vector3D P, Vector3D A, Vector3D B, Vector3D C){
-//		Vector3D vAP = new Vector3f(A.x - P.x, A.y - P.y, A.z - P.z);
-//		Vector3D vBP = new Vector3f(B.x - P.x, B.y - P.y, B.z - P.z);
-//		Vector3D vDP = new Vector3f(C.x - P.x, C.y - P.y, C.z - P.z);
 		Vector3D vAP = Vector3D.sub(A, P);
 		Vector3D vBP = Vector3D.sub(B, P);
 		Vector3D vDP = Vector3D.sub(C, P);
