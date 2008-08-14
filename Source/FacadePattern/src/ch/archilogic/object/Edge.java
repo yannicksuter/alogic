@@ -85,7 +85,7 @@ public class Edge {
 						return new IEdgeSegment(s.getFace(), pE); 
 					} else 
 					{ // walk into the next segment
-						return walkNextSegment(segmentList.indexOf(s), edgeLen - len);
+						return walkNextSegment(segmentList.indexOf(s)+1, edgeLen - len);
 					}
 				}
 			}
@@ -94,19 +94,16 @@ public class Edge {
 	}
 	
 	private IEdgeSegment walkNextSegment(int segmentId, double edgeLen) {
-		if (segmentId <= segmentList.size()) {
-			EdgeSegment s = segmentList.get(segmentId);
-			Line l = s.getLine();
-			double len = l.getLength();
-			if (edgeLen <= len) 
-			{ // end point on segment
-				Vector3D pE = Vector3D.add(s.getStartPoint(), l.getDir().normalize().mult(edgeLen));
-				return new IEdgeSegment(s.getFace(), pE); 
-			} else 
-			{ // walk into the next segment
-				return walkNextSegment(segmentId+1, edgeLen - len);
-			}
+		EdgeSegment s = segmentList.get(segmentId % segmentList.size());
+		Line l = s.getLine();
+		double len = l.getLength();
+		if (edgeLen <= len) 
+		{ // end point on segment
+			Vector3D pE = Vector3D.add(s.getStartPoint(), l.getDir().normalize().mult(edgeLen));
+			return new IEdgeSegment(s.getFace(), pE); 
+		} else 
+		{ // walk into the next segment
+			return walkNextSegment(segmentId+1, edgeLen - len);
 		}
-		return null;
 	}
 }

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Vector;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.ColoringAttributes;
@@ -155,6 +156,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		catt.setColor(new Color3f(col));
 		LineAttributes latt = new LineAttributes();
 		latt.setLineWidth(lineWidth);
+		latt.setLinePattern(LineAttributes.PATTERN_DOT);
 		app.setColoringAttributes(catt);
 		app.setLineAttributes(latt);
 		
@@ -163,70 +165,49 @@ public class SimpleRandomPatternSolver implements Solver {
 
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
-		
-		Logger.info("searching for the reference point, normal and edge");
-		Face refFace = null;
-		int refIndex = -1;
-		for (Face face : objReference.getFaces()) {
-			if (face.hasEdges()) {
-				refIndex = face.getEdge(0);
-				refFace = face;
-				break;
-			}
-		}
 				
 		Logger.info("head banging..");
 		if (edge != null) {
-			int numSegments = 10;
+			int numSegments = 60;
 			double edgeLen = edge.getLength() / numSegments;
-			IEdgeSegment s0 = edge.getStartPoint();
-			IEdgeSegment s1 = edge.getPoint(s0.endPoint, edgeLen);
-			if (s0 != null && s1 != null) {
+			IEdgeSegment start = edge.getStartPoint();
+
+			for (int i = 0; i<numSegments; i++) {
+				IEdgeSegment s0 = edge.getPoint(start.point, edgeLen*i);
+				IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
+				if (s0 != null && s1 != null) {
+					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
+					List<Vector3D> f = createSegment(s0, s1, edgeLen);
+					objEnvelope.createFace(f);				
+				}
 			}
 		}
-		
-		List<Vector3D> f1 = createFirstSegment(refFace, refIndex);
-		objEnvelope.createFace(f1);
 				
 		status = SolverState.IDLE;
 	}
 
-	private List<Vector3D> createFirstSegment(Face face, int idx) throws FaceException {
-		Vector3D p0 = new Vector3D(face.getVertices().get(idx));
-		Vector3D refEdgeVec = face.getSideVec(idx);
-
-		Logger.setDebugVerbose(false);
-		IObject p1 = objReference.catwalk(p0, refEdgeVec, 0.5, null, face);
-
+	private List<Vector3D> createSegment(IEdgeSegment s0, IEdgeSegment s1, double edgeLen) {
 		List<Vector3D> l = new ArrayList<Vector3D>();
-		l.add(p0);
-		l.add(p1.point);
 
-		// visualize visited faces
-		for (Face f : p1.visited) {
-			objFaceEvaluated.addFace(f);
-		}
-		
 		// compute downwards vector
-		Vector3D v = Vector3D.cross(face.getFaceNormal(), refEdgeVec.normalize()).normalize();
+		Vector3D edgeVec = Vector3D.sub(s1.point, s0.point).normalize();
+		Vector3D v0 = Vector3D.cross(s0.face.getFaceNormal(), edgeVec).normalize();
+		Vector3D v1 = Vector3D.cross(s1.face.getFaceNormal(), edgeVec).normalize();
+
+		IObject p0 = objReference.catwalk(s0.point, v0, edgeLen, null, s0.face);
+		IObject p1 = objReference.catwalk(s1.point, v1, edgeLen, null, s1.face);
+
+		// create the face
+		l.add(s0.point);
+		l.add(s1.point);
+		l.add(p1.point);
+		l.add(p0.point);		
 		
-		IObject p2 = objReference.catwalk(p1.point, v, 1.5, null, p1.face);
-		l.add(p2.point);
-
 		// visualize visited faces
-		for (Face f : p2.visited) {
-			objFaceEvaluated.addFace(f);
-		}
+//		for (Face f : p0.visited) {
+//			objFaceEvaluated.addFace(f);
+//		}		
 		
-//		Logger.setDebugVerbose(true);
-		IObject p3 = objReference.catwalk(p0, v, 1.5, null, face);
-		l.add(p3.point);
-
-		// visualize visited faces
-		for (Face f : p3.visited) {
-			objFaceEvaluated.addFace(f);
-		}
-
 		return l;
 	}
 

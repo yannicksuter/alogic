@@ -339,7 +339,7 @@ public class Face {
 	}
 	
 	private boolean validateAngle(double angle) {
-		if ( Double.isNaN(angle) || Math.abs(angle) < Math.PI*0.5 || angle > Math.PI*1.5) {
+		if ( Double.isNaN(angle) || Math.abs(angle) <= Math.PI*0.5 || angle >= Math.PI*1.5) {
 			return true;
 		} 
 		return false;

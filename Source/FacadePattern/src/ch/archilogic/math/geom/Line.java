@@ -59,7 +59,7 @@ public class Line {
 
 	public boolean elementOf(Vector3D r) {
 		Vector3D dir = Vector3D.sub(r, P);
-		if (Vector3D.cross(dir, D).length() == 0.0) {			
+		if (Vector3D.cross(dir, D).length() <= Vector3D.EPSILON) {			
 			return true;
 		}
 		return false;
