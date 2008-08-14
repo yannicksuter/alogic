@@ -144,11 +144,11 @@ public class ObjectDef {
 		
 		// get intersection data
 		IFace faceIsec = currentFace.intersectPlane(plane, p, dir);
-		Logger.debug(faceIsec.toString());
 		
 		// evaluate intersection and do follow up intersections
 		IObject endPoint = new IObject(currentFace);
 		if (faceIsec.sideIdx != -1) {
+			Logger.debug(faceIsec.toString());
 			Logger.debug(String.format("analysing edge[%d]", faceIsec.sideIdx));
 			Vector3D newDir = Vector3D.sub(faceIsec.point, p);
 			if (l <= newDir.length()) {

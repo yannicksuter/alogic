@@ -129,16 +129,17 @@ public class SimpleRandomPatternSolver implements Solver {
 				break;
 			}
 		}
-		objEdge.addAppearance(createAppearance(Color.yellow, 3));
+		objEdge.addAppearance(createAppearance(Color.yellow, 3, LineAttributes.PATTERN_SOLID));
+		objReference.addAppearance(createAppearance(Color.white, 1, LineAttributes.PATTERN_DOT));
 
 		// evaluation visualizer
 		objFaceEvaluated = new ObjectDef();
-		objFaceEvaluated.addAppearance(createAppearance(Color.green, 2));		
+		objFaceEvaluated.addAppearance(createAppearance(Color.green, 2, LineAttributes.PATTERN_SOLID));		
 		
 		// create envelop object
 		Logger.info("creating new envelop");	
 		objEnvelope = new ObjectDef();
-		objEnvelope.addAppearance(createAppearance(Color.red, 2));		
+		objEnvelope.addAppearance(createAppearance(Color.red, 2, LineAttributes.PATTERN_SOLID));		
 	
 		// add to scene graph
 		if (objReference != null) {			
@@ -150,13 +151,13 @@ public class SimpleRandomPatternSolver implements Solver {
 		}
 	}
 	
-	private Appearance createAppearance(Color col, int lineWidth) {
+	private Appearance createAppearance(Color col, int lineWidth, int linePattern) {
 		Appearance app = new Appearance();
 		ColoringAttributes catt = new ColoringAttributes();
 		catt.setColor(new Color3f(col));
 		LineAttributes latt = new LineAttributes();
 		latt.setLineWidth(lineWidth);
-		latt.setLinePattern(LineAttributes.PATTERN_DOT);
+		latt.setLinePattern(linePattern);
 		app.setColoringAttributes(catt);
 		app.setLineAttributes(latt);
 		
@@ -168,7 +169,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				
 		Logger.info("head banging..");
 		if (edge != null) {
-			int numSegments = 60;
+			int numSegments = 50;
 			double edgeLen = edge.getLength() / numSegments;
 			IEdgeSegment start = edge.getStartPoint();
 
@@ -177,8 +178,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
 				if (s0 != null && s1 != null) {
 					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
-					List<Vector3D> f = createSegment(s0, s1, edgeLen);
-					objEnvelope.createFace(f);				
+					createSegment(objEnvelope, s0, s1, edgeLen);
 				}
 			}
 		}
@@ -186,29 +186,36 @@ public class SimpleRandomPatternSolver implements Solver {
 		status = SolverState.IDLE;
 	}
 
-	private List<Vector3D> createSegment(IEdgeSegment s0, IEdgeSegment s1, double edgeLen) {
+	private void createSegment(ObjectDef obj, IEdgeSegment s0, IEdgeSegment s1, double edgeLen) throws FaceException {
 		List<Vector3D> l = new ArrayList<Vector3D>();
+		IObject p0, p1;
 
 		// compute downwards vector
 		Vector3D edgeVec = Vector3D.sub(s1.point, s0.point).normalize();
 		Vector3D v0 = Vector3D.cross(s0.face.getFaceNormal(), edgeVec).normalize();
 		Vector3D v1 = Vector3D.cross(s1.face.getFaceNormal(), edgeVec).normalize();
-
-		IObject p0 = objReference.catwalk(s0.point, v0, edgeLen, null, s0.face);
-		IObject p1 = objReference.catwalk(s1.point, v1, edgeLen, null, s1.face);
-
-		// create the face
-		l.add(s0.point);
-		l.add(s1.point);
-		l.add(p1.point);
-		l.add(p0.point);		
 		
-		// visualize visited faces
-//		for (Face f : p0.visited) {
-//			objFaceEvaluated.addFace(f);
-//		}		
-		
-		return l;
+		do {
+			l.clear();			
+	
+			// find new points
+			p0 = objReference.catwalk(s0.point, v0, edgeLen, null, s0.face);
+			p1 = objReference.catwalk(s1.point, v1, edgeLen, null, s1.face);
+			
+			if (p0.found && p1.found) {
+				// create the face
+				l.add(s0.point);
+				l.add(s1.point);
+				l.add(p1.point);
+				l.add(p0.point);
+				obj.createFace(l);				
+
+				v0 = Vector3D.sub(p0.point, s0.point).normalize();
+				v1 = Vector3D.sub(p1.point, s1.point).normalize();				
+				s0 = new IEdgeSegment(p0.face, p0.point);
+				s1 = new IEdgeSegment(p1.face, p1.point);				
+			}
+		} while(p0.found && p1.found);
 	}
 
 	public void export(Exporter exporter, String filename) {
