@@ -18,7 +18,7 @@ import ch.archilogic.runtime.exception.ObjectException;
 public class RefModelObj extends ObjectDef {
 	
 	@SuppressWarnings("unchecked")
-	public RefModelObj(Shape3D shape) throws ObjectException, FaceException {
+	public RefModelObj(Shape3D shape, double scale) throws ObjectException, FaceException {
 		super();
 
 		ObjHelper.convert(shape, false, false, false, false, false, false);
@@ -41,13 +41,13 @@ public class RefModelObj extends ObjectDef {
 					n.clear();
 					a.getCoordinate(i*3+0, p1);
 					a.getNormal(i*3+0, n1);
-					p.add(new Vector3D(p1));
+					p.add(new Vector3D(p1).mult(scale));
 					n.add(new Vector3D(n1));
 					a.getCoordinate(i*3+1, p2);
-					p.add(new Vector3D(p2));
+ 					p.add(new Vector3D(p2).mult(scale));
 					n.add(new Vector3D(n2));
 					a.getCoordinate(i*3+2, p3);
-					p.add(new Vector3D(p3));
+					p.add(new Vector3D(p3).mult(scale));
 					n.add(new Vector3D(n3));
 					createFace(p, n);
 				}

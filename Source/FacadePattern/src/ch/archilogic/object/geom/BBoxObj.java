@@ -1,5 +1,6 @@
 package ch.archilogic.object.geom;
 
+import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.helper.BoxHelper;
@@ -47,5 +48,10 @@ public class BBoxObj extends ObjectDef  {
 
 	public void setLower(Vector3D lower) {
 		this.lower = lower;
+	}
+	
+	public Vector3D getCenter() {
+		Line l = new Line(upper.copy(), Vector3D.sub(lower, upper));		
+		return l.getPoint(0.5);
 	}
 }

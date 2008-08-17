@@ -118,7 +118,7 @@ public class GraphRenderer extends Canvas3D {
 		zoom.setSchedulingBounds(bounds);
 		spin.addChild(zoom);
 
-		scale.setScale(0.5);
+		scale.setScale(2);
 		spin.setTransform(scale);
 
 		// <background and light>

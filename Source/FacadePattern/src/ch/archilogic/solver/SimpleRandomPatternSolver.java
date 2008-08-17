@@ -78,17 +78,21 @@ public class SimpleRandomPatternSolver implements Solver {
 				Hashtable<String,Shape3D> table = s.getNamedObjects();
 				for (String key : table.keySet()) {
 					Shape3D o = table.get(key);
+					
+//					ObjHelper.printInfo(o);
 
 					if (o.getBounds() instanceof javax.media.j3d.BoundingBox) {
 						javax.media.j3d.BoundingBox b = (javax.media.j3d.BoundingBox) o.getBounds();
 						b.getUpper(upper);
 						b.getLower(lower);
+						Logger.info(b.toString());
 						
 						box.setUpper(new Vector3D(upper.getX(), upper.getY(), upper.getZ()));
 						box.setLower(new Vector3D(lower.getX(), lower.getY(), lower.getZ()));
 					}
+					
 					// create new model to be shown
-					objReference = new RefModelObj((Shape3D)o.cloneTree());
+					objReference = new RefModelObj((Shape3D)o.cloneTree(), 1);
 					objBoundingBox = box;
 				}
 			} catch (Exception e) {
@@ -165,7 +169,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				
 		Logger.info("head banging..");		
 		if (edge != null) {
-			int numSegments = 50;
+			int numSegments = 120;
 			double edgeLen = edge.getLength() / numSegments;
 			IEdgeSegment start = edge.getStartPoint();
 
