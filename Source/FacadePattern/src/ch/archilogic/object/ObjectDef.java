@@ -205,7 +205,7 @@ public class ObjectDef {
 						}
 					} else 
 					{ // face has no more neighbours
-						endPoint.found = true;
+						endPoint.found = false;
 						endPoint.point = faceIsec.point;					
 						endPoint.dir = newDir;
 						Logger.debug(String.format("*** edge end in corder [%s]", currentFace.hasVertice(faceIsec.point)));						
@@ -215,6 +215,7 @@ public class ObjectDef {
 					if (nextFace == null) 
 					{ // intersecting an edge of the triangle
 						endPoint.found = true;
+						endPoint.edge = true;
 						endPoint.point = faceIsec.point;					
 						endPoint.dir = newDir;
 						Logger.debug(String.format("*** edge end [%s]", currentFace.hasVertice(faceIsec.point)));

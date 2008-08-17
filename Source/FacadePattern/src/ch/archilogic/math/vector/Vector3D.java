@@ -3,6 +3,8 @@ package ch.archilogic.math.vector;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+import ch.archilogic.math.Rnd;
+
 public class Vector3D {
 	public final static double EPSILON = 0.0000000001;
 	public final static Vector3D ZERO = new Vector3D(0.0);
@@ -150,6 +152,11 @@ public class Vector3D {
 
 	public Vector3D mult(double scalar) {
 		return new Vector3D(scalar * this.x, scalar * this.y, scalar * this.z);
+	}
+
+	public static Vector3D random() {
+		Vector3D v = new Vector3D(Rnd.nextDouble()-0.5, Rnd.nextDouble()-0.5, Rnd.nextDouble()-0.5); 
+		return v.normalize();
 	}
 	
 	// converter

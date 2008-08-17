@@ -9,6 +9,7 @@ import javax.swing.*;
 import ch.archilogic.export.ConsoleExporter;
 import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
+import ch.archilogic.math.Rnd;
 import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.SimpleRandomPatternSolver;
@@ -86,6 +87,8 @@ public class MainFrame extends JFrame {
 	public static void main(String args[]) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
+				Rnd.init();
+				
 				// initialize the solver
 				Solver solver = new SimpleRandomPatternSolver();
 				

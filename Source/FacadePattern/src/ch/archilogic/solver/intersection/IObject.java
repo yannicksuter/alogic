@@ -7,10 +7,11 @@ import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 
 public class IObject {
-	public Face face;
-	public Vector3D point;
-	public Vector3D dir;
-	public boolean found;
+	public Face face = null;
+	public Vector3D point = null;
+	public Vector3D dir = null;
+	public boolean found = false;
+	public boolean edge = false;
 	
 	public List<Face> visited = new ArrayList<Face>();
 	
