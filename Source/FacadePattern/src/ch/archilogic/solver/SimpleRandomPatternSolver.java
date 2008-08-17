@@ -42,7 +42,9 @@ public class SimpleRandomPatternSolver implements Solver {
 	private ObjectDef objEnvelope;
 	private ObjectDef objFaceEvaluated;
 	
-	private Edge edge;	
+	private Edge edge;
+	
+	private boolean doThinking = true;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -68,38 +70,35 @@ public class SimpleRandomPatternSolver implements Solver {
 		objGraph = new ObjectGraph();
 
 		Logger.info("load reference object");
-		BBoxObj box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
+		BBoxObj box = null;
 		Scene s = null;
 		try {
-			try {
-				Point3d lower = new Point3d(); 
-				Point3d upper = new Point3d();
-				s = ObjHelper.loadRefObject(refObjPath);
-				Hashtable<String,Shape3D> table = s.getNamedObjects();
-				for (String key : table.keySet()) {
-					Shape3D o = table.get(key);
-					
+			Point3d lower = new Point3d(); 
+			Point3d upper = new Point3d();
+			s = ObjHelper.loadRefObject(refObjPath);
+			Hashtable<String,Shape3D> table = s.getNamedObjects();
+			for (String key : table.keySet()) {
+				Shape3D o = table.get(key);					
 //					ObjHelper.printInfo(o);
-
-					if (o.getBounds() instanceof javax.media.j3d.BoundingBox) {
-						javax.media.j3d.BoundingBox b = (javax.media.j3d.BoundingBox) o.getBounds();
-						b.getUpper(upper);
-						b.getLower(lower);
-						Logger.info(b.toString());
-						
-						box.setUpper(new Vector3D(upper.getX(), upper.getY(), upper.getZ()));
-						box.setLower(new Vector3D(lower.getX(), lower.getY(), lower.getZ()));
-					}
-					
-					// create new model to be shown
+				if (o.getBounds() instanceof javax.media.j3d.BoundingBox) {
+					javax.media.j3d.BoundingBox b = (javax.media.j3d.BoundingBox) o.getBounds();
+					b.getUpper(upper);
+					b.getLower(lower);
+					Logger.info(b.toString());
+				}
+				
+				// create new model to be shown
+				if ( !key.equalsIgnoreCase("box") ) {
 					objReference = new RefModelObj((Shape3D)o.cloneTree(), 1);
+					
+					// create bounding box
+					box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
+					box.setUpper(new Vector3D(upper.getX(), upper.getY(), upper.getZ()));
+					box.setLower(new Vector3D(lower.getX(), lower.getY(), lower.getZ()));
 					objBoundingBox = box;
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
-			box.create();
-		} catch (FaceException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -145,11 +144,15 @@ public class SimpleRandomPatternSolver implements Solver {
 	
 		// add to scene graph
 		if (objReference != null) {			
-			objGraph.addChild(objFaceEvaluated);
+//			objGraph.addChild(objFaceEvaluated);
 			objGraph.addChild(objEnvelope);
 			objGraph.addChild(objReference);				
 			objGraph.addChild(objEdge);			
-			objGraph.addChild(box);
+			
+			if (box != null){
+				box.create();
+				objGraph.addChild(box);
+			}
 		}
 		
 		// center the objects
@@ -176,20 +179,22 @@ public class SimpleRandomPatternSolver implements Solver {
 
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
-				
-		Logger.info("head banging..");		
-		if (edge != null) {
-			int numSegments = 120;
-			double edgeLen = edge.getLength() / numSegments;
-			IEdgeSegment start = edge.getStartPoint();
 
-			for (int i = 0; i<numSegments; i++) {
-				IEdgeSegment s0 = edge.getPoint(start.point, edgeLen*i);
-				IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
-				if (s0 != null && s1 != null) {
-					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
-//					createFirstSegment(objEnvelope, s0, s1, edgeLen);						
-					createSegment(objEnvelope, s0, s1, edgeLen);
+		if (doThinking) {
+			Logger.info("head banging..");		
+			if (edge != null) {
+				int numSegments = 120;
+				double edgeLen = edge.getLength() / numSegments;
+				IEdgeSegment start = edge.getStartPoint();
+	
+				for (int i = 0; i<numSegments; i++) {
+					IEdgeSegment s0 = edge.getPoint(start.point, edgeLen*i);
+					IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
+					if (s0 != null && s1 != null) {
+						Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
+	//					createFirstSegment(objEnvelope, s0, s1, edgeLen);						
+						createSegment(objEnvelope, s0, s1, edgeLen);
+					}
 				}
 			}
 		}

@@ -43,6 +43,7 @@ public class Edge {
 							if ( !startPoint.equals(refPoint) ) {
 								found = true;
 							} else {
+								found = false;
 								this.type = EdgeType.CIRCULAR;
 							}
 						}
