@@ -160,4 +160,12 @@ public class Vector3D {
 	public static Point3f getPoint3f(Vector3D v) {
 		return new Point3f((float)v.getX(), (float)v.getY(), (float)v.getZ());
 	}
+
+	public Vector3f getVector3f() {
+		return new Vector3f((float)x, (float)y, (float)z);
+	}
+	
+	public Vector3f getVector3f(Vector3D v) {
+		return new Vector3f((float)v.getX(), (float)v.getY(), (float)v.getZ());
+	}
 }

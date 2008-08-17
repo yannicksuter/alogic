@@ -80,22 +80,32 @@ public class GraphRenderer extends Canvas3D {
 	}
 
 	private BranchGroup createSceneGraph(Canvas3D cv) {
+		ObjectGraph graph = solver.getObjectGraph();
+		
 		BranchGroup root = new BranchGroup();
+				
+		// mouse spin
 		TransformGroup spin = new TransformGroup();
 		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spin.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		root.addChild(spin);
+
+		// set translation
+		Transform3D trans3D = new Transform3D();
+		trans3D.setTranslation(graph.getTranslation().getVector3f());
+		TransformGroup transGrp = new TransformGroup(trans3D);
+		spin.addChild(transGrp);
 		
 		// appearance
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
 			
-		try {
-			ObjectGraph graph = solver.getObjectGraph();
+		try {			
+			// load objects
 			for (ObjectDef obj : graph.getObjects()) {
 				Shape3D shp = obj.getShape(true, false);
 				if (shp != null) {
-					spin.addChild(shp);
+					transGrp.addChild(shp);
 				}
 			}
 		} catch (FaceException e) {
@@ -118,7 +128,7 @@ public class GraphRenderer extends Canvas3D {
 		zoom.setSchedulingBounds(bounds);
 		spin.addChild(zoom);
 
-		scale.setScale(2);
+		scale.setScale(1);
 		spin.setTransform(scale);
 
 		// <background and light>

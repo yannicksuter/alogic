@@ -103,6 +103,8 @@ public class SimpleRandomPatternSolver implements Solver {
 			e.printStackTrace();
 		}
 		
+		Logger.info(String.format("number of faces: %d", objReference.getFaces().size()));
+		
 		// initialize reference object
 		Logger.info("create face normals");
 		objReference.createNormals();
@@ -148,6 +150,14 @@ public class SimpleRandomPatternSolver implements Solver {
 			objGraph.addChild(objReference);				
 			objGraph.addChild(objEdge);			
 			objGraph.addChild(box);
+		}
+		
+		// center the objects
+		if (box != null) {
+			objGraph.setTranslation(box.getCenter());
+			Logger.info(String.format("translation: %s", objGraph.getTranslation()));
+		} else {
+			objGraph.setTranslation(new Vector3D());
 		}
 	}
 	
