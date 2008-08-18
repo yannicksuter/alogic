@@ -8,7 +8,7 @@ public class Rnd {
 	private static Random rnd = null;
 	
 	public static void init() {
-		rnd = new Random(19580427);
+		rnd = new Random(32479827);
 	}
 	
 	public static double nextDouble() {

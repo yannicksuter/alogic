@@ -147,7 +147,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		if (objReference != null) {			
 //			objGraph.addChild(objFaceEvaluated);
 			objGraph.addChild(objEnvelope);
-//			objGraph.addChild(objReference);				
+			objGraph.addChild(objReference);				
 			objGraph.addChild(objEdge);			
 			
 			if (box != null){
