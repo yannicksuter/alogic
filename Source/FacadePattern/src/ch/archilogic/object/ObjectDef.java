@@ -10,6 +10,7 @@ import javax.media.j3d.LineStripArray;
 import javax.media.j3d.Shape3D;
 
 import ch.archilogic.log.Logger;
+import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.runtime.exception.FaceException;
@@ -21,11 +22,14 @@ public class ObjectDef {
 	private ObjectType type;
 	private List<Vector3D> vertices = new ArrayList<Vector3D>();
 	private List<Face> faces = new ArrayList<Face>();
-	private Appearance appearance = null;
 	
+	private List<Edge> edgeList = null;	
+	
+	private Appearance appearance = null;
+
 	private boolean doCreateNormales;
 	private boolean doDetectNeighbours;
-
+	
 	public ObjectDef() {
 		this.doCreateNormales = false;
 		this.doDetectNeighbours = false;				
@@ -313,5 +317,44 @@ public class ObjectDef {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * analyse object and create a list of all edges(-lines)
+	 * @return List of all edges of the object
+	 */	
+	public List<Edge> computeEdges() {
+		edgeList = new ArrayList<Edge>();
+		
+		for (Face f : getFaces()) {
+			if (f.hasEdges()) {
+				if ( getEdgeWithFaceElement(f) == null ) {
+					Edge edge = new Edge();
+					int id = f.getEdge(0);
+					Line l = f.getSideLine(id);
+					edge.createFromObject(this, l.getAPoint());		
+					edgeList.add(edge);
+					
+					Logger.info(String.format("edge found, length = %f", edge.getLength()));
+				}
+			}
+		}
+		
+		return edgeList;
 	}	
+
+	/**
+	 * return an existing edge where a face is part of
+	 * @return Edge
+	 */
+	public Edge getEdgeWithFaceElement(Face f) {
+		for (Edge e : edgeList) {
+			for (EdgeSegment segment : e.getSegmentList()) {
+				if (segment.getFace() == f) {
+					return e;
+				}
+			}
+		}
+		return null;
+	}
 }

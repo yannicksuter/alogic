@@ -36,16 +36,17 @@ public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
 
-	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
+	private static String refObjPath = "file:c:\\tmp\\loadme_simple.obj";
+//	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
+	
 	private ObjectDef objReference;
 	private ObjectDef objBoundingBox;
 	private ObjectDef objEnvelope;
 	private ObjectDef objFaceEvaluated;
 	
-	private Edge edge;
+	private List<Edge> edges;
 	
 	private boolean doThinking = true;
-	private boolean doJittering = true;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -113,24 +114,18 @@ public class SimpleRandomPatternSolver implements Solver {
 		Logger.info("face: neighbour & edges detection (can take some seconds)");
 		objReference.detectEdges();
 		
-		// visualize edges
+		// compute & visualize edges
 		Logger.info("object: edges detection");
 		ObjectDef objEdge = new ObjectDef();		
-		edge = new Edge();
-		for (Face f : objReference.getFaces()) {
-			if (f.hasEdges()) {
-				int id = f.getEdge(0);
-				Line l = f.getSideLine(id);
-				edge.createFromObject(objReference, l.getAPoint());		
-				
-				// visualization
-				for (EdgeSegment segment : edge.getSegmentList()) {
-					objEdge.addFace(segment.createFace());
-				}
-				
-				break;
-			}
+		
+		edges = objReference.computeEdges();
+		for (Edge edge : edges) {
+			// visualization
+			for (EdgeSegment segment : edge.getSegmentList()) {
+				objEdge.addFace(segment.createFace());
+			}			
 		}
+				
 		objEdge.addAppearance(createAppearance(Color.yellow, 3, LineAttributes.PATTERN_SOLID));
 		objReference.addAppearance(createAppearance(Color.white, 1, LineAttributes.PATTERN_DOT));
 
@@ -147,7 +142,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		if (objReference != null) {			
 //			objGraph.addChild(objFaceEvaluated);
 			objGraph.addChild(objEnvelope);
-			objGraph.addChild(objReference);				
+//			objGraph.addChild(objReference);				
 			objGraph.addChild(objEdge);			
 			
 			if (box != null){
@@ -183,13 +178,14 @@ public class SimpleRandomPatternSolver implements Solver {
 
 		if (doThinking) {
 			Logger.info("head banging..");		
-			if (edge != null) {
+			if (edges != null && edges.size() > 0) {
 				int numSegments = 120;
+				Edge edge = edges.get(0);
 				double edgeLen = edge.getLength() / numSegments;
 				IEdgeSegment start = edge.getStartPoint();
 	
 				for (int i = 0; i<numSegments; i++) {
-					Logger.info(String.format("segment #%d", i));
+//					Logger.info(String.format("segment #%d", i));
 					IEdgeSegment s0 = edge.getPoint(start.point, edgeLen*i);
 					IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
 					if (s0 != null && s1 != null) {
