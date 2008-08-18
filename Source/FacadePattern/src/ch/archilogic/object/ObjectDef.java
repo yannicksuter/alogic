@@ -170,6 +170,23 @@ public class ObjectDef {
 			createFaceOV(f.getVertices());
 		}
 	}
+
+	public void triangulate(boolean onlyEgdeFaces) throws FaceException {
+		List<Face> oldFaces = new ArrayList<Face>();
+		oldFaces.addAll(getFaces());
+		for (Face face : oldFaces) {
+			if ((onlyEgdeFaces && face.hasEdges()) || !onlyEgdeFaces) {
+				List<Face> newFaces = face.triangulate();
+				if (newFaces != null) {
+					deleteFace(face);
+					for (Face f : newFaces) {
+						createFaceOV(f.getVertices());
+					}					
+				}
+			}
+		}
+	}
+
 	public IObject catwalk(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {
 		Plane plane = new Plane(p, dir, currentFace.getFaceNormal());
 		return w(p, dir, l, previousFace, currentFace, plane);

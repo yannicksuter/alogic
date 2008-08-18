@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.archilogic.log.Logger;
+import ch.archilogic.math.Rnd;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.geom.Plane;
 import ch.archilogic.math.vector.VecHelper;
@@ -198,6 +199,37 @@ public class Face {
 		}
 	}
 	
+	public List<Face> triangulate() {
+		if (getVertices().size() == 4) {
+			List<Face> newFaces = new ArrayList<Face>();
+			if (Rnd.nextDouble()-0.5 > 0) {
+				Face f1 = new Face();
+				f1.addVertice(getVertices().get(0));
+				f1.addVertice(getVertices().get(1));
+				f1.addVertice(getVertices().get(3));
+				newFaces.add(f1);
+				Face f2 = new Face();
+				f2.addVertice(getVertices().get(1));
+				f2.addVertice(getVertices().get(2));
+				f2.addVertice(getVertices().get(3));
+				newFaces.add(f2);
+			} else {
+				Face f1 = new Face();
+				f1.addVertice(getVertices().get(0));
+				f1.addVertice(getVertices().get(1));
+				f1.addVertice(getVertices().get(2));
+				newFaces.add(f1);
+				Face f2 = new Face();
+				f2.addVertice(getVertices().get(0));
+				f2.addVertice(getVertices().get(2));
+				f2.addVertice(getVertices().get(3));
+				newFaces.add(f2);				
+			}
+			return newFaces;
+		}
+		return null;
+	}
+
 	public List<Face> subdivide() {
 		List<Face> newFaces = new ArrayList<Face>();
 		if (vertices.size() == 4) {

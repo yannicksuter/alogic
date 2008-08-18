@@ -25,9 +25,11 @@ public class IObject {
 		this.face = face;
 	}
 
-	public IObject(Face face, Vector3D point) {
+	public IObject(Face face, Vector3D point, boolean found, boolean edge) {
 		this.face = face;
 		this.point = point;
+		this.found = found;
+		this.edge = edge;
 	}
 	
 	public void set(IObject i) {

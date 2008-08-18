@@ -51,6 +51,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doThinking = true;
 	private boolean doJittering = true;
 	private boolean doShowLockedVertices = true;
+	private boolean doTriangulateEdge = true;
+	private boolean doShowLockedPoints = true;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -197,28 +199,30 @@ public class SimpleRandomPatternSolver implements Solver {
 			Edge edge = edges.get(0);
 			edgeLen = edge.getLength() / numSegments;
 			IEdgeSegment start = edge.getStartPoint();
+			
+			Vector3D dir = null;
 
 			for (int i = 0; i<numSegments; i++) {
-//				Logger.info(String.format("segment #%d", i));
+				Logger.debug(String.format("segment #%d", i));
 				IEdgeSegment s0 = edge.getPoint(start.point, edgeLen*i);
 				IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
 				if (s0 != null && s1 != null) {
 					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
-//						createSegmentJittered(objEnvelope, s0, s1, edgeLen);
+										
+					IObject u0 = new IObject(s0.face, s0.point, true, true);
+					IObject u1 = new IObject(s1.face, s1.point, true, true);
 					
-					IObject u0 = new IObject(s0.face, s0.point);
-					u0.found = true;
-					u0.edge = true;
-					
-					IObject u1 = new IObject(s1.face, s1.point);
-					u1.found = true;
-					u1.edge = true;
+					// define general direction for propagation
+					if (i == 0 && edges.size() != 1) {
+						Vector3D edgeVec = Vector3D.sub(u1.point, u0.point).normalize();
+						dir = Vector3D.cross(u0.face.getFaceNormal(), edgeVec).normalize();				
+					}					
 					
 					if (i == numSegments-1) {
 //						Logger.setDebugVerbose(true);
-						createSegment(objEnvelope, u0, u1, edgeLen);						
+						createSegment(objEnvelope, u0, u1, edgeLen, dir);						
 					} else {
-						createSegment(objEnvelope, u0, u1, edgeLen);
+						createSegment(objEnvelope, u0, u1, edgeLen, dir);
 					}
 				}
 			}
@@ -234,17 +238,24 @@ public class SimpleRandomPatternSolver implements Solver {
 				}
 			}
 		}
-	
-		for (ObjectVector v : objEnvelope.getVertices()) {
-			if (v.isLocked()) {
-				objPoints.addPoint(v);
+		
+		if (doTriangulateEdge) {
+			Logger.info("triangulation of edge vertices");
+			objEnvelope.triangulate(true);
+		}
+		
+		if (doShowLockedPoints) {
+			for (ObjectVector v : objEnvelope.getVertices()) {
+				if (v.isLocked()) {
+					objPoints.addPoint(v);
+				}
 			}
 		}
 		
 		status = SolverState.IDLE;
 	}
 
-	private void createSegment(ObjectDef obj, IObject u0, IObject u1, double edgeLen) throws FaceException {
+	private void createSegment(ObjectDef obj, IObject u0, IObject u1, double edgeLen, Vector3D dir) throws FaceException {
 		int facenNb = 0;
 		List<ObjectVector> l = new ArrayList<ObjectVector>();
 		IObject p0, p1;
@@ -253,28 +264,27 @@ public class SimpleRandomPatternSolver implements Solver {
 		IEdgeSegment fRefSecond = obj.getFaceWithVertice(u1.point, 0);
 		
 		// compute downwards vector
-		Vector3D edgeVec = Vector3D.sub(u1.point, u0.point).normalize();
-		Vector3D v0 = Vector3D.cross(u0.face.getFaceNormal(), edgeVec).normalize();
-//		Vector3D v1 = Vector3D.cross(s1.face.getFaceNormal(), edgeVec).normalize();
+		if (dir == null) {
+			Vector3D edgeVec = Vector3D.sub(u1.point, u0.point).normalize();
+			dir = Vector3D.cross(u0.face.getFaceNormal(), edgeVec).normalize();
+		}
 		
 		do {
 			if (fRefFirst == null) {
-				p0 = objReference.catwalk(u0.point, v0, edgeLen, null, u0.face);
+				p0 = objReference.catwalk(u0.point, dir, edgeLen, null, u0.face);
 			} else 
 			{
 				ObjectVector oVert = fRefFirst.face.getVertices().get(2);
-//				p0 = new IObject(fRefFirst.face, oVert);
 				p0 = new IObject(oVert);
 				p0.found = true;
 				p0.edge = oVert.isLocked();
 			}
 	
 			if (fRefSecond == null) {
-				p1 = objReference.catwalk(u1.point, v0, edgeLen, null, u1.face);
+				p1 = objReference.catwalk(u1.point, dir, edgeLen, null, u1.face);
 			} else 
 			{
 				ObjectVector oVert = fRefSecond.face.getVertices().get(3);
-//				p1 = new IObject(fRefSecond.face, oVert);
 				p1 = new IObject(oVert);
 				p1.found = true;
 				p1.edge = oVert.isLocked();
