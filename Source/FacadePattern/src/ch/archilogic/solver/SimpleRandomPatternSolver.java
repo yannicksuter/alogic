@@ -52,7 +52,6 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doJittering = true;
 	private boolean doShowLockedVertices = true;
 	private boolean doTriangulateEdge = true;
-	private boolean doShowLockedPoints = true;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -244,7 +243,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			objEnvelope.triangulate(true);
 		}
 		
-		if (doShowLockedPoints) {
+		if (doShowLockedVertices) {
 			for (ObjectVector v : objEnvelope.getVertices()) {
 				if (v.isLocked()) {
 					objPoints.addPoint(v);
