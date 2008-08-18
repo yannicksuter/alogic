@@ -36,8 +36,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
 
-	private static String refObjPath = "file:c:\\tmp\\loadme_simple.obj";
-//	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
+//	private static String refObjPath = "file:c:\\tmp\\loadme_simple.obj";
+	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
 	
 	private ObjectDef objReference;
 	private ObjectDef objBoundingBox;
