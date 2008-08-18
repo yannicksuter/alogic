@@ -5,6 +5,7 @@ import java.util.List;
 
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
+import ch.archilogic.object.ObjectVector;
 
 public class IObject {
 	public Face face = null;
@@ -14,7 +15,12 @@ public class IObject {
 	public boolean edge = false;
 	
 	public List<Face> visited = new ArrayList<Face>();
-	
+
+	public IObject(ObjectVector vert) {
+		this.face = vert.getFace();
+		this.point = vert;
+	}
+
 	public IObject(Face face) {
 		this.face = face;
 	}

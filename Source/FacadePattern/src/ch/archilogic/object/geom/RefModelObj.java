@@ -49,7 +49,8 @@ public class RefModelObj extends ObjectDef {
 					a.getCoordinate(i*3+2, p3);
 					p.add(new Vector3D(p3).mult(scale));
 					n.add(new Vector3D(n3));
-					createFace(p, n);
+//					createFace(p, n);
+					createFace(p);
 				}
 			} else {
 				throw new ObjectException("object could not be parsed.");

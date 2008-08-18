@@ -54,8 +54,8 @@ public class EdgeSegment {
 	
 	public Face createFace() {
 		Face f = new Face();
-		f.addVertice(getStartPoint());
-		f.addVertice(getEndPoint());
+		f.addVertice(new ObjectVector(getStartPoint()));
+		f.addVertice(new ObjectVector(getEndPoint()));
 		return f;
 	}
 

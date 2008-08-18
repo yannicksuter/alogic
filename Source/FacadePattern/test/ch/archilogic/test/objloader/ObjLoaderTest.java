@@ -18,7 +18,8 @@ import ch.archilogic.object.helper.ObjHelper;
 public class ObjLoaderTest extends TestCase {
 	private static String Box1mObjPath = "file:c:\\tmp\\1mbox.obj";
 	private static String Box100mObjPath = "file:c:\\tmp\\100mbox.obj";
-	
+		
+	@SuppressWarnings("unchecked")
 	public void testBoxLoader() throws FileNotFoundException, IncorrectFormatException, ParsingErrorException, MalformedURLException {
 		Scene box1 = ObjHelper.loadRefObject(Box1mObjPath);
 		Hashtable<String,Shape3D> table1 = box1.getNamedObjects();

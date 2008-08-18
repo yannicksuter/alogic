@@ -79,6 +79,12 @@ public class Vector3D {
 		return this.z;
 	}
 	
+	public void set(Vector3D v) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+	}
+	
 	public double length() {
 		return Math.sqrt(Vector3D.dot(this, this));
 	}

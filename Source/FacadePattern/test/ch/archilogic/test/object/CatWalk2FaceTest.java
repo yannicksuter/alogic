@@ -4,6 +4,7 @@ import ch.archilogic.log.Logger;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
+import ch.archilogic.object.ObjectVector;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IObject;
 import junit.framework.TestCase;
@@ -13,9 +14,9 @@ public class CatWalk2FaceTest extends TestCase {
 		ObjectDef obj = new ObjectDef();
 		
 		Face f1 = new Face();
-		f1.addVertice(new Vector3D(10,0,0));
-		f1.addVertice(new Vector3D(0,0,0));
-		f1.addVertice(new Vector3D(0,10,0));
+		f1.addVertice(new ObjectVector(10,0,0));
+		f1.addVertice(new ObjectVector(0,0,0));
+		f1.addVertice(new ObjectVector(0,10,0));
 		obj.addFace(f1);
 
 		// prepare object
@@ -29,15 +30,15 @@ public class CatWalk2FaceTest extends TestCase {
 		ObjectDef obj = new ObjectDef();
 		
 		Face f1 = new Face();
-		f1.addVertice(new Vector3D(10,0,0));
-		f1.addVertice(new Vector3D(0,0,0));
-		f1.addVertice(new Vector3D(0,10,0));
+		f1.addVertice(new ObjectVector(10,0,0));
+		f1.addVertice(new ObjectVector(0,0,0));
+		f1.addVertice(new ObjectVector(0,10,0));
 		obj.addFace(f1);
 
 		Face f2 = new Face();
-		f2.addVertice(new Vector3D(10,0,0));
-		f2.addVertice(new Vector3D(0,10,0));
-		f2.addVertice(new Vector3D(10,10,0));
+		f2.addVertice(new ObjectVector(10,0,0));
+		f2.addVertice(new ObjectVector(0,10,0));
+		f2.addVertice(new ObjectVector(10,10,0));
 		obj.addFace(f2);
 		
 		// prepare object

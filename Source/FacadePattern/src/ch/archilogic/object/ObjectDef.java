@@ -20,7 +20,7 @@ import ch.archilogic.solver.intersection.IObject;
 
 public class ObjectDef {
 	private ObjectType type;
-	private List<Vector3D> vertices = new ArrayList<Vector3D>();
+	private List<ObjectVector> vertices = new ArrayList<ObjectVector>();
 	private List<Face> faces = new ArrayList<Face>();
 	
 	private List<Edge> edgeList = null;	
@@ -51,6 +51,10 @@ public class ObjectDef {
 	public void create() throws FaceException {
 	}
 
+	public List<ObjectVector> getVertices() {
+		return vertices;
+	}
+	
 	public int getVerticeNb() {
 		return vertices.size();
 	}
@@ -89,24 +93,32 @@ public class ObjectDef {
 	}
 
 	public void addFace(Face f) throws FaceException {
-		createFace(f.getVertices(), null);
+		createFaceOV(f.getVertices());
 	}
 	
 	public void createFace(List<Vector3D> verts) throws FaceException {
+		List<ObjectVector> objVerts = new ArrayList<ObjectVector>();
+		for (Vector3D v : verts) {
+			objVerts.add(new ObjectVector(v));
+		}
+		createFace(objVerts, null);
+	}
+
+	public void createFaceOV(List<ObjectVector> verts) throws FaceException {
 		createFace(verts, null);
 	}
 	
-	public void createFace(List<Vector3D> pointList, List<Vector3D> normalList) throws FaceException {
-		if (pointList == null) {
+	public void createFace(List<ObjectVector> verticeList, List<Vector3D> normalList) throws FaceException {
+		if (verticeList == null) {
 			throw new FaceException("no points to define a face.");
 		}
 		
 		Face face = new Face();
-		for (int i=0; i< pointList.size(); i++) {
-			Vector3D p = pointList.get(i);
+		for (int i=0; i< verticeList.size(); i++) {
+			ObjectVector p = verticeList.get(i);
 
 			if (containsEqual(p) == null) {
-				vertices.add(new Vector3D(p));
+				vertices.add(new ObjectVector(p));
 			}
 			
 			int index = getIndexOf(p);
@@ -155,7 +167,7 @@ public class ObjectDef {
 	public void subdivide(Face face) throws FaceException {
 		List<Face> newFaces = face.subdivide();
 		for (Face f : newFaces) {
-			createFace(f.getVertices(), null);
+			createFaceOV(f.getVertices());
 		}
 	}
 	public IObject catwalk(Vector3D p, Vector3D dir, double l, Face previousFace, Face currentFace) {

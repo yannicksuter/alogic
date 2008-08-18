@@ -14,7 +14,7 @@ import ch.archilogic.solver.intersection.ILine;
 public class Face {
 	private int id;
 
-	private List<Vector3D> vertices = new ArrayList<Vector3D>();
+	private List<ObjectVector> vertices = new ArrayList<ObjectVector>();
 	private List<Vector3D> normals = new ArrayList<Vector3D>();
 	private List<Integer> indices = new ArrayList<Integer>();
 	private Face [] neighbours = null;
@@ -24,10 +24,10 @@ public class Face {
 	}
 	
 	public Face(Vector3D p0, Vector3D p1, Vector3D p2, Vector3D p3) {
-		addVertice(p0);
-		addVertice(p1);
-		addVertice(p2);
-		addVertice(p3);
+		addVertice(new ObjectVector(p0));
+		addVertice(new ObjectVector(p1));
+		addVertice(new ObjectVector(p2));
+		addVertice(new ObjectVector(p3));
 	}
 
 	public int getId() {
@@ -37,8 +37,12 @@ public class Face {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 	public void addVertice(Vector3D p) {
+		vertices.add(new ObjectVector(p));
+	}
+	
+	public void addVertice(ObjectVector p) {
 		vertices.add(p);
 	}
 	
@@ -50,11 +54,11 @@ public class Face {
 		normals.add(n);
 	}
 
-	public List<Vector3D> getVertices() {
+	public List<ObjectVector> getVertices() {
 		return vertices;
 	}
 
-	public void setVertices(List<Vector3D> vertices) {
+	public void setVertices(List<ObjectVector> vertices) {
 		this.vertices = vertices;
 	}
 
