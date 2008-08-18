@@ -298,7 +298,8 @@ public class SimpleRandomPatternSolver implements Solver {
 			} else {
 				break;
 			}
-		} while(p0.found && p1.found);
+//		} while(p0.found && p1.found);
+		} while(!p0.edge || !p1.edge);
 	}
 
 	private void createSegmentJittered(ObjectDef obj, IEdgeSegment s0, IEdgeSegment s1, double edgeLen) throws FaceException {
