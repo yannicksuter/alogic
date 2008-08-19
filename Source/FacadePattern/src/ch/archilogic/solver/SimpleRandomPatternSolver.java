@@ -53,6 +53,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doShowLockedVertices = true;
 	private boolean doTriangulateEdge = true;
 	
+	private double scale = 1.0; 
+	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
 	}
@@ -69,6 +71,10 @@ public class SimpleRandomPatternSolver implements Solver {
 		return status;
 	}
 
+	public double getScale() {
+		return this.scale;
+	}
+	
 	public void addReference(ObjectFile obj) {
 	}	
 	
@@ -103,6 +109,10 @@ public class SimpleRandomPatternSolver implements Solver {
 					box.setUpper(new Vector3D(upper.getX(), upper.getY(), upper.getZ()));
 					box.setLower(new Vector3D(lower.getX(), lower.getY(), lower.getZ()));
 					objBoundingBox = box;
+					
+					// compute scaling factor
+					this.scale = 1 / (upper.getX() - lower.getX());
+					Logger.info(String.format("scaling factor: %f", scale));
 				}
 			}
 		} catch (Exception e) {

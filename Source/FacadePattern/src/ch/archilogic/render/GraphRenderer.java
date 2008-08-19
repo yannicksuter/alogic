@@ -22,10 +22,9 @@ public class GraphRenderer extends Canvas3D {
 	private static final long serialVersionUID = 1091353214144552939L;
 	
 	SimpleUniverse su = null;
-    private Transform3D scale = new Transform3D();             
 	
     private boolean optionAntialiasing = false;
-    
+
 	public boolean isOptionAntialiasing() {
 		return optionAntialiasing;
 	}
@@ -128,7 +127,8 @@ public class GraphRenderer extends Canvas3D {
 		zoom.setSchedulingBounds(bounds);
 		spin.addChild(zoom);
 
-		scale.setScale(2);
+		Transform3D scale = new Transform3D();             
+		scale.setScale(solver.getScale());
 		spin.setTransform(scale);
 
 		// <background and light>

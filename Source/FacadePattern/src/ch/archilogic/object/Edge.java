@@ -8,6 +8,7 @@ import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 
 public class Edge {
+	private static final double MAX_ANGLE = Math.PI * (20.0 / 180.0);   
 	enum EdgeType {
 		LINE, 
 		CIRCULAR
@@ -66,7 +67,7 @@ public class Edge {
 
 	public IEdgeSegment getStartPoint() {
 		if (segmentList != null) {
-			return new IEdgeSegment(segmentList.get(0).getFace(), segmentList.get(0).getStartPoint());
+			return new IEdgeSegment(segmentList.get(0).getFace(), segmentList.get(0).getStartPoint(), IEdgeSegment.IType.STARPOINT);
 		}
 		return null;
 	}
@@ -82,7 +83,7 @@ public class Edge {
 					if (edgeLen <= len) 
 					{ // end point on segment
 						Vector3D pE = Vector3D.add(p, l.getDir().normalize().mult(edgeLen));
-						return new IEdgeSegment(s.getFace(), pE); 
+						return new IEdgeSegment(s.getFace(), pE, IEdgeSegment.IType.LINE); 
 					} else 
 					{ // walk into the next segment
 						return walkNextSegment(segmentList.indexOf(s)+1, edgeLen - len);
@@ -95,15 +96,39 @@ public class Edge {
 	
 	private IEdgeSegment walkNextSegment(int segmentId, double edgeLen) {
 		EdgeSegment s = segmentList.get(segmentId % segmentList.size());
-		Line l = s.getLine();
-		double len = l.getLength();
-		if (edgeLen <= len) 
-		{ // end point on segment
-			Vector3D pE = Vector3D.add(s.getStartPoint(), l.getDir().normalize().mult(edgeLen));
-			return new IEdgeSegment(s.getFace(), pE); 
+		
+		if (checkAngleBetweenSegments(segmentId-1, segmentId)) 
+		{ // line continuity is ok		
+			Line l = s.getLine();
+			double len = l.getLength();
+			if (edgeLen <= len) 
+			{ // end point on segment
+				Vector3D pE = Vector3D.add(s.getStartPoint(), l.getDir().normalize().mult(edgeLen));
+				return new IEdgeSegment(s.getFace(), pE, IEdgeSegment.IType.LINE); 
+			} else 
+			{ // walk into the next segment
+				return walkNextSegment(segmentId+1, edgeLen - len);
+			}
 		} else 
-		{ // walk into the next segment
-			return walkNextSegment(segmentId+1, edgeLen - len);
+		{ // line is broken
+			IEdgeSegment res = new IEdgeSegment(s.getFace(), s.getStartPoint(), IEdgeSegment.IType.CORNER);
+			res.setLenRemaining(edgeLen);			
+			return res;
 		}
 	}
+
+	private boolean checkAngleBetweenSegments(int firstSegmentId, int secondSegmentId) {
+		EdgeSegment firstSegment = segmentList.get(firstSegmentId % segmentList.size());
+		EdgeSegment secondSegment = segmentList.get(secondSegmentId % segmentList.size());
+		
+//		double angle = Vector3D.angle(firstSegment.getLine().getDir(), secondSegment.getLine().getDir());
+//		if (Double.isNaN(angle) || Math.abs(angle) < MAX_ANGLE) {
+//			return true;
+//		}
+//		return false;
+		
+		return true;
+	}
+	
+	
 }

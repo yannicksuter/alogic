@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import javax.media.j3d.Shape3D;
+import javax.media.j3d.Transform3D;
 import javax.media.j3d.TriangleArray;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
@@ -22,7 +23,7 @@ public class RefModelObj extends ObjectDef {
 		super();
 
 		ObjHelper.convert(shape, false, false, false, false, false, false);
-		
+
 		Enumeration en = shape.getAllGeometries();
 		while (en.hasMoreElements()) {
 			Object obj = en.nextElement();		

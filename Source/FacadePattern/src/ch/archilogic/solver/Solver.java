@@ -9,6 +9,8 @@ import ch.archilogic.runtime.exception.FaceException;
 public interface Solver {
 	public String getDescription();
 	public SolverState getStatus();	
+
+	public double getScale();
 	public ObjectGraph getObjectGraph();
 	
 	// load reference object

@@ -24,7 +24,7 @@ public class ObjHelper {
 		throws FileNotFoundException, IncorrectFormatException, ParsingErrorException, MalformedURLException 
 	{
 		Scene s = null;
-		int flags = ObjectFile.RESIZE;
+		int flags = 0/*ObjectFile.RESIZE*/;
 		
 		ObjectFile f = new ObjectFile(flags);
 		s = f.load(new URL(filename));
