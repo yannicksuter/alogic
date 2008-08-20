@@ -52,8 +52,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	
 	private boolean doThinking = true;
 	private boolean doJittering = true;
-	private boolean doShowLockedVertices = false;
-	private boolean doShowCornersOnEdge = true;
+	private boolean doShowLockedVertices = true;
+	private boolean doShowCornersOnEdge = false;
 	private boolean doTriangulateEdge = true;
 	
 	private double scale = 1.0; 
@@ -219,18 +219,30 @@ public class SimpleRandomPatternSolver implements Solver {
 			
 			Vector3D dir = null;
 			IEdgeSegment s = edge.getStartPoint();
+			// define general direction for propagation
+			dir = Vector3D.cross(s.face.getFaceNormal(), s.line.getDir()).normalize();				
+			
 			do {
+				IEdgeSegment n = edge.getPoint(s.point, segmentLen, true);
+				
 				if (s.type == IEdgeSegment.IType.CORNER) {
-					Logger.info(String.format("corner : %s", s.point));
+					Logger.debug(String.format("corner : %s", s.point));
 					objCornerPoints.addPoint(new ObjectVector(s.point, Color.ORANGE));
 				} else 
 				{
 					objCornerPoints.addPoint(new ObjectVector(s.point, Color.CYAN));
 				}
+
+				if (s != null && n != null) {
+					IObject u0 = new IObject(s.face, s.point, true, true);
+					IObject u1 = new IObject(n.face, n.point, true, true);
+					createSegment(objEnvelope, u0, u1, segmentLen, dir);						
+				}
 				
-				s = edge.getPoint(s.point, segmentLen, true);
+				s = n;
 			} while (s.type != IEdgeSegment.IType.ENDPOINT);
 
+/*			
 			for (int i = 0; i<numSegments; i++) {
 				Logger.debug(String.format("segment #%d", i));
 				IEdgeSegment s0 = edge.getPoint(start.point, segmentLen*i, false);
@@ -255,6 +267,7 @@ public class SimpleRandomPatternSolver implements Solver {
 					}
 				}
 			}
+*/			
 		}
 		
 		if (doJittering ) {

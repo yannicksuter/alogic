@@ -72,7 +72,7 @@ public class Edge {
 	
 	public IEdgeSegment getStartPoint() {
 		if (segmentList != null) {
-			return new IEdgeSegment(segmentList.get(0).getFace(), segmentList.get(0).getStartPoint(), IEdgeSegment.IType.STARPOINT);
+			return new IEdgeSegment(segmentList.get(0).getFace(), segmentList.get(0).getStartPoint(), segmentList.get(0).getLine(), IEdgeSegment.IType.STARPOINT);
 		}
 		return null;
 	}
