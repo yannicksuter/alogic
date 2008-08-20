@@ -1,11 +1,14 @@
 package ch.archilogic.object;
 
+import java.awt.Color;
+
 import ch.archilogic.math.vector.Vector3D;
 
 public class ObjectVector extends Vector3D {
 	private Face face = null;
 	private boolean locked = false;
-	
+	private Color color = null;
+
 	public ObjectVector(Vector3D v) {
 		super(v);
 	}
@@ -31,11 +34,16 @@ public class ObjectVector extends Vector3D {
 		this.locked = locked;
 	}
 
+	public ObjectVector(Vector3D v, Color c) {
+		super(v);
+		this.color = c;
+	}
+	
 	public void set(Face face, Vector3D v, boolean locked) {
 		this.set(v);
 		this.face = face;
 		this.locked = locked;
-	}
+	}	
 	
 	public Face getFace() {
 		return face;
@@ -56,4 +64,12 @@ public class ObjectVector extends Vector3D {
 	public void setVector(Vector3D v) {
 		this.set(v);
 	}	
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
+	}
 }

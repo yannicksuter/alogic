@@ -13,17 +13,30 @@ import javax.vecmath.Color4f;
 
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.ObjectDef;
+import ch.archilogic.object.ObjectVector;
 import ch.archilogic.runtime.exception.FaceException;
 
 public class PointShapeObj extends ObjectDef {
 	final static int CUBESIZE = 5;
 
-	List<Vector3D> verts = new ArrayList<Vector3D>();
+	private Color pointColor = Color.CYAN;
+	private List<ObjectVector> verts = new ArrayList<ObjectVector>();
 
-	public void addPoint(Vector3D v) {
+	public void setColor(Color col) {
+		this.pointColor = col;
+	}
+	
+	public void addPoint(ObjectVector v) {
 		verts.add(v);
 	}
 
+	private Color4f convertColor(Color c) {
+		if (c == null) {
+			return new Color4f(pointColor.getRed(), pointColor.getGreen(), pointColor.getBlue(), pointColor.getAlpha());
+		}
+		return new Color4f(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());		
+	}
+	
 	@SuppressWarnings("static-access")
 	@Override
 	public Shape3D getShape(boolean asWireframe, boolean asSolid) throws FaceException {
@@ -41,12 +54,11 @@ public class PointShapeObj extends ObjectDef {
 		ta.setTransparency(0.2f); // used if color is not COLOR_4
 		app.setTransparencyAttributes(ta);
 
-		Color4f col = new Color4f(Color.CYAN.getRed(), Color.CYAN.getGreen(), Color.CYAN.getBlue(), Color.CYAN.getAlpha());
 		PointArray pointArray = new PointArray(verts.size(), PointArray.COORDINATES | PointArray.COLOR_4);
 		for (int i = 0; i < verts.size(); i++) {
-			Vector3D v = verts.get(i);
+			ObjectVector v = verts.get(i);
 			pointArray.setCoordinate(i, v.getPoint3f());
-			pointArray.setColor(i, col);
+			pointArray.setColor(i, convertColor(v.getColor()));
 		}
 
 		Shape3D shape = new Shape3D(pointArray, app);

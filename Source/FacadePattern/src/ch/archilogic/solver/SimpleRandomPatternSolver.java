@@ -31,6 +31,7 @@ import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;
+import ch.archilogic.solver.intersection.IFace.IsecType;
 
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
@@ -45,12 +46,14 @@ public class SimpleRandomPatternSolver implements Solver {
 	private ObjectDef objFaceEvaluated;
 	
 	private PointShapeObj objPoints = new PointShapeObj();
+	private PointShapeObj objCornerPoints = new PointShapeObj();
 	
 	private List<Edge> edges;
 	
 	private boolean doThinking = true;
 	private boolean doJittering = true;
 	private boolean doShowLockedVertices = true;
+	private boolean doShowCornersOnEdge = true;
 	private boolean doTriangulateEdge = true;
 	
 	private double scale = 1.0; 
@@ -159,6 +162,10 @@ public class SimpleRandomPatternSolver implements Solver {
 			objGraph.addChild(objEnvelope);
 //			objGraph.addChild(objReference);				
 			objGraph.addChild(objEdge);			
+
+			if (doShowCornersOnEdge) {
+				objGraph.addChild(objCornerPoints);
+			}
 			
 			if (doShowLockedVertices) {
 				objGraph.addChild(objPoints);
@@ -200,21 +207,34 @@ public class SimpleRandomPatternSolver implements Solver {
 			return;
 		}
 
-		double edgeLen = 0;
+		double segmentLen = 0;
 		
 		Logger.info("thinking..");		
 		if (edges != null && edges.size() > 0) {
 			int numSegments = 120;
 			Edge edge = edges.get(0);
-			edgeLen = edge.getLength() / numSegments;
+			double totalLen = edge.getLength();
+			segmentLen = totalLen / numSegments;
 			IEdgeSegment start = edge.getStartPoint();
 			
 			Vector3D dir = null;
+			IEdgeSegment s = edge.getStartPoint();
+			do {
+				if (s.type == IEdgeSegment.IType.CORNER) {
+					Logger.info(String.format("corner : %s", s.point));
+					objCornerPoints.addPoint(new ObjectVector(s.point, Color.ORANGE));
+				} else 
+				{
+					objCornerPoints.addPoint(new ObjectVector(s.point, Color.CYAN));
+				}
+				
+				s = edge.getPoint(s.point, segmentLen);
+			} while (s.type != IEdgeSegment.IType.ENDPOINT);
 
 			for (int i = 0; i<numSegments; i++) {
 				Logger.debug(String.format("segment #%d", i));
-				IEdgeSegment s0 = edge.getPoint(start.point, edgeLen*i);
-				IEdgeSegment s1 = edge.getPoint(start.point, edgeLen*(i+1));
+				IEdgeSegment s0 = edge.getPoint(start.point, segmentLen*i);
+				IEdgeSegment s1 = edge.getPoint(start.point, segmentLen*(i+1));
 				if (s0 != null && s1 != null) {
 					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
 										
@@ -229,9 +249,9 @@ public class SimpleRandomPatternSolver implements Solver {
 					
 					if (i == numSegments-1) {
 //						Logger.setDebugVerbose(true);
-						createSegment(objEnvelope, u0, u1, edgeLen, dir);						
+						createSegment(objEnvelope, u0, u1, segmentLen, dir);						
 					} else {
-						createSegment(objEnvelope, u0, u1, edgeLen, dir);
+						createSegment(objEnvelope, u0, u1, segmentLen, dir);
 					}
 				}
 			}
@@ -241,7 +261,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			for (ObjectVector v : objEnvelope.getVertices()) {
 				if (!v.isLocked() && v.getFace() != null) {
 					Vector3D vRnd = Vector3D.random();
-					IObject newPoint = objReference.catwalk(v, vRnd, edgeLen*0.2, null, v.getFace());
+					IObject newPoint = objReference.catwalk(v, vRnd, segmentLen*0.2, null, v.getFace());
 					Logger.debug(String.format("old: %s new: ", v, newPoint.point.toString()));
 					v.set(newPoint.face, newPoint.point, false);
 				}
@@ -260,7 +280,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				}
 			}
 		}
-		
+	
 		status = SolverState.IDLE;
 	}
 
