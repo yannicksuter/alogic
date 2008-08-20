@@ -52,7 +52,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	
 	private boolean doThinking = true;
 	private boolean doJittering = true;
-	private boolean doShowLockedVertices = true;
+	private boolean doShowLockedVertices = false;
 	private boolean doShowCornersOnEdge = true;
 	private boolean doTriangulateEdge = true;
 	
@@ -228,13 +228,13 @@ public class SimpleRandomPatternSolver implements Solver {
 					objCornerPoints.addPoint(new ObjectVector(s.point, Color.CYAN));
 				}
 				
-				s = edge.getPoint(s.point, segmentLen);
+				s = edge.getPoint(s.point, segmentLen, true);
 			} while (s.type != IEdgeSegment.IType.ENDPOINT);
 
 			for (int i = 0; i<numSegments; i++) {
 				Logger.debug(String.format("segment #%d", i));
-				IEdgeSegment s0 = edge.getPoint(start.point, segmentLen*i);
-				IEdgeSegment s1 = edge.getPoint(start.point, segmentLen*(i+1));
+				IEdgeSegment s0 = edge.getPoint(start.point, segmentLen*i, false);
+				IEdgeSegment s1 = edge.getPoint(start.point, segmentLen*(i+1), false);
 				if (s0 != null && s1 != null) {
 					Logger.debug(String.format("%d, s0 %s -> s1 %s", i, s0.point, s1.point));
 										

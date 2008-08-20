@@ -13,7 +13,7 @@ public class Edge {
 		LINE, 
 		CIRCULAR
 	}
-	
+		
 	private EdgeType type;
 	private List<EdgeSegment> segmentList = null;
 
@@ -77,7 +77,7 @@ public class Edge {
 		return null;
 	}
 	
-	public IEdgeSegment getPoint(Vector3D p, double edgeLen) {
+	public IEdgeSegment getPoint(Vector3D p, double edgeLen, boolean withCornerDetection) {
 		// find the segment on which p is
 		for (EdgeSegment s : segmentList) {
 			Line l = s.getLine(); 
@@ -91,7 +91,7 @@ public class Edge {
 						return new IEdgeSegment(s.getFace(), pE, IEdgeSegment.IType.LINE); 
 					} else 
 					{ // walk into the next segment
-						return walkNextSegment(segmentList.indexOf(s)+1, edgeLen - len);
+						return walkNextSegment(segmentList.indexOf(s)+1, edgeLen - len, withCornerDetection);
 					}
 				}
 			}
@@ -99,11 +99,11 @@ public class Edge {
 		return null;
 	}
 	
-	private IEdgeSegment walkNextSegment(int segmentId, double edgeLen) {
+	private IEdgeSegment walkNextSegment(int segmentId, double edgeLen, boolean withCornerDetection) {
 		segmentId = getSegmentId(segmentId);
 		EdgeSegment s = segmentList.get(segmentId);
 		
-		if (checkAngleBetweenSegments(segmentId-1, segmentId)) 
+		if ((withCornerDetection && checkAngleBetweenSegments(segmentId-1, segmentId)) || !withCornerDetection) 
 		{ // line continuity is ok
 			if (segmentId == 0) 
 			{ // endpoint reached
@@ -120,7 +120,7 @@ public class Edge {
 					return new IEdgeSegment(s.getFace(), pE, IEdgeSegment.IType.LINE); 
 				} else 
 				{ // walk into the next segment
-					return walkNextSegment(segmentId+1, edgeLen - len);
+					return walkNextSegment(segmentId+1, edgeLen - len, withCornerDetection);
 				}
 			}
 		} else 

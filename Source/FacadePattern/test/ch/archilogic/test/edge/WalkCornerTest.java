@@ -54,7 +54,7 @@ public class WalkCornerTest extends TestCase {
 		IEdgeSegment s = edge.getStartPoint();
 		do {
 			Logger.info(String.format("%s : %s", s.type.name(), s.point));		
-			s = edge.getPoint(s.point, segmentLen);
+			s = edge.getPoint(s.point, segmentLen, true);
 		} while (s.type != IEdgeSegment.IType.ENDPOINT);		
 		Logger.info(String.format("%s : %s", s.type.name(), s.point));		
 	}
