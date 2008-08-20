@@ -3,15 +3,21 @@ package ch.archilogic.object;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 
 public class Edge {
-	private static final double MAX_ANGLE = Math.PI * (20.0 / 180.0);   
+	private static final double MAX_ANGLE = Math.PI * (70.0 / 180.0);   
 	public enum EdgeType {
 		LINE, 
 		CIRCULAR
+	}
+	
+	public enum CornerType {
+		CLOSING,
+		OPENING
 	}
 		
 	private EdgeType type;
@@ -128,6 +134,10 @@ public class Edge {
 			IEdgeSegment res = new IEdgeSegment(s.getFace(), s.getStartPoint(), IEdgeSegment.IType.CORNER);
 			if (s.getStartPoint().epsilonEquals(getStartPoint().point, Vector3D.EPSILON)) {
 				res.type = IEdgeSegment.IType.ENDPOINT;
+			} else 
+			{ // keep information for later evaluation
+				res.setPrevSegmentId(getSegmentId(segmentId-1));
+				res.setCurSegmentId(getSegmentId(segmentId));
 			}
 			res.setLenRemaining(edgeLen);			
 			return res;
@@ -142,6 +152,18 @@ public class Edge {
 		if (Double.isNaN(angle) || Math.abs(angle) < MAX_ANGLE) {
 			return true;
 		}
+		
 		return false;
+	}
+	
+	public CornerType evaluateCorner(IEdgeSegment e, Vector3D dir) {
+		EdgeSegment segment = segmentList.get(getSegmentId(e.getCurSegmentId()));
+
+		double angle = Vector3D.angle(segment.getLine().getDir(), dir);
+		if (Double.isNaN(angle) || Math.abs(angle) <= (Math.PI / 2)) {
+			return CornerType.CLOSING;
+		}
+		
+		return CornerType.OPENING;
 	}
 }
