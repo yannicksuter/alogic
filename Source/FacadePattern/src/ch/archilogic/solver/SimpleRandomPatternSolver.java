@@ -32,6 +32,7 @@ import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;
+import ch.archilogic.solver.intersection.IEdgeSegment.IType;
 
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
@@ -54,7 +55,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doJittering = true;
 	private boolean doShowLockedVertices = false;
 	private boolean doShowCornersOnEdge = true;
-	private boolean doTriangulateEdge = true;
+	private boolean doTriangulateEdge = false;
 	
 	private double scale = 1.0; 
 	
@@ -207,42 +208,54 @@ public class SimpleRandomPatternSolver implements Solver {
 			return;
 		}
 
+		int segNb = 0;
 		double segmentLen = 0;
 		
 		Logger.info("thinking..");		
 		if (edges != null && edges.size() > 0) {
 			Edge edge = edges.get(0);
-			segmentLen = edge.getLength() / 120.0;
+			segmentLen = edge.getLength() / 160.0;
 			
 			Vector3D dir = null;
 			IEdgeSegment s = edge.getStartPoint();
 			// define general direction for propagation
 			dir = Vector3D.cross(s.face.getFaceNormal(), s.line.getDir()).normalize();				
 			
+			boolean bCornerBefore = false;
 			do {
-				IEdgeSegment n = edge.getPoint(s.point, segmentLen, true);
-				
-				if (s.type == IEdgeSegment.IType.CORNER) {
-					CornerType cornerType = edge.evaluateCorner(s, dir);
-					Logger.info(String.format("corner %s : %s", s.point, cornerType.name()));
-					if (cornerType == CornerType.CLOSING) {
-						objCornerPoints.addPoint(new ObjectVector(s.point, Color.PINK));						
-					} else 
-					{
-						objCornerPoints.addPoint(new ObjectVector(s.point, Color.ORANGE));						
-					}
+				segNb++;
+
+				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(s, dir, false) == CornerType.OPENING) {
+					Logger.info(String.format("%d corner %s", segNb, s.point));
+					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
+//					break;
 				} else 
 				{
-					objCornerPoints.addPoint(new ObjectVector(s.point, Color.CYAN));
+					bCornerBefore = false;
+					IEdgeSegment n = edge.getPoint(s.point, segmentLen, true);
+					if (s != null && n != null) {				
+						if (n.type == IEdgeSegment.IType.CORNER) {
+							CornerType cornerType = edge.evaluateCorner(n, dir, false);
+							Logger.debug(String.format("%d corner %s : %s", segNb, n.point, cornerType.name()));
+							if (cornerType == CornerType.CLOSING) 
+							{ // create a segment in a closing edge
+//								objCornerPoints.addPoint(new ObjectVector(n.point, Color.PINK));	
+								IObject u0 = new IObject(s.face, s.point, true, true);
+								n = createSegmentOnClosingEdge(objEnvelope, u0, n, segmentLen, dir, edge);
+								if (n.type == IType.CORNER) {
+									bCornerBefore = true;
+								}
+							} 
+						} else 
+						{ // normal "on line" segment creation
+//							objCornerPoints.addPoint(new ObjectVector(n.point, Color.CYAN));
+							IObject u0 = new IObject(s.face, s.point, true, true);
+							IObject u1 = new IObject(n.face, n.point, true, true);
+							createSegment(objEnvelope, u0, u1, segmentLen, dir);						
+						}
+					}
+					s = n;
 				}
-
-				if (s != null && n != null) {
-					IObject u0 = new IObject(s.face, s.point, true, true);
-					IObject u1 = new IObject(n.face, n.point, true, true);
-					createSegment(objEnvelope, u0, u1, segmentLen, dir);						
-				}
-				
-				s = n;
 			} while (s.type != IEdgeSegment.IType.ENDPOINT);
 		}
 		
@@ -273,6 +286,105 @@ public class SimpleRandomPatternSolver implements Solver {
 		status = SolverState.IDLE;
 	}
 
+	private IEdgeSegment createSegmentOnOpeningEdge(ObjectDef obj, IEdgeSegment s, double edgeLen, Vector3D dir, Edge edge) throws FaceException {
+		IEdgeSegment nextCorner = edge.getPoint(s.point, 100000, true);
+		IEdgeSegment secondPointOnEdge = null;
+
+//		objCornerPoints.addPoint(new ObjectVector(s.point, Color.CYAN));
+//		objCornerPoints.addPoint(new ObjectVector(nextCorner.point, Color.RED));
+//		Logger.setDebugVerbose(true);
+//		edge.setObject(objCornerPoints);		
+//		IEdgeSegment pointX = edge.getPoint(nextCorner.point, -edgeLen, true);		
+//		Logger.setDebugVerbose(false);	
+//		objCornerPoints.addPoint(new ObjectVector(pointX.point, Color.BLUE));
+//		Logger.setDebugVerbose(false);
+//		return null;
+		
+		Vector3D edgeDir = Vector3D.sub(nextCorner.point, s.point);
+		double len = edgeDir.length();
+
+		if (nextCorner != null && nextCorner.type == IType.CORNER) 
+		{
+			List<ObjectVector> l = new ArrayList<ObjectVector>();
+			secondPointOnEdge = edge.getPoint(nextCorner.point, edgeLen, true);
+			IEdgeSegment point0 = nextCorner;
+			IObject point1 = new IObject(secondPointOnEdge.face, secondPointOnEdge.point, true, true); 
+			IObject point2 = null; 
+			IEdgeSegment fRefSecond = obj.getFaceWithVertice(point1.point, 0);
+			do {
+				IEdgeSegment point3 = edge.getPoint(point0.point, -edgeLen, true);
+				
+				if (fRefSecond == null) {
+					point2 = objReference.catwalk(point1.point, dir, edgeLen, null, point1.face);
+				} else 
+				{
+					ObjectVector oVert = fRefSecond.face.getVertices().get(3);
+					point2 = new IObject(oVert);
+					point2.found = true;
+					point2.edge = oVert.isLocked();
+				}				
+
+				l.clear();			
+				l.add(new ObjectVector(point0.face, point0.point, true));
+				l.add(new ObjectVector(point1.face, point1.point, point1.edge));
+				l.add(new ObjectVector(point2.face, point2.point, point2.edge));
+				l.add(new ObjectVector(point3.face, point3.point, true));
+				obj.createFaceOV(l);				
+				
+				point0 = point3;
+				point1 = point2;
+				
+				fRefSecond = obj.getFaceWithVertice(point1.point, 0);
+			} while (point0.type != IEdgeSegment.IType.CORNER);
+
+			// segment need to be finished
+			IObject i = new IObject(point0.face, point0.point, true, true);
+			createSegment(objEnvelope, i, point1, edgeLen, dir);														
+		} 
+
+		return secondPointOnEdge;
+	}
+
+	private IEdgeSegment createSegmentOnClosingEdge(ObjectDef obj, IObject point0, IEdgeSegment firstPointOnEdge, double edgeLen, Vector3D dir, Edge edge) throws FaceException {
+		List<ObjectVector> l = new ArrayList<ObjectVector>();
+		IEdgeSegment fRefFirst = obj.getFaceWithVertice(point0.point, 1);
+		IObject point4 = null; 
+		IEdgeSegment secondPointOnEdge = null;
+		do {
+			secondPointOnEdge = edge.getPoint(firstPointOnEdge.point, edgeLen, true);
+			if (fRefFirst == null) {
+				point4 = objReference.catwalk(point0.point, dir, edgeLen, null, point0.face);
+			} else 
+			{
+				ObjectVector oVert = fRefFirst.face.getVertices().get(2);
+				point4 = new IObject(oVert);
+				point4.found = true;
+				point4.edge = oVert.isLocked();
+			}				
+
+			l.clear();			
+			l.add(new ObjectVector(point0.face, point0.point, point0.edge));
+			l.add(new ObjectVector(firstPointOnEdge.face, firstPointOnEdge.point, true));
+			l.add(new ObjectVector(secondPointOnEdge.face, secondPointOnEdge.point, true));
+			l.add(new ObjectVector(point4.face, point4.point, point4.edge));
+			obj.createFaceOV(l);				
+			
+			firstPointOnEdge = secondPointOnEdge;
+			point0 = point4;
+
+			fRefFirst = obj.getFaceWithVertice(point4.point, 1);
+			
+		} while ((secondPointOnEdge.type != IEdgeSegment.IType.ENDPOINT) && (secondPointOnEdge.type != IEdgeSegment.IType.CORNER));
+
+		if (secondPointOnEdge.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(secondPointOnEdge, dir, false) == CornerType.OPENING) 
+		{ // segment need to be finished
+			IObject i = new IObject(secondPointOnEdge.face, secondPointOnEdge.point, true, true);
+			createSegment(objEnvelope, point4, i, edgeLen, dir);														
+		}
+		
+		return secondPointOnEdge;
+	}
+
 	private void createSegment(ObjectDef obj, IObject u0, IObject u1, double edgeLen, Vector3D dir) throws FaceException {
 		int facenNb = 0;
 		List<ObjectVector> l = new ArrayList<ObjectVector>();
@@ -281,7 +393,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		IEdgeSegment fRefFirst = obj.getFaceWithVertice(u0.point, 1);
 		IEdgeSegment fRefSecond = obj.getFaceWithVertice(u1.point, 0);
 		
-		// compute downwards vector
+		// compute direction vector
 		if (dir == null) {
 			Vector3D edgeVec = Vector3D.sub(u1.point, u0.point).normalize();
 			dir = Vector3D.cross(u0.face.getFaceNormal(), edgeVec).normalize();

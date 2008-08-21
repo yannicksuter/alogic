@@ -11,7 +11,7 @@ import ch.archilogic.object.ObjectVector;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 
-public class WalkCornerTest extends TestCase {
+public class WalkCornerBackwardsTest extends TestCase {
 	public static ObjectDef createObject(double sidelen) throws FaceException {
 		ObjectDef obj = new ObjectDef();
 		
@@ -43,11 +43,17 @@ public class WalkCornerTest extends TestCase {
 		assertTrue(edge.getLength() == 40);
 		assertTrue(edge.getType() == Edge.EdgeType.CIRCULAR);
 		
+		Logger.info("normal");
 		for (EdgeSegment s : edge.getSegmentList()) {
-			Logger.debug(String.format("%s -> %s", s.getStartPoint(), s.getEndPoint()));
+			Logger.info(String.format("%s -> %s", s.getStartPoint(), s.getEndPoint()));
+		}
+
+		Logger.info("reverse");
+		for (EdgeSegment s : edge.getSegmentListReverse()) {
+			Logger.info(String.format("%s -> %s", s.getStartPoint(), s.getEndPoint()));
 		}
 		
-		double segmentLen = 3;
+		double segmentLen = -3;
 		IEdgeSegment s = edge.getStartPoint();
 		do {
 			Logger.info(String.format("%s : %s", s.type.name(), s.point));		

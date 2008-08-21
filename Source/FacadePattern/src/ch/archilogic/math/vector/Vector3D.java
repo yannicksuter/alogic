@@ -159,6 +159,10 @@ public class Vector3D {
 	public Vector3D mult(double scalar) {
 		return new Vector3D(scalar * this.x, scalar * this.y, scalar * this.z);
 	}
+	
+	public Vector3D neg() {
+		return new Vector3D(-x, -y, -z);
+	}	
 
 	public static Vector3D random() {
 		Vector3D v = new Vector3D(Rnd.nextDouble()-0.5, Rnd.nextDouble()-0.5, Rnd.nextDouble()-0.5); 

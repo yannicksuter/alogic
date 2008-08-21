@@ -1,11 +1,13 @@
 package ch.archilogic.object;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
 import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.object.geom.PointShapeObj;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 
 public class Edge {
@@ -22,6 +24,8 @@ public class Edge {
 		
 	private EdgeType type;
 	private List<EdgeSegment> segmentList = null;
+	private List<EdgeSegment> segmentListReverse = null;
+	private PointShapeObj objCornerPoints;
 
 	public EdgeType getType() {
 		return type;
@@ -30,7 +34,11 @@ public class Edge {
 	public List<EdgeSegment> getSegmentList() {
 		return segmentList;
 	}
-	
+
+	public List<EdgeSegment> getSegmentListReverse() {
+		return segmentListReverse;
+	}
+
 	public void createFromObject(ObjectDef obj, Vector3D startPoint) {
 		this.type = EdgeType.LINE;
 		this.segmentList = new ArrayList<EdgeSegment>();
@@ -58,6 +66,9 @@ public class Edge {
 				}
 			}
 		} while(found);
+		
+		// create reverse edge
+		createReverse();
 	}
 
 	public double getLength() {
@@ -83,9 +94,27 @@ public class Edge {
 		return null;
 	}
 	
+	private void createReverse() {
+		this.segmentListReverse = new ArrayList<EdgeSegment>();
+		for (int i=segmentList.size()-1; i>=0; i--) {
+			EdgeSegment e = segmentList.get(i);
+			Line line = new Line(e.getEndPoint(), Vector3D.sub(e.getStartPoint(), e.getEndPoint()));
+			segmentListReverse.add( new EdgeSegment(e.getFace(), e.getSideIdx(), line) );
+		}
+	}
+
 	public IEdgeSegment getPoint(Vector3D p, double edgeLen, boolean withCornerDetection) {
+		if (edgeLen >= 0) {
+			return getPoint(segmentList, p, edgeLen, withCornerDetection);
+		} else
+		{
+			return getPoint(segmentListReverse, p, -edgeLen, withCornerDetection);
+		}
+	}
+
+	private IEdgeSegment getPoint(List<EdgeSegment> list, Vector3D p, double edgeLen, boolean withCornerDetection) {
 		// find the segment on which p is
-		for (EdgeSegment s : segmentList) {
+		for (EdgeSegment s : list) {
 			Line l = s.getLine(); 
 			if (l.elementOf(p)) {
 				double t = l.getT(p);
@@ -97,7 +126,7 @@ public class Edge {
 						return new IEdgeSegment(s.getFace(), pE, IEdgeSegment.IType.LINE); 
 					} else 
 					{ // walk into the next segment
-						return walkNextSegment(segmentList.indexOf(s)+1, edgeLen - len, withCornerDetection);
+						return walkNextSegment(list, list.indexOf(s)+1, edgeLen - len, withCornerDetection);
 					}
 				}
 			}
@@ -105,11 +134,16 @@ public class Edge {
 		return null;
 	}
 	
-	private IEdgeSegment walkNextSegment(int segmentId, double edgeLen, boolean withCornerDetection) {
+	private IEdgeSegment walkNextSegment(List<EdgeSegment> list, int segmentId, double edgeLen, boolean withCornerDetection) {
 		segmentId = getSegmentId(segmentId);
-		EdgeSegment s = segmentList.get(segmentId);
+		EdgeSegment s = list.get(segmentId);
 		
-		if ((withCornerDetection && checkAngleBetweenSegments(segmentId-1, segmentId)) || !withCornerDetection) 
+		Logger.debug(String.format("Rev Seg: id=%d, s=%s e=%s", segmentId, s.getStartPoint(), s.getEndPoint()));
+		if (objCornerPoints != null) {
+			objCornerPoints.addPoint(new ObjectVector(s.getStartPoint(), Color.GREEN));
+		}
+		
+		if ((withCornerDetection && checkAngleBetweenSegments(list, segmentId-1, segmentId)) || !withCornerDetection) 
 		{ // line continuity is ok
 			if (segmentId == 0) 
 			{ // endpoint reached
@@ -126,7 +160,7 @@ public class Edge {
 					return new IEdgeSegment(s.getFace(), pE, IEdgeSegment.IType.LINE); 
 				} else 
 				{ // walk into the next segment
-					return walkNextSegment(segmentId+1, edgeLen - len, withCornerDetection);
+					return walkNextSegment(list, segmentId+1, edgeLen - len, withCornerDetection);
 				}
 			}
 		} else 
@@ -144,11 +178,13 @@ public class Edge {
 		}
 	}
 
-	private boolean checkAngleBetweenSegments(int firstSegmentId, int secondSegmentId) {
-		EdgeSegment firstSegment = segmentList.get(getSegmentId(firstSegmentId));
-		EdgeSegment secondSegment = segmentList.get(getSegmentId(secondSegmentId));
+	private boolean checkAngleBetweenSegments(List<EdgeSegment> list, int firstSegmentId, int secondSegmentId) {
+		EdgeSegment firstSegment = list.get(getSegmentId(firstSegmentId));
+		EdgeSegment secondSegment = list.get(getSegmentId(secondSegmentId));
 		
 		double angle = Vector3D.angle(firstSegment.getLine().getDir(), secondSegment.getLine().getDir());
+		Logger.debug(String.format("Angle between: %f", angle));
+		
 		if (Double.isNaN(angle) || Math.abs(angle) < MAX_ANGLE) {
 			return true;
 		}
@@ -156,8 +192,11 @@ public class Edge {
 		return false;
 	}
 	
-	public CornerType evaluateCorner(IEdgeSegment e, Vector3D dir) {
+	public CornerType evaluateCorner(IEdgeSegment e, Vector3D dir, boolean useReverseList) {
 		EdgeSegment segment = segmentList.get(getSegmentId(e.getCurSegmentId()));
+		if (useReverseList) {
+			segment = segmentListReverse.get(getSegmentId(e.getCurSegmentId()));
+		}
 
 		double angle = Vector3D.angle(segment.getLine().getDir(), dir);
 		if (Double.isNaN(angle) || Math.abs(angle) <= (Math.PI / 2)) {
@@ -165,5 +204,9 @@ public class Edge {
 		}
 		
 		return CornerType.OPENING;
+	}
+
+	public void setObject(PointShapeObj objCornerPoints) {
+		this.objCornerPoints = objCornerPoints;		
 	}
 }

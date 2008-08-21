@@ -13,7 +13,13 @@ public class EdgeSegment {
 		this.sideIdx = sideIdx;
 		this.line = face.getSideLine(sideIdx);
 	}
-	
+
+	public EdgeSegment(Face face, int sideIdx, Line line) {
+		this.face = face;
+		this.sideIdx = sideIdx;
+		this.line = line;
+	}
+		
 	public Face getFace() {
 		return face;
 	}
