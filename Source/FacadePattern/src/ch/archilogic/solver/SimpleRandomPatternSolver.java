@@ -35,6 +35,11 @@ import ch.archilogic.solver.intersection.IObject;
 import ch.archilogic.solver.intersection.IEdgeSegment.IType;
 
 public class SimpleRandomPatternSolver implements Solver {
+	public enum ThinkType {
+		CYLINDRIC,
+		FLAT
+	};
+	
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
 	
@@ -46,6 +51,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private PointShapeObj objPoints = new PointShapeObj();
 	private PointShapeObj objCornerPoints = new PointShapeObj();
 	
+	private BBoxObj box = null;
 	private List<Edge> edges;
 	
 	private boolean doThinking = true;
@@ -60,12 +66,14 @@ public class SimpleRandomPatternSolver implements Solver {
 	private String refObjPath = "file:c:\\tmp\\loadme.obj";
 	private double scale = 1.0;
 	private int useEdgeId = 1;
+	private boolean useEdgeCenterDir = false;
 	private Vector3D useEdgeDir = new Vector3D(0,1,0);
 	private double useEdgeLen = 1;
 	private boolean considerCorner = false;
 	private boolean evaluateCorner = false;
 	private int findMaxNbEdges = 2;
-	private boolean useCylindricalPropagation = true;
+	private int findMaxFaces = 10;
+	private ThinkType useThinkModel = ThinkType.CYLINDRIC;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -94,10 +102,9 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void initialize() throws FaceException {
 		objGraph = new ObjectGraph();
 		
-		setTweakParam(3);
+		setTweakParam(5);
 
 		Logger.info("load reference object");
-		BBoxObj box = null;
 		Scene s = null;
 		try {
 			Point3d lower = new Point3d(); 
@@ -217,28 +224,49 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 
 	public void think() throws FaceException {
-		if (useCylindricalPropagation) {
-			thinkCylindric();
-		} else {
-			thinkFlat();
+		status = SolverState.THINKING;
+
+		if (doThinking) {
+			if (useThinkModel == ThinkType.CYLINDRIC) {
+				Logger.info("thinking cylindric..");		
+				thinkCylindric();
+			} else {
+				Logger.info("thinking flat..");		
+				thinkFlat();
+			}
+			
+			if (doJittering ) {
+				for (ObjectVector v : objEnvelope.getVertices()) {
+					if (!v.isLocked() && v.getFace() != null) {
+						Vector3D vRnd = Vector3D.random();
+						IObject newPoint = objReference.catwalk(v, vRnd, useEdgeLen*0.2, null, v.getFace());
+						Logger.debug(String.format("old: %s new: ", v, newPoint.point.toString()));
+						v.set(newPoint.face, newPoint.point, false);
+					}
+				}
+			}
+			
+			if (doTriangulateEdge) {
+				Logger.info("triangulation of edge vertices");
+				objEnvelope.triangulate(true);
+			}
+			
+			if (doShowLockedVertices) {
+				for (ObjectVector v : objEnvelope.getVertices()) {
+					if (v.isLocked()) {
+						objPoints.addPoint(v);
+					}
+				}
+			}
 		}
+
+		status = SolverState.IDLE;
 	}
 
 	public void thinkFlat() throws FaceException {
-	}
-	
-	public void thinkCylindric() throws FaceException {
-		status = SolverState.THINKING;
-
-		if (!doThinking) {
-			status = SolverState.IDLE;
-			return;
-		}
-
 		int segNb = 0;
 		double segmentLen = 0;
 		
-		Logger.info("thinking..");		
 		if (edges != null && edges.size() > 0) {
 			Edge edge = edges.get(useEdgeId);
 			segmentLen = useEdgeLen;
@@ -255,7 +283,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			
 			boolean bCornerBefore = false;
 			do {
-				segNb++;
+				segNb++;				
 				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, s, dir, false) == CornerType.OPENING) {
 					Logger.debug(String.format("%d corner %s", segNb, s.point));
 					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
@@ -282,32 +310,59 @@ public class SimpleRandomPatternSolver implements Solver {
 				}
 			} while (s.type != IEdgeSegment.IType.ENDPOINT);
 		}
-		
-		if (doJittering ) {
-			for (ObjectVector v : objEnvelope.getVertices()) {
-				if (!v.isLocked() && v.getFace() != null) {
-					Vector3D vRnd = Vector3D.random();
-					IObject newPoint = objReference.catwalk(v, vRnd, segmentLen*0.2, null, v.getFace());
-					Logger.debug(String.format("old: %s new: ", v, newPoint.point.toString()));
-					v.set(newPoint.face, newPoint.point, false);
-				}
-			}
-		}
-		
-		if (doTriangulateEdge) {
-			Logger.info("triangulation of edge vertices");
-			objEnvelope.triangulate(true);
-		}
-		
-		if (doShowLockedVertices) {
-			for (ObjectVector v : objEnvelope.getVertices()) {
-				if (v.isLocked()) {
-					objPoints.addPoint(v);
-				}
-			}
-		}
+	}
 	
-		status = SolverState.IDLE;
+	public void thinkCylindric() throws FaceException {
+		int segNb = 0;
+		double segmentLen = 0;
+		
+		if (edges != null && edges.size() > 0) {
+			Edge edge = edges.get(useEdgeId);
+			segmentLen = useEdgeLen;
+			
+			Vector3D dir = null;
+			IEdgeSegment s = edge.getStartPoint();
+			// define general direction for propagation
+			if (useEdgeDir == null) {
+				dir = Vector3D.cross(s.face.getFaceNormal(), s.line.getDir()).normalize();
+			} 
+			else {
+				dir = useEdgeDir;
+			}
+			
+			boolean bCornerBefore = false;
+			do {
+				segNb++;
+				if (useEdgeCenterDir) {
+					dir = Vector3D.sub(box.getCenter(), s.point);
+				}
+				
+				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, s, dir, false) == CornerType.OPENING) {
+					Logger.debug(String.format("%d corner %s", segNb, s.point));
+					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
+				} else 
+				{
+					bCornerBefore = false;
+					IEdgeSegment n = edge.getPoint(s.point, segmentLen, considerCorner);
+					if (n.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, n, dir, false) == CornerType.CLOSING) 
+					{ // create a segment in a closing edge
+						Logger.debug(String.format("%d corner %s : %s", segNb, n.point, CornerType.CLOSING.name()));
+						IObject u0 = new IObject(s.face, s.point, true, true);
+						n = createSegmentOnClosingEdge(objEnvelope, u0, n, segmentLen, dir, edge);
+						if (n.type == IType.CORNER) {
+							bCornerBefore = true;
+						}
+					} else 
+					{ // normal "on line" segment creation
+						takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);												
+						IObject u0 = new IObject(s.face, s.point, true, true);
+						IObject u1 = new IObject(n.face, n.point, true, true);
+						createSegment(objEnvelope, u0, u1, segmentLen, dir);						
+					}
+					s = n;
+				}
+			} while (s.type != IEdgeSegment.IType.ENDPOINT);
+		}
 	}
 	
 	private boolean takeNextPointOnEdgeThreshold(IEdgeSegment n, Edge edge, double segmentLen, Vector3D dir) {
@@ -463,7 +518,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			fRefSecond = obj.getFaceWithVertice(p1.point, 0);
 			
 			facenNb++;
-			if (facenNb == 10)
+			if (facenNb == findMaxFaces)
 				break;
 			
 			if (!p0.found && !p1.found) {
@@ -483,7 +538,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;			
-			useCylindricalPropagation = true;
+			useThinkModel = ThinkType.CYLINDRIC;
 			break;
 		case 2:
 			refObjPath = "file:c:\\tmp\\loadme_f2.obj";
@@ -494,7 +549,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			considerCorner = true;
 			evaluateCorner = true;
 			findMaxNbEdges = 2;
-			useCylindricalPropagation = true;
+			useThinkModel = ThinkType.CYLINDRIC;
 			break;
 		case 3:
 			refObjPath = "file:c:\\tmp\\loadme_f3.obj";
@@ -507,7 +562,15 @@ public class SimpleRandomPatternSolver implements Solver {
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;
-			useCylindricalPropagation = true;
+			useThinkModel = ThinkType.CYLINDRIC;
+			break;
+		case 5:
+			refObjPath = "file:c:\\tmp\\loadme_f2_dach.obj";
+			useEdgeId = 1;
+			useEdgeDir = null;
+			useEdgeCenterDir = true;
+			findMaxFaces = -1;
+			useThinkModel = ThinkType.CYLINDRIC;
 			break;
 		}
 	}
