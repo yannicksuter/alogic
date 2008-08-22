@@ -18,6 +18,7 @@ public class Edge {
 	}
 	
 	public enum CornerType {
+		UNDEFINED,
 		CLOSING,
 		OPENING
 	}
@@ -192,7 +193,11 @@ public class Edge {
 		return false;
 	}
 	
-	public CornerType evaluateCorner(IEdgeSegment e, Vector3D dir, boolean useReverseList) {
+	public CornerType evaluateCorner(boolean evaluate, IEdgeSegment e, Vector3D dir, boolean useReverseList) {
+		if (!evaluate) {
+			return CornerType.UNDEFINED;
+		}
+		
 		EdgeSegment segment = segmentList.get(getSegmentId(e.getCurSegmentId()));
 		if (useReverseList) {
 			segment = segmentListReverse.get(getSegmentId(e.getCurSegmentId()));

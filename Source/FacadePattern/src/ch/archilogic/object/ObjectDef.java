@@ -350,9 +350,10 @@ public class ObjectDef {
 
 	/**
 	 * analyse object and create a list of all edges(-lines)
+	 * @param findMaxNbEdges 
 	 * @return List of all edges of the object
 	 */	
-	public List<Edge> computeEdges() {
+	public List<Edge> computeEdges(int findMaxNbEdges) {
 		edgeList = new ArrayList<Edge>();
 		
 		for (Face f : getFaces()) {
@@ -365,6 +366,10 @@ public class ObjectDef {
 					edgeList.add(edge);
 					
 					Logger.info(String.format("edge found, length = %f", edge.getLength()));
+					if (findMaxNbEdges != -1 && edgeList.size() == findMaxNbEdges) 
+					{ // todo: why does it break here with f3
+						break;
+					}
 				}
 			}
 		}

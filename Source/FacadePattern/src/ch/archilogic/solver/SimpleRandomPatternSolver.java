@@ -52,12 +52,20 @@ public class SimpleRandomPatternSolver implements Solver {
 	private List<Edge> edges;
 	
 	private boolean doThinking = true;
-	private boolean doJittering = true;
+	private boolean doJittering = false;
 	private boolean doShowLockedVertices = false;
 	private boolean doShowCornersOnEdge = true;
+	private boolean doShowReferenceObj = true;
+	private boolean doShowEdges = true;
 	private boolean doTriangulateEdge = false;
 	
-	private double scale = 1.0; 
+	// these are defaults, check below setTweakParam(int objNb) to optimize for specific objects 
+	private double scale = 1.0;
+	private int useEdgeId = 1;
+	private Vector3D useEdgeDir = new Vector3D(0,1,0);
+	private boolean considerCorner = false;
+	private boolean evaluateCorner = false;
+	private int findMaxNbEdges = 2;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -85,6 +93,8 @@ public class SimpleRandomPatternSolver implements Solver {
 	@SuppressWarnings("unchecked")
 	public void initialize() throws FaceException {
 		objGraph = new ObjectGraph();
+		
+		setTweakParam(3);
 
 		Logger.info("load reference object");
 		BBoxObj box = null;
@@ -137,7 +147,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		Logger.info("object: edges detection");
 		ObjectDef objEdge = new ObjectDef();		
 		
-		edges = objReference.computeEdges();
+		edges = objReference.computeEdges(findMaxNbEdges);		
 		for (Edge edge : edges) {
 			// visualization
 			for (EdgeSegment segment : edge.getSegmentList()) {
@@ -161,8 +171,14 @@ public class SimpleRandomPatternSolver implements Solver {
 		if (objReference != null) {			
 //			objGraph.addChild(objFaceEvaluated);
 			objGraph.addChild(objEnvelope);
-//			objGraph.addChild(objReference);				
-			objGraph.addChild(objEdge);			
+			
+			if (doShowReferenceObj) {
+				objGraph.addChild(objReference);
+			}
+
+			if (doShowEdges) {
+				objGraph.addChild(objEdge);
+			}
 
 			if (doShowCornersOnEdge) {
 				objGraph.addChild(objCornerPoints);
@@ -213,25 +229,30 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		Logger.info("thinking..");		
 		if (edges != null && edges.size() > 0) {
-			Edge edge = edges.get(0);
+			Edge edge = edges.get(useEdgeId);
 			segmentLen = 0.9;//edge.getLength() / 160.0;
 			
 			Vector3D dir = null;
 			IEdgeSegment s = edge.getStartPoint();
 			// define general direction for propagation
-			dir = Vector3D.cross(s.face.getFaceNormal(), s.line.getDir()).normalize();				
+			if (useEdgeDir == null) {
+				dir = Vector3D.cross(s.face.getFaceNormal(), s.line.getDir()).normalize();
+			} 
+			else {
+				dir = useEdgeDir;
+			}
 			
 			boolean bCornerBefore = false;
 			do {
 				segNb++;
-				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(s, dir, false) == CornerType.OPENING) {
+				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, s, dir, false) == CornerType.OPENING) {
 					Logger.debug(String.format("%d corner %s", segNb, s.point));
 					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
 				} else 
 				{
 					bCornerBefore = false;
-					IEdgeSegment n = edge.getPoint(s.point, segmentLen, true);
-					if (n.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(n, dir, false) == CornerType.CLOSING) 
+					IEdgeSegment n = edge.getPoint(s.point, segmentLen, considerCorner);
+					if (n.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, n, dir, false) == CornerType.CLOSING) 
 					{ // create a segment in a closing edge
 						Logger.debug(String.format("%d corner %s : %s", segNb, n.point, CornerType.CLOSING.name()));
 						IObject u0 = new IObject(s.face, s.point, true, true);
@@ -279,9 +300,9 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 	
 	private boolean takeNextPointOnEdgeThreshold(IEdgeSegment n, Edge edge, double segmentLen, Vector3D dir) {
-		IEdgeSegment next = edge.getPoint(n.point, segmentLen, true);
-		if (Vector3D.length(next.point, n.point) < (segmentLen*0.5)) {
-			CornerType cornerType = edge.evaluateCorner(next, dir, false);
+		IEdgeSegment next = edge.getPoint(n.point, segmentLen, considerCorner);
+		if (Vector3D.length(next.point, n.point) < (segmentLen*0.5) && next.type != IEdgeSegment.IType.ENDPOINT) {
+			CornerType cornerType = edge.evaluateCorner(evaluateCorner, next, dir, false);
 			if (cornerType != CornerType.CLOSING) { 
 				n = next;
 				return true;
@@ -372,7 +393,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			
 		} while ((secondPointOnEdge.type != IEdgeSegment.IType.ENDPOINT) && (secondPointOnEdge.type != IEdgeSegment.IType.CORNER));
 
-		if (secondPointOnEdge.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(secondPointOnEdge, dir, false) == CornerType.OPENING) 
+		if (secondPointOnEdge.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, secondPointOnEdge, dir, false) == CornerType.OPENING) 
 		{ // segment need to be finished
 			IObject i = new IObject(secondPointOnEdge.face, secondPointOnEdge.point, true, true);
 			createSegment(objEnvelope, point4, i, edgeLen, dir);														
@@ -438,6 +459,17 @@ public class SimpleRandomPatternSolver implements Solver {
 				break;
 			}		
 		} while(! (p0.edge && p1.edge) );
+	}
+	
+	private void setTweakParam(int objNb) {
+		if (objNb == 3) {
+			scale = 1.0;
+			useEdgeId = 1;
+			useEdgeDir = new Vector3D(0,1,0);
+			considerCorner = false;
+			evaluateCorner = false;
+			findMaxNbEdges = 2;			
+		}
 	}
 	
 	public void export(Exporter exporter, String filename) {
