@@ -224,7 +224,6 @@ public class SimpleRandomPatternSolver implements Solver {
 			boolean bCornerBefore = false;
 			do {
 				segNb++;
-
 				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(s, dir, false) == CornerType.OPENING) {
 					Logger.debug(String.format("%d corner %s", segNb, s.point));
 					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
@@ -232,32 +231,20 @@ public class SimpleRandomPatternSolver implements Solver {
 				{
 					bCornerBefore = false;
 					IEdgeSegment n = edge.getPoint(s.point, segmentLen, true);
-					if (s != null && n != null) {				
-						if (n.type == IEdgeSegment.IType.CORNER) {
-							CornerType cornerType = edge.evaluateCorner(n, dir, false);
-							Logger.debug(String.format("%d corner %s : %s", segNb, n.point, cornerType.name()));
-							if (cornerType == CornerType.CLOSING) 
-							{ // create a segment in a closing edge
-//								objCornerPoints.addPoint(new ObjectVector(n.point, Color.PINK));	
-								IObject u0 = new IObject(s.face, s.point, true, true);
-								n = createSegmentOnClosingEdge(objEnvelope, u0, n, segmentLen, dir, edge);
-								if (n.type == IType.CORNER) {
-									bCornerBefore = true;
-								}
-							} 
-							else {
-								takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);
-								IObject u0 = new IObject(s.face, s.point, true, true);
-								IObject u1 = new IObject(n.face, n.point, true, true);
-								createSegment(objEnvelope, u0, u1, segmentLen, dir);														
-							}
-						} else 
-						{ // normal "on line" segment creation
-							takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);												
-							IObject u0 = new IObject(s.face, s.point, true, true);
-							IObject u1 = new IObject(n.face, n.point, true, true);
-							createSegment(objEnvelope, u0, u1, segmentLen, dir);						
+					if (n.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(n, dir, false) == CornerType.CLOSING) 
+					{ // create a segment in a closing edge
+						Logger.debug(String.format("%d corner %s : %s", segNb, n.point, CornerType.CLOSING.name()));
+						IObject u0 = new IObject(s.face, s.point, true, true);
+						n = createSegmentOnClosingEdge(objEnvelope, u0, n, segmentLen, dir, edge);
+						if (n.type == IType.CORNER) {
+							bCornerBefore = true;
 						}
+					} else 
+					{ // normal "on line" segment creation
+						takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);												
+						IObject u0 = new IObject(s.face, s.point, true, true);
+						IObject u1 = new IObject(n.face, n.point, true, true);
+						createSegment(objEnvelope, u0, u1, segmentLen, dir);						
 					}
 					s = n;
 				}
