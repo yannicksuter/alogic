@@ -52,7 +52,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private List<Edge> edges;
 	
 	private boolean doThinking = true;
-	private boolean doJittering = true;
+	private boolean doJittering = false;
 	private boolean doShowLockedVertices = false;
 	private boolean doShowCornersOnEdge = true;
 	private boolean doTriangulateEdge = false;
@@ -290,19 +290,9 @@ public class SimpleRandomPatternSolver implements Solver {
 		IEdgeSegment nextCorner = edge.getPoint(s.point, 100000, true);
 		IEdgeSegment secondPointOnEdge = null;
 
-//		objCornerPoints.addPoint(new ObjectVector(s.point, Color.CYAN));
-//		objCornerPoints.addPoint(new ObjectVector(nextCorner.point, Color.RED));
-//		Logger.setDebugVerbose(true);
-//		edge.setObject(objCornerPoints);		
-//		IEdgeSegment pointX = edge.getPoint(nextCorner.point, -edgeLen, true);		
-//		Logger.setDebugVerbose(false);	
-//		objCornerPoints.addPoint(new ObjectVector(pointX.point, Color.BLUE));
-//		Logger.setDebugVerbose(false);
-//		return null;
-		
 		Vector3D edgeDir = Vector3D.sub(nextCorner.point, s.point);
-		double len = edgeDir.length();
-
+		double len = edgeDir.length() < edgeLen ? edgeDir.length() : edgeLen;
+		
 		if (nextCorner != null && nextCorner.type == IType.CORNER) 
 		{
 			List<ObjectVector> l = new ArrayList<ObjectVector>();
@@ -315,7 +305,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				IEdgeSegment point3 = edge.getPoint(point0.point, -edgeLen, true);
 				
 				if (fRefSecond == null) {
-					point2 = objReference.catwalk(point1.point, dir, edgeLen, null, point1.face);
+					point2 = objReference.catwalk(point1.point, dir, len, null, point1.face);
 				} else 
 				{
 					ObjectVector oVert = fRefSecond.face.getVertices().get(3);
@@ -338,7 +328,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			} while (point0.type != IEdgeSegment.IType.CORNER);
 
 			// segment need to be finished
-			IObject i = new IObject(point0.face, point0.point, true, true);
+			IObject i = new IObject(s.face, s.point, true, true);
 			createSegment(objEnvelope, i, point1, edgeLen, dir);														
 		} 
 
