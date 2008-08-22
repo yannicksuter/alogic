@@ -49,7 +49,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private List<Edge> edges;
 	
 	private boolean doThinking = true;
-	private boolean doJittering = false;
+	private boolean doJittering = true;
 	private boolean doShowLockedVertices = true;
 	private boolean doShowCornersOnEdge = true;
 	private boolean doShowReferenceObj = true;
@@ -93,7 +93,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void initialize() throws FaceException {
 		objGraph = new ObjectGraph();
 		
-		setTweakParam(2);
+		setTweakParam(3);
 
 		Logger.info("load reference object");
 		BBoxObj box = null;
@@ -485,8 +485,10 @@ public class SimpleRandomPatternSolver implements Solver {
 		case 3:
 			refObjPath = "file:c:\\tmp\\loadme_f3.obj";
 			scale = 1.0;
-			useEdgeId = 1;
-			useEdgeDir = new Vector3D(0,1,0);
+//			useEdgeId = 1;
+//			useEdgeDir = new Vector3D(0,1,0);
+			useEdgeId = 0;
+			useEdgeDir = new Vector3D(0,-1,0);
 			useEdgeLen = 1.2;
 			considerCorner = false;
 			evaluateCorner = false;
