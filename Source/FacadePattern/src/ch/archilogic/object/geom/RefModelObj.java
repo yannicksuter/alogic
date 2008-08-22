@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 import javax.media.j3d.Shape3D;
-import javax.media.j3d.Transform3D;
 import javax.media.j3d.TriangleArray;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;

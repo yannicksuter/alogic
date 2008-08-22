@@ -52,7 +52,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private List<Edge> edges;
 	
 	private boolean doThinking = true;
-	private boolean doJittering = false;
+	private boolean doJittering = true;
 	private boolean doShowLockedVertices = false;
 	private boolean doShowCornersOnEdge = true;
 	private boolean doTriangulateEdge = false;
@@ -199,7 +199,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		return app;
 	}
-
+	
 	public void think() throws FaceException {
 		status = SolverState.THINKING;
 
@@ -214,7 +214,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		Logger.info("thinking..");		
 		if (edges != null && edges.size() > 0) {
 			Edge edge = edges.get(0);
-			segmentLen = edge.getLength() / 160.0;
+			segmentLen = 0.9;//edge.getLength() / 160.0;
 			
 			Vector3D dir = null;
 			IEdgeSegment s = edge.getStartPoint();
@@ -226,9 +226,8 @@ public class SimpleRandomPatternSolver implements Solver {
 				segNb++;
 
 				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(s, dir, false) == CornerType.OPENING) {
-					Logger.info(String.format("%d corner %s", segNb, s.point));
+					Logger.debug(String.format("%d corner %s", segNb, s.point));
 					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
-//					break;
 				} else 
 				{
 					bCornerBefore = false;
@@ -246,9 +245,15 @@ public class SimpleRandomPatternSolver implements Solver {
 									bCornerBefore = true;
 								}
 							} 
+							else {
+								takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);
+								IObject u0 = new IObject(s.face, s.point, true, true);
+								IObject u1 = new IObject(n.face, n.point, true, true);
+								createSegment(objEnvelope, u0, u1, segmentLen, dir);														
+							}
 						} else 
 						{ // normal "on line" segment creation
-//							objCornerPoints.addPoint(new ObjectVector(n.point, Color.CYAN));
+							takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);												
 							IObject u0 = new IObject(s.face, s.point, true, true);
 							IObject u1 = new IObject(n.face, n.point, true, true);
 							createSegment(objEnvelope, u0, u1, segmentLen, dir);						
@@ -285,6 +290,18 @@ public class SimpleRandomPatternSolver implements Solver {
 	
 		status = SolverState.IDLE;
 	}
+	
+	private boolean takeNextPointOnEdgeThreshold(IEdgeSegment n, Edge edge, double segmentLen, Vector3D dir) {
+		IEdgeSegment next = edge.getPoint(n.point, segmentLen, true);
+		if (Vector3D.length(next.point, n.point) < (segmentLen*0.5)) {
+			CornerType cornerType = edge.evaluateCorner(next, dir, false);
+			if (cornerType != CornerType.CLOSING) { 
+				n = next;
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private IEdgeSegment createSegmentOnOpeningEdge(ObjectDef obj, IEdgeSegment s, double edgeLen, Vector3D dir, Edge edge) throws FaceException {
 		IEdgeSegment nextCorner = edge.getPoint(s.point, 100000, true);
@@ -297,6 +314,8 @@ public class SimpleRandomPatternSolver implements Solver {
 		{
 			List<ObjectVector> l = new ArrayList<ObjectVector>();
 			secondPointOnEdge = edge.getPoint(nextCorner.point, edgeLen, true);
+			takeNextPointOnEdgeThreshold(secondPointOnEdge, edge, edgeLen, dir);			
+			
 			IEdgeSegment point0 = nextCorner;
 			IObject point1 = new IObject(secondPointOnEdge.face, secondPointOnEdge.point, true, true); 
 			IObject point2 = null; 

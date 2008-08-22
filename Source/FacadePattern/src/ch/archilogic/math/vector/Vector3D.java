@@ -89,7 +89,7 @@ public class Vector3D {
 		return Math.sqrt(Vector3D.dot(this, this));
 	}
 
-	public double length(Vector3D a, Vector3D b) {
+	public static double length(Vector3D a, Vector3D b) {
 		return Vector3D.sub(b,a).length();
 	}
 

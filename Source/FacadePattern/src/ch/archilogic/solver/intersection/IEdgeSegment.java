@@ -3,7 +3,6 @@ package ch.archilogic.solver.intersection;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
-import ch.archilogic.object.Edge.CornerType;
 
 public class IEdgeSegment {
 	public enum IType {

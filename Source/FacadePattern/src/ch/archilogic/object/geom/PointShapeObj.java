@@ -11,7 +11,6 @@ import javax.media.j3d.Shape3D;
 import javax.media.j3d.TransparencyAttributes;
 import javax.vecmath.Color4f;
 
-import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectVector;
 import ch.archilogic.runtime.exception.FaceException;
