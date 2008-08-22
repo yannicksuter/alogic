@@ -65,6 +65,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean considerCorner = false;
 	private boolean evaluateCorner = false;
 	private int findMaxNbEdges = 2;
+	private boolean useCylindricalPropagation = true;
 	
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -214,8 +215,19 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		return app;
 	}
-	
+
 	public void think() throws FaceException {
+		if (useCylindricalPropagation) {
+			thinkCylindric();
+		} else {
+			thinkFlat();
+		}
+	}
+
+	public void thinkFlat() throws FaceException {
+	}
+	
+	public void thinkCylindric() throws FaceException {
 		status = SolverState.THINKING;
 
 		if (!doThinking) {
@@ -471,6 +483,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;			
+			useCylindricalPropagation = true;
 			break;
 		case 2:
 			refObjPath = "file:c:\\tmp\\loadme_f2.obj";
@@ -481,6 +494,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			considerCorner = true;
 			evaluateCorner = true;
 			findMaxNbEdges = 2;
+			useCylindricalPropagation = true;
 			break;
 		case 3:
 			refObjPath = "file:c:\\tmp\\loadme_f3.obj";
@@ -493,6 +507,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;
+			useCylindricalPropagation = true;
 			break;
 		}
 	}
