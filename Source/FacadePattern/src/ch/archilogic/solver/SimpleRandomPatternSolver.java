@@ -38,7 +38,6 @@ public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
 
-//	private static String refObjPath = "file:c:\\tmp\\loadme_simple.obj";
 	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
 	
 	private ObjectDef objReference;
@@ -53,7 +52,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	
 	private boolean doThinking = true;
 	private boolean doJittering = false;
-	private boolean doShowLockedVertices = false;
+	private boolean doShowLockedVertices = true;
 	private boolean doShowCornersOnEdge = true;
 	private boolean doShowReferenceObj = true;
 	private boolean doShowEdges = true;
@@ -63,6 +62,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private double scale = 1.0;
 	private int useEdgeId = 1;
 	private Vector3D useEdgeDir = new Vector3D(0,1,0);
+	private double useEdgeLen = 1;
 	private boolean considerCorner = false;
 	private boolean evaluateCorner = false;
 	private int findMaxNbEdges = 2;
@@ -94,7 +94,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void initialize() throws FaceException {
 		objGraph = new ObjectGraph();
 		
-		setTweakParam(3);
+		setTweakParam(2);
 
 		Logger.info("load reference object");
 		BBoxObj box = null;
@@ -230,7 +230,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		Logger.info("thinking..");		
 		if (edges != null && edges.size() > 0) {
 			Edge edge = edges.get(useEdgeId);
-			segmentLen = 0.9;//edge.getLength() / 160.0;
+			segmentLen = useEdgeLen;
 			
 			Vector3D dir = null;
 			IEdgeSegment s = edge.getStartPoint();
@@ -462,13 +462,37 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 	
 	private void setTweakParam(int objNb) {
-		if (objNb == 3) {
+		switch(objNb) {
+		case 1:
+			refObjPath = "file:c:\\tmp\\loadme_f1.obj";
 			scale = 1.0;
 			useEdgeId = 1;
 			useEdgeDir = new Vector3D(0,1,0);
+			useEdgeLen = 0.9;
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;			
+			break;
+		case 2:
+			refObjPath = "file:c:\\tmp\\loadme_f2.obj";
+			scale = 1.0;
+			useEdgeId = 0;
+			useEdgeDir = null;
+			useEdgeLen = 0.9;
+			considerCorner = true;
+			evaluateCorner = true;
+			findMaxNbEdges = 2;
+			break;
+		case 3:
+			refObjPath = "file:c:\\tmp\\loadme_f3.obj";
+			scale = 1.0;
+			useEdgeId = 1;
+			useEdgeDir = new Vector3D(0,1,0);
+			useEdgeLen = 0.9;
+			considerCorner = false;
+			evaluateCorner = false;
+			findMaxNbEdges = 2;
+			break;
 		}
 	}
 	
