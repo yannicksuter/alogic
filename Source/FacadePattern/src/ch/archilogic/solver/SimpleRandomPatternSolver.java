@@ -37,8 +37,6 @@ import ch.archilogic.solver.intersection.IEdgeSegment.IType;
 public class SimpleRandomPatternSolver implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
-
-	private static String refObjPath = "file:c:\\tmp\\loadme.obj";
 	
 	private ObjectDef objReference;
 	private ObjectDef objBoundingBox;
@@ -59,6 +57,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doTriangulateEdge = false;
 	
 	// these are defaults, check below setTweakParam(int objNb) to optimize for specific objects 
+	private String refObjPath = "file:c:\\tmp\\loadme.obj";
 	private double scale = 1.0;
 	private int useEdgeId = 1;
 	private Vector3D useEdgeDir = new Vector3D(0,1,0);
@@ -468,7 +467,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			scale = 1.0;
 			useEdgeId = 1;
 			useEdgeDir = new Vector3D(0,1,0);
-			useEdgeLen = 0.9;
+			useEdgeLen = 1.2;
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;			
@@ -478,7 +477,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			scale = 1.0;
 			useEdgeId = 0;
 			useEdgeDir = null;
-			useEdgeLen = 0.9;
+			useEdgeLen = 1.2;
 			considerCorner = true;
 			evaluateCorner = true;
 			findMaxNbEdges = 2;
@@ -488,7 +487,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			scale = 1.0;
 			useEdgeId = 1;
 			useEdgeDir = new Vector3D(0,1,0);
-			useEdgeLen = 0.9;
+			useEdgeLen = 1.2;
 			considerCorner = false;
 			evaluateCorner = false;
 			findMaxNbEdges = 2;
