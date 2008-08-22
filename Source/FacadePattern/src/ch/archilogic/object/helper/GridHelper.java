@@ -49,7 +49,7 @@ public class GridHelper {
 		for (int x = 0; x < numSegX+1; x++) {
 			for (int y = 0; y < numSegY+1; y++) {
 				double t0 = (x*len) / side0.getLength();
-				double t1 = (y*len) / side0.getLength();
+				double t1 = (y*len) / side1.getLength();
 				Vector3D vP = Vector3D.add(d0.mult(t0), d1.mult(t1));
 				points[x][y] = Vector3D.add(side0.getAPoint(), vP);				
 			}

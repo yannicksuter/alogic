@@ -71,7 +71,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean useEdgeCenterDir = false;
 	private boolean useEdgeSegmentDir = false;
 	private Vector3D useEdgeDir = new Vector3D(0,1,0);
-	private double useEdgeLen = 1;
+	private double useEdgeLen = 1.2;
 	private boolean considerCorner = false;
 	private boolean evaluateCorner = false;
 	private int findMaxNbEdges = 2;
@@ -275,6 +275,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	public void thinkFlat() throws FaceException {
 		GridHelper grid = new GridHelper(box.getFace(0), useEdgeLen);
 		grid.projection(objReference);		
+
 		grid.removeUnlockedVertices();
 		grid.unlockAll();
 		
