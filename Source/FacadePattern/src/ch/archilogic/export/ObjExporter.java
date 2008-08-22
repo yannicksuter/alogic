@@ -34,7 +34,20 @@ public class ObjExporter implements Exporter {
 			for (int i=0; i<envelope.getFaceNb();i++) {
 				Face face = envelope.getFace(i);		
 				List<Integer> faceList = face.getIndices();
-				out.println(String.format("f %d %d %d %d", faceList.get(0)+1, faceList.get(1)+1, faceList.get(2)+1, faceList.get(3)+1));
+				switch (faceList.size()) {
+				case 2:
+					out.println(String.format("f %d %d", faceList.get(0)+1, faceList.get(1)+1));
+					break;
+				case 3: 
+					out.println(String.format("f %d %d %d", faceList.get(0)+1, faceList.get(1)+1, faceList.get(2)+1));
+					break;					
+				case 4:
+					out.println(String.format("f %d %d %d %d", faceList.get(0)+1, faceList.get(1)+1, faceList.get(2)+1, faceList.get(3)+1));
+					break;					
+				case 5:
+					out.println(String.format("f %d %d %d %d %d", faceList.get(0)+1, faceList.get(1)+1, faceList.get(2)+1, faceList.get(3)+1, faceList.get(4)+1));
+					break;					
+				}
 			}			
 						
 			out.close();

@@ -12,7 +12,8 @@ import ch.archilogic.runtime.exception.FaceException;
 
 public class GridObj extends ObjectDef {	
 	private float size = 1.0f;
-	private int nbSegments = 50;
+	private int nbSegmentsX = 50;
+	private int nbSegmentsY = 50;
 	
 	public GridObj() {
 		setType(ObjectType.OBJ_GRID);
@@ -24,7 +25,7 @@ public class GridObj extends ObjectDef {
 	}
 
 	private Point3f createVertice(int u, int v) {
-		float segSize = size / nbSegments;
+		float segSize = size / nbSegmentsX;
 		float segHalf = size / 2;
 		
 		return new Point3f(
@@ -35,15 +36,15 @@ public class GridObj extends ObjectDef {
 	
 	@Override
 	public void create() throws FaceException {
-		Point3f[][] points = new Point3f[nbSegments+1][nbSegments+1];
-		for (int u=0; u<nbSegments+1;u++) {
-			for (int v=0; v<nbSegments+1;v++) {
+		Point3f[][] points = new Point3f[nbSegmentsX+1][nbSegmentsY+1];
+		for (int u=0; u<nbSegmentsX+1;u++) {
+			for (int v=0; v<nbSegmentsY+1;v++) {
 				points[u][v] = createVertice(u, v);
 			}
 		}
 				
-		for (int u=0; u<nbSegments;u++) {
-			for (int v=0; v<nbSegments;v++) {
+		for (int u=0; u<nbSegmentsX;u++) {
+			for (int v=0; v<nbSegmentsY;v++) {
 				List<Vector3D> l = new ArrayList<Vector3D>();
 				l.add(new Vector3D(points[u][v]));
 				l.add(new Vector3D(points[u][v+1]));

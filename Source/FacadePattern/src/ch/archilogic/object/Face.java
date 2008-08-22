@@ -11,6 +11,7 @@ import ch.archilogic.math.vector.VecHelper;
 import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.solver.intersection.IFace;
 import ch.archilogic.solver.intersection.ILine;
+import ch.archilogic.solver.intersection.IObject;
 
 public class Face {
 	private int id;
@@ -137,8 +138,8 @@ public class Face {
 		}
 		return -1;
 	}
-
-	public boolean hasEdges() {
+	
+	public boolean hasSidesWithNoNeighbours() {
 		if (neighbours != null) {
 			for (int i=0;i<neighbours.length; i++) {
 				if (neighbours[i] == null) {
@@ -186,10 +187,7 @@ public class Face {
 	}
 	
 	public void detectNeighbours(List<Face> faces) {
-		if (neighbours == null)  {
-			neighbours = new Face[getSideCount()];
-		}
-		
+		neighbours = new Face[getSideCount()];	
 		for (Face face : faces) {
 			int neighbourIdx = isNeighbour(face);
 			if (neighbourIdx != -1) {
@@ -325,52 +323,30 @@ public class Face {
 
 		return r;
 	}	
-
-	/**
-	 * findet heraus ob ein Punkt, wenn er auf der Ebene eines dreicks AB
-	 * und AD ist, innerhalb des dreickes liegt
-	 * @param P
-	 * @return
-	 */
-	public boolean insideTriangle(Vector3D P, Vector3D A, Vector3D B, Vector3D C){
-		Vector3D vAP = Vector3D.sub(A, P);
-		Vector3D vBP = Vector3D.sub(B, P);
-		Vector3D vDP = Vector3D.sub(C, P);
-
-		double w1 = (float) Math.sqrt(((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z))*((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z)));
-		double w2 = (float) Math.sqrt(((vBP.x*vBP.x)+(vBP.y*vBP.y)+(vBP.z*vBP.z))*((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z)));
-		double w3 = (float) Math.sqrt(((vDP.x*vDP.x)+(vDP.y*vDP.y)+(vDP.z*vDP.z))*((vAP.x*vAP.x)+(vAP.y*vAP.y)+(vAP.z*vAP.z)));
-		
-		// segmente zwischen den Geraden
-		double a1 = (vAP.x * vBP.x + vAP.y * vBP.y + vAP.z * vBP.z)/w1;
-		double a2 = (vBP.x * vDP.x + vBP.y * vDP.y + vBP.z * vDP.z)/w2;
-		double a3 = (vDP.x * vAP.x + vDP.y * vAP.y + vDP.z * vAP.z)/w3;
-
-		// winkelsumme
-		double total = (Math.acos(a1) + Math.acos(a2) + Math.acos(a3)) * 57.29578;
-		//System.out.println(String.format("winkel: %f", total));
-		
-		// ist die summe nicht 360, dann ist der Punkt ausserhalb des dreiecks
-		if (Math.abs(total - 360) > 0.001)
-			return false;
-		
-		return true;
-	}
 	
 	public boolean isPartOf(Vector3D P){
 		if (vertices.size() == 3) {
-			return insideTriangle(P, vertices.get(0), vertices.get(1), vertices.get(2));
+			return inTriangle(P, vertices.get(0), vertices.get(1), vertices.get(2));
 		} 
 		else if (vertices.size() == 4) {
 			// r1 fuer ABD
-			boolean r1 = insideTriangle(P, vertices.get(0), vertices.get(1), vertices.get(3));
+			boolean r1 = inTriangle(P, vertices.get(0), vertices.get(1), vertices.get(3));
 			// r2 fuer BCD - Missing Check für Dreick BCD von Viereck ABCD
-			boolean r2 = insideTriangle(P, vertices.get(1), vertices.get(2), vertices.get(3));		
+			boolean r2 = inTriangle(P, vertices.get(1), vertices.get(2), vertices.get(3));		
 			return r1 || r2;			
 		}
 		return false;
 	}
 
+	public boolean hasIndex(int index) {
+		for (int i : indices) {
+			if (i == index) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public boolean hasVertice(Vector3D ref) {
 		for (Vector3D p : vertices) {
 			if (p.epsilonEquals(ref, Vector3D.EPSILON)) {
@@ -431,5 +407,74 @@ public class Face {
 			}
 		}
 		return res;
+	}
+
+    private boolean inTriangle(Vector3D P, Vector3D A, Vector3D B, Vector3D C){
+    	// Compute vectors        
+    	Vector3D v0 = Vector3D.sub(C,A);
+    	Vector3D v1 = Vector3D.sub(B,A);
+    	Vector3D v2 = Vector3D.sub(P,A);
+
+    	// Compute dot products
+    	double dot00 = Vector3D.dot(v0, v0);
+    	double dot01 = Vector3D.dot(v0, v1);
+    	double dot02 = Vector3D.dot(v0, v2);
+    	double dot11 = Vector3D.dot(v1, v1);
+    	double dot12 = Vector3D.dot(v1, v2);
+
+    	// Compute barycentric coordinates
+    	double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    	double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    	double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    	// Check if point is in triangle
+    	return (u > 0) && (v > 0) && (u + v < 1);    	
+    }
+	
+	public IObject intersectLine(Line line) {
+		Vector3D p = new Vector3D(line.P.x, 0, line.P.z);
+		Vector3D a = new Vector3D(vertices.get(0).x, 0, vertices.get(0).z);
+		Vector3D b = new Vector3D(vertices.get(1).x, 0, vertices.get(1).z);
+		Vector3D c = new Vector3D(vertices.get(2).x, 0, vertices.get(2).z);
+		
+		if ( inTriangle(p,a,b,c) ) {
+			Plane plane = new Plane(vertices.get(0), getSideLine(0).D, getSideLine(1).D);
+			ILine i = plane.getIntersect(line);
+			if (i != null) {
+				Logger.debug(String.format("face: %s", toString()));
+				Logger.debug(String.format("i.p: %s", i.p.toString()));			
+				IObject res = new IObject(this);
+				res.point = i.p;
+				return res;
+			}
+		}
+		
+		return null;
+	}	
+
+	public boolean hasLockedVerts() {
+		for (ObjectVector v : vertices) {
+			if (v.isLocked()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean hasEdgeVerts() {
+		for (ObjectVector v : vertices) {
+			if (v.isEdge()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public String toString() {
+		String s = String.format("f[%d]:\n", id);
+		for (Vector3D v : vertices) {
+			s = String.format("%s %s\n", s, v.toString());
+		}
+		return s;
 	}
 }

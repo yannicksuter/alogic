@@ -21,7 +21,7 @@ public class Plane {
     public Vector3f normal(Vector3f pnt) {
         return new Vector3f((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
     }
-
+    
     public ILine getIntersect(Line l) {
     	Vector3D p = Vector3D.sub(this.x, l.getAPoint());
     	

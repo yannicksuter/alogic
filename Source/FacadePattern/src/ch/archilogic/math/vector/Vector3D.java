@@ -128,6 +128,10 @@ public class Vector3D {
 			- b.x * a.y * c.z
 			- a.x * c.y * b.z;
 	}
+
+	public double dot(Vector3D v) {
+		return v.x * x + v.y * y + v.z * z;
+	}
 	
 	public static double dot(Vector3D v1, Vector3D v2) {
 		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
@@ -138,6 +142,10 @@ public class Vector3D {
 				v1.y * v2.z - v1.z * v2.y,
 				v1.z * v2.x - v1.x * v2.z,
 				v1.x * v2.y - v1.y * v2.x);
+	}
+
+	public Vector3D to(Vector3D v) {
+		return new Vector3D(v.x - this.x, v.y - this.y, v.z - this.z);
 	}
 	
 	public static Vector3D add(Vector3D v1, Vector3D v2) {

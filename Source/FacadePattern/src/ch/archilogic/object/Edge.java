@@ -49,7 +49,7 @@ public class Edge {
 		do {
 			found = false;
 			for (Face face : obj.getFaces()) {
-				if (face.hasEdges() && face.hasVertice(refPoint)) {
+				if (face.hasSidesWithNoNeighbours() && face.hasVertice(refPoint)) {
 					for (int i = 0; i<face.getEdgeCount(); i++) {
 						int idx = face.getEdge(i);
 						Line l = face.getSideLine(idx);

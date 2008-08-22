@@ -75,8 +75,8 @@ public class ObjectDef {
 		return faces;
 	}
 
-	public Vector3D containsEqual(Vector3D ref) {
-		for (Vector3D p : vertices) {
+	public ObjectVector containsEqual(Vector3D ref) {
+		for (ObjectVector p : vertices) {
 			if (p.equals(ref)) {
 				return p;
 			}
@@ -141,9 +141,22 @@ public class ObjectDef {
 		if (doDetectNeighbours) {
 			face.detectNeighbours(faces);
 		}
+		
+		Logger.debug(String.format("adding face: %s", face.toString()));
 		faces.add(face);
 	}
 
+	public void deleteVertice(Vector3D v) throws FaceException {
+		List<Face> oldFaces = new ArrayList<Face>();
+		oldFaces.addAll(getFaces());
+		for (Face f : oldFaces) {
+			if (f.hasVertice(v)) {
+				deleteFace(f);
+			}
+		}
+		vertices.remove(v);
+	}
+	
 	public void deleteFace(Face face) throws FaceException {
 		if (faces.contains(face)) {
 			faces.remove(face);
@@ -175,7 +188,7 @@ public class ObjectDef {
 		List<Face> oldFaces = new ArrayList<Face>();
 		oldFaces.addAll(getFaces());
 		for (Face face : oldFaces) {
-			if ((onlyEgdeFaces && face.hasEdges()) || !onlyEgdeFaces) {
+			if ((onlyEgdeFaces && face.hasSidesWithNoNeighbours()) || !onlyEgdeFaces) {
 				List<Face> newFaces = face.triangulate();
 				if (newFaces != null) {
 					deleteFace(face);
@@ -347,7 +360,7 @@ public class ObjectDef {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * analyse object and create a list of all edges(-lines)
 	 * @param findMaxNbEdges 
@@ -357,7 +370,7 @@ public class ObjectDef {
 		edgeList = new ArrayList<Edge>();
 		
 		for (Face f : getFaces()) {
-			if (f.hasEdges()) {
+			if (f.hasSidesWithNoNeighbours()) {
 				if ( getEdgeWithFaceElement(f) == null ) {
 					Edge edge = new Edge();
 					int id = f.getEdge(0);
@@ -387,6 +400,16 @@ public class ObjectDef {
 				if (segment.getFace() == f) {
 					return e;
 				}
+			}
+		}
+		return null;
+	}
+
+	public IObject raycast(Line line) {
+		for (Face f : getFaces()) {
+			IObject res = f.intersectLine(line);
+			if (res != null) {
+				return res;
 			}
 		}
 		return null;

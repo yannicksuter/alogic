@@ -6,6 +6,7 @@ import ch.archilogic.math.vector.Vector3D;
 
 public class ObjectVector extends Vector3D {
 	private Face face = null;
+	private boolean edge = false;
 	private boolean locked = false;
 	private Color color = null;
 
@@ -21,6 +22,7 @@ public class ObjectVector extends Vector3D {
 		super(v);
 		this.face = v.getFace();
 		this.locked = v.isLocked();
+		this.edge = v.edge;
 	}
 	
 	public ObjectVector(Face face, Vector3D v) {
@@ -64,6 +66,14 @@ public class ObjectVector extends Vector3D {
 	public void setVector(Vector3D v) {
 		this.set(v);
 	}	
+
+	public boolean isEdge() {
+		return edge;
+	}
+
+	public void setEdge(boolean edge) {
+		this.edge = edge;
+	}
 
 	public Color getColor() {
 		return color;
