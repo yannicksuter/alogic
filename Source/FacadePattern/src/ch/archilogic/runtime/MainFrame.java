@@ -6,6 +6,7 @@ import java.awt.event.KeyListener;
 
 import javax.swing.*;
 
+import ch.archilogic.dialog.SelectConfigDlg;
 import ch.archilogic.export.ConsoleExporter;
 import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
@@ -14,7 +15,6 @@ import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.SimpleRandomPatternSolver;
 import ch.archilogic.solver.Solver;
-import ch.archilogic.solver.config.ConfigType;
 
 import com.sun.j3d.utils.universe.*;
 
@@ -90,21 +90,28 @@ public class MainFrame extends JFrame {
 			public void run() {
 				Rnd.init();
 				
-				// initialize the solver
-				Solver solver = new SimpleRandomPatternSolver();
-				
-				try {
-					solver.initialize(ConfigType.getConfig(ConfigType.MODEL_DACH_F3));
-					solver.think();
-				} catch (FaceException e) {
-					e.printStackTrace();
+				// select config
+				SelectConfigDlg dlg = SelectConfigDlg.create();
+				if (!dlg.isCanceled()) {
+					// initialize the solver
+					Solver solver = new SimpleRandomPatternSolver();
+					
+					try {
+						solver.initialize(dlg.getConfig());
+						solver.think();
+					} catch (FaceException e) {
+						e.printStackTrace();
+					}
+					
+					MainFrame window = new MainFrame();				
+					window.setTitle("Facade Pattern Solver - avg area=" + solver.getQuadSizeAvg());
+					window.setSolver(solver);				
+					
+					window.setVisible(true);
+				} else
+				{
+					System.exit(0);
 				}
-				
-				MainFrame window = new MainFrame();				
-				window.setTitle("Facade Pattern Solver - " + solver.getQuadSizeAvg());
-				window.setSolver(solver);				
-				
-				window.setVisible(true);
 			}
 		});
 	}

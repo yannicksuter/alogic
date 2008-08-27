@@ -71,4 +71,9 @@ public enum ConfigType {
 		}
 		return conf;
 	}	
+	
+	@Override
+	public String toString() {
+		return desc;
+	}
 }
