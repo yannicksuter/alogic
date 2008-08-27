@@ -20,6 +20,9 @@ public interface Solver {
 	public void initialize() throws FaceException;
 	public void think() throws FaceException;
 	
+	// get information
+	public double getQuadSizeAvg();
+	
 	// export results
 	public void export(Exporter exporter, String filename);
 }

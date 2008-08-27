@@ -405,6 +405,23 @@ public class ObjectDef {
 		return null;
 	}
 
+	public double getAvgFaceSize(int vertCount) {
+		double area = 0;
+		int faceCnt = 0;
+		for (Face f:faces) {
+			if (f.getVertices().size() == vertCount) {
+				faceCnt++;
+				area += f.getArea();
+			}
+		}
+		
+		if (faceCnt != 0) {
+			return (area / faceCnt);
+		}
+		
+		return 0;
+	}
+
 	public IObject raycast(Line line) {
 		for (Face f : getFaces()) {
 			IObject res = f.intersectLine(line);

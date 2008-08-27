@@ -1,6 +1,5 @@
 package ch.archilogic.object.helper;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectVector;
-import ch.archilogic.object.geom.PointShapeObj;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;

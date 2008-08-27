@@ -78,7 +78,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private int findMaxFaces = 10;
 	private int findMaxCornerFaces = -1;
 	private ThinkType useThinkModel = ThinkType.CYLINDRIC;
-	
+		
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
 	}
@@ -619,6 +619,10 @@ public class SimpleRandomPatternSolver implements Solver {
 			useThinkModel = ThinkType.FLAT;
 			break;
 		}
+	}
+	
+	public double getQuadSizeAvg() {
+		return objEnvelope.getAvgFaceSize(4);
 	}
 	
 	public void export(Exporter exporter, String filename) {

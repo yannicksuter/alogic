@@ -100,7 +100,8 @@ public class MainFrame extends JFrame {
 				}
 				
 				MainFrame window = new MainFrame();				
-				window.setSolver(solver);
+				window.setTitle("Facade Pattern Solver - " + solver.getQuadSizeAvg());
+				window.setSolver(solver);				
 				
 				window.setVisible(true);
 			}
