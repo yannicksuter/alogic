@@ -32,6 +32,7 @@ import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.GridHelper;
 import ch.archilogic.object.helper.ObjHelper;
 import ch.archilogic.runtime.exception.FaceException;
+import ch.archilogic.solver.config.Config;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;
 import ch.archilogic.solver.intersection.IEdgeSegment.IType;
@@ -64,20 +65,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doShowEdges = false;
 	private boolean doTriangulateEdge = false;
 	
-	// these are defaults, check below setTweakParam(int objNb) to optimize for specific objects 
-	private String refObjPath = "file:c:\\tmp\\loadme.obj";
-	private double scale = 1.0;
-	private int useEdgeId = 1;
-	private boolean useEdgeCenterDir = false;
-	private boolean useEdgeSegmentDir = false;
-	private Vector3D useEdgeDir = new Vector3D(0,1,0);
-	private double useEdgeLen = 1.2;
-	private boolean considerCorner = false;
-	private boolean evaluateCorner = false;
-	private int findMaxNbEdges = 2;
-	private int findMaxFaces = 10;
-	private int findMaxCornerFaces = -1;
-	private ThinkType useThinkModel = ThinkType.CYLINDRIC;
+	private Config conf = new Config(null);
 		
 	public ObjectDef getObjEnvelope() {
 		return objBoundingBox;
@@ -96,24 +84,23 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 
 	public double getScale() {
-		return this.scale;
+		return conf.getScale();
 	}
 	
 	public void addReference(ObjectFile obj) {
 	}	
 	
 	@SuppressWarnings("unchecked")
-	public void initialize() throws FaceException {
+	public void initialize(Config conf) throws FaceException {
+		this.conf = conf;
 		objGraph = new ObjectGraph();
-		
-		setTweakParam(12);
 
 		Logger.info("load reference object");
 		Scene s = null;
 		try {
 			Point3d lower = new Point3d(); 
 			Point3d upper = new Point3d();
-			s = ObjHelper.loadRefObject(refObjPath);
+			s = ObjHelper.loadRefObject(conf.getRefObjPath());
 			Hashtable<String,Shape3D> table = s.getNamedObjects();
 			for (String key : table.keySet()) {
 				Shape3D o = table.get(key);					
@@ -130,7 +117,7 @@ public class SimpleRandomPatternSolver implements Solver {
 					objReference = new RefModelObj((Shape3D)o.cloneTree(), 1);
 					
 					// create bounding box
-					if (useThinkModel == ThinkType.CYLINDRIC) {
+					if (conf.getUseThinkModel() == ThinkType.CYLINDRIC) {
 						box = new BBoxObj(BoxHelper.FRONT|BoxHelper.BACK|BoxHelper.LEFT|BoxHelper.RIGHT);
 					} else 
 					{
@@ -141,8 +128,8 @@ public class SimpleRandomPatternSolver implements Solver {
 					objBoundingBox = box;
 					
 					// compute scaling factor
-					this.scale = 1 / (upper.getX() - lower.getX());
-					Logger.info(String.format("scaling factor: %f", scale));
+					conf.setScale(1 / (upper.getX() - lower.getX()));
+					Logger.info(String.format("scaling factor: %f", conf.getScale()));
 				}
 			}
 		} catch (Exception e) {
@@ -163,7 +150,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		Logger.info("object: edges detection");
 		ObjectDef objEdge = new ObjectDef();		
 		
-		edges = objReference.computeEdges(findMaxNbEdges);		
+		edges = objReference.computeEdges(conf.getFindMaxNbEdges());		
 		for (Edge edge : edges) {
 			// visualization
 			for (EdgeSegment segment : edge.getSegmentList()) {
@@ -236,7 +223,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		status = SolverState.THINKING;
 
 		if (doThinking) {
-			if (useThinkModel == ThinkType.CYLINDRIC) {
+			if (conf.getUseThinkModel() == ThinkType.CYLINDRIC) {
 				Logger.info("thinking cylindric..");		
 				thinkCylindric();
 			} else {
@@ -248,7 +235,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				for (ObjectVector v : objEnvelope.getVertices()) {
 					if (!v.isLocked() && v.getFace() != null) {
 						Vector3D vRnd = Vector3D.random();
-						IObject newPoint = objReference.catwalk(v, vRnd, useEdgeLen*0.2, null, v.getFace());
+						IObject newPoint = objReference.catwalk(v, vRnd, conf.getUseEdgeLen()*0.2, null, v.getFace());
 						Logger.debug(String.format("old: %s new: ", v, newPoint.point.toString()));
 						v.set(newPoint.face, newPoint.point, false);
 					}
@@ -273,7 +260,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 
 	public void thinkFlat() throws FaceException {
-		GridHelper grid = new GridHelper(box.getFace(0), useEdgeLen);
+		GridHelper grid = new GridHelper(box.getFace(0), conf.getUseEdgeLen());
 		grid.projection(objReference);		
 
 		grid.removeUnlockedVertices();
@@ -282,11 +269,11 @@ public class SimpleRandomPatternSolver implements Solver {
 		if (edges != null && edges.size() > 0) {
 			int segNb = 0;
 			for (Edge edge : edges) {
-				double segmentLen = useEdgeLen;
+				double segmentLen = conf.getUseEdgeLen();
 				IEdgeSegment s = edge.getStartPoint();
 				do {
 					segNb++;
-					IEdgeSegment n = edge.getPoint(s.point, segmentLen, considerCorner);	
+					IEdgeSegment n = edge.getPoint(s.point, segmentLen, conf.isConsiderCorner());	
 					grid.createBorderFace(s, n);
 					s = n;				
 				} while (s.type != IEdgeSegment.IType.ENDPOINT);
@@ -306,34 +293,34 @@ public class SimpleRandomPatternSolver implements Solver {
 		double segmentLen = 0;
 		
 		if (edges != null && edges.size() > 0) {
-			Edge edge = edges.get(useEdgeId);
-			segmentLen = useEdgeLen;
+			Edge edge = edges.get(conf.getUseEdgeId());
+			segmentLen = conf.getUseEdgeLen();
 			
 			Vector3D dir = null;
 			IEdgeSegment s = edge.getStartPoint();
 			// define general direction for propagation
-			if (useEdgeDir == null) {
+			if (conf.getUseEdgeDir() == null) {
 				dir = Vector3D.cross(s.face.getFaceNormal(), s.line.getDir()).normalize();
 			} 
 			else {
-				dir = useEdgeDir;
+				dir = conf.getUseEdgeDir();
 			}
 			
 			boolean bCornerBefore = false;
 			do {
 				segNb++;
-				if (useEdgeCenterDir) {
+				if (conf.isUseEdgeCenterDir()) {
 					dir = Vector3D.sub(box.getCenter(), s.point);
 				}
 				
-				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, s, dir, false) == CornerType.OPENING) {
+				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(conf.isEvaluateCorner(), s, dir, false) == CornerType.OPENING) {
 					Logger.debug(String.format("%d corner %s", segNb, s.point));
 					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
 				} else 
 				{
 					bCornerBefore = false;
-					IEdgeSegment n = edge.getPoint(s.point, segmentLen, considerCorner);
-					if (n.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, n, dir, false) == CornerType.CLOSING) 
+					IEdgeSegment n = edge.getPoint(s.point, segmentLen, conf.isConsiderCorner());
+					if (n.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(conf.isEvaluateCorner(), n, dir, false) == CornerType.CLOSING) 
 					{ // create a segment in a closing edge
 						Logger.debug(String.format("%d corner %s : %s", segNb, n.point, CornerType.CLOSING.name()));
 						IObject u0 = new IObject(s.face, s.point, true, true);
@@ -355,9 +342,9 @@ public class SimpleRandomPatternSolver implements Solver {
 	}
 	
 	private boolean takeNextPointOnEdgeThreshold(IEdgeSegment n, Edge edge, double segmentLen, Vector3D dir) {
-		IEdgeSegment next = edge.getPoint(n.point, segmentLen, considerCorner);
+		IEdgeSegment next = edge.getPoint(n.point, segmentLen, conf.isConsiderCorner());
 		if (Vector3D.length(next.point, n.point) < (segmentLen*0.5) && next.type != IEdgeSegment.IType.ENDPOINT) {
-			CornerType cornerType = edge.evaluateCorner(evaluateCorner, next, dir, false);
+			CornerType cornerType = edge.evaluateCorner(conf.isEvaluateCorner(), next, dir, false);
 			if (cornerType != CornerType.CLOSING) { 
 				n = next;
 				return true;
@@ -448,11 +435,11 @@ public class SimpleRandomPatternSolver implements Solver {
 			fRefFirst = obj.getFaceWithVertice(point4.point, 1);
 
 			faceNb++;
-			if (faceNb == findMaxCornerFaces)
+			if (faceNb == conf.getFindMaxCornerFaces())
 				break;			
 		} while ((secondPointOnEdge.type != IEdgeSegment.IType.ENDPOINT) && (secondPointOnEdge.type != IEdgeSegment.IType.CORNER));
 
-		if (secondPointOnEdge.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(evaluateCorner, secondPointOnEdge, dir, false) == CornerType.OPENING) 
+		if (secondPointOnEdge.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(conf.isEvaluateCorner(), secondPointOnEdge, dir, false) == CornerType.OPENING) 
 		{ // segment need to be finished
 			IObject i = new IObject(secondPointOnEdge.face, secondPointOnEdge.point, true, true);
 			createSegment(objEnvelope, point4, i, edgeLen, dir);														
@@ -470,7 +457,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		IEdgeSegment fRefSecond = obj.getFaceWithVertice(u1.point, 0);
 		
 		// compute direction vector
-		if (dir == null || useEdgeSegmentDir) {
+		if (dir == null || conf.isUseEdgeSegmentDir()) {
 			Vector3D edgeVec = Vector3D.sub(u1.point, u0.point).normalize();
 			dir = Vector3D.cross(u0.face.getFaceNormal(), edgeVec).normalize();
 		}
@@ -511,115 +498,14 @@ public class SimpleRandomPatternSolver implements Solver {
 			fRefSecond = obj.getFaceWithVertice(p1.point, 0);
 			
 			faceNb++;
-			if (faceNb == findMaxFaces)
+			if (faceNb == conf.getFindMaxFaces())
 				break;
 			
 			if (!p0.found && !p1.found) {
 				break;
 			}		
 		} while(! (p0.edge && p1.edge) );
-	}
-	
-	private void setTweakParam(int objNb) {
-		switch(objNb) {
-		case 1:
-			refObjPath = "file:c:\\tmp\\loadme_f1.obj";
-			scale = 1.0;
-			useEdgeId = 1;
-			useEdgeDir = new Vector3D(0,1,0);
-			useEdgeLen = 1.2;
-			considerCorner = false;
-			evaluateCorner = false;
-			findMaxNbEdges = 2;			
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 2:
-			refObjPath = "file:c:\\tmp\\loadme_f2.obj";
-			scale = 1.0;
-			useEdgeId = 0;
-			useEdgeDir = null;
-			useEdgeLen = 1.2;
-			considerCorner = true;
-			evaluateCorner = true;
-			findMaxNbEdges = 2;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 3:
-			refObjPath = "file:c:\\tmp\\loadme_f3.obj";
-			scale = 1.0;
-//			useEdgeId = 1;
-//			useEdgeDir = new Vector3D(0,1,0);
-			useEdgeId = 0;
-			useEdgeDir = new Vector3D(0,-1,0);
-			useEdgeLen = 1.2;
-			considerCorner = false;
-			evaluateCorner = false;
-			findMaxNbEdges = 2;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 4:
-			refObjPath = "file:c:\\tmp\\loadme_f1_dach.obj";
-			useEdgeId = 0;
-			useEdgeDir = null;
-			useEdgeCenterDir = true;
-			findMaxFaces = 14;
-			considerCorner = false;
-			evaluateCorner = false;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 5:
-			refObjPath = "file:c:\\tmp\\loadme_f2_dach.obj";
-			useEdgeId = 1;
-			useEdgeDir = null;
-			useEdgeCenterDir = true;
-			findMaxFaces = -1;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 6:
-			refObjPath = "file:c:\\tmp\\loadme_f3_dach.obj";
-			useEdgeId = 0;
-			useEdgeDir = null;
-			useEdgeCenterDir = true;
-			findMaxFaces = 14;
-			considerCorner = false;
-			evaluateCorner = false;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 7:
-			refObjPath = "file:c:\\tmp\\loadme_f5_dach.obj";
-			useEdgeId = 0;
-			useEdgeDir = null;
-			useEdgeCenterDir = true;
-			findMaxFaces = 14;
-			considerCorner = false;
-			evaluateCorner = false;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 8:
-			refObjPath = "file:c:\\tmp\\loadme_f4_dach.obj";
-			useEdgeId = 0;
-			useEdgeDir = null;
-			useEdgeCenterDir = true;
-			findMaxFaces = 14;
-			considerCorner = true;
-			evaluateCorner = false;
-//			useEdgeSegmentDir = false;
-			useThinkModel = ThinkType.CYLINDRIC;
-			break;
-		case 10:
-			refObjPath = "file:c:\\tmp\\loadme_f15_dach_voll.obj";
-			useThinkModel = ThinkType.FLAT;
-			break;
-		case 11:
-			refObjPath = "file:c:\\tmp\\loadme_f2_dach_voll.obj";
-			useThinkModel = ThinkType.FLAT;
-			break;
-		case 12:
-			refObjPath = "file:c:\\tmp\\loadme_f3_dach_voll.obj";
-			useThinkModel = ThinkType.FLAT;
-			break;
-		}
-	}
+	}	
 	
 	public double getQuadSizeAvg() {
 		return objEnvelope.getAvgFaceSize(4);

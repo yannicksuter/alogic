@@ -5,6 +5,7 @@ import com.sun.j3d.loaders.objectfile.ObjectFile;
 import ch.archilogic.export.Exporter;
 import ch.archilogic.object.ObjectGraph;
 import ch.archilogic.runtime.exception.FaceException;
+import ch.archilogic.solver.config.Config;
 
 public interface Solver {
 	public String getDescription();
@@ -17,7 +18,7 @@ public interface Solver {
 	public void addReference(ObjectFile obj);
 	
 	// solve problem
-	public void initialize() throws FaceException;
+	public void initialize(Config conf) throws FaceException;
 	public void think() throws FaceException;
 	
 	// get information

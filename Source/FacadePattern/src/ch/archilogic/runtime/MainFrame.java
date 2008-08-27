@@ -14,6 +14,7 @@ import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.SimpleRandomPatternSolver;
 import ch.archilogic.solver.Solver;
+import ch.archilogic.solver.config.ConfigType;
 
 import com.sun.j3d.utils.universe.*;
 
@@ -93,7 +94,7 @@ public class MainFrame extends JFrame {
 				Solver solver = new SimpleRandomPatternSolver();
 				
 				try {
-					solver.initialize();
+					solver.initialize(ConfigType.getConfig(ConfigType.MODEL_DACH_F3));
 					solver.think();
 				} catch (FaceException e) {
 					e.printStackTrace();
