@@ -2,7 +2,7 @@ package ch.archilogic.solver.config;
 
 import ch.archilogic.log.Logger;
 import ch.archilogic.math.vector.Vector3D;
-import ch.archilogic.solver.SimpleRandomPatternSolver.ThinkType;
+import ch.archilogic.solver.think.ThinkType;
 
 public enum ConfigType {
 	MODEL_F1_5("Hauptteil Findling 1,4,5"),

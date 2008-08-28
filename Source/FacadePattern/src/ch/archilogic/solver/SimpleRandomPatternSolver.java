@@ -36,13 +36,9 @@ import ch.archilogic.solver.config.Config;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;
 import ch.archilogic.solver.intersection.IEdgeSegment.IType;
+import ch.archilogic.solver.think.ThinkType;
 
 public class SimpleRandomPatternSolver implements Solver {
-	public enum ThinkType {
-		CYLINDRIC,
-		FLAT
-	};
-	
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
 	
@@ -64,6 +60,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doShowReferenceObj = false;
 	private boolean doShowEdges = false;
 	private boolean doTriangulateEdge = false;
+	private boolean doFixPlanarity = false;
 	
 	private Config conf = new Config(null);
 		
@@ -245,6 +242,11 @@ public class SimpleRandomPatternSolver implements Solver {
 			if (doTriangulateEdge) {
 				Logger.info("triangulation of edge vertices");
 				objEnvelope.triangulate(true);
+			}
+			
+			if (doFixPlanarity) {
+				PlanarSolver planarSolver = new PlanarSolver(objEnvelope);
+				planarSolver.fixObject();
 			}
 			
 			if (doShowLockedVertices) {

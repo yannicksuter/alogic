@@ -1,7 +1,7 @@
 package ch.archilogic.solver.config;
 
 import ch.archilogic.math.vector.Vector3D;
-import ch.archilogic.solver.SimpleRandomPatternSolver.ThinkType;
+import ch.archilogic.solver.think.ThinkType;
 
 public class Config {
 	public Config(ConfigType type) {

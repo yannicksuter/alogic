@@ -66,7 +66,14 @@ public class SelectConfigDlg extends JDialog implements ActionListener {
         setTitle("Select a configuration..");
         setResizable(false);
         setPreferredSize(new Dimension(350, 250));
+        
         pack();
+
+		setLocationRelativeTo(null);
+		setModal(true);
+		setVisible(true);
+		
+		solveButton.enableInputMethods(true);
     }
 
     @Override
@@ -86,7 +93,10 @@ public class SelectConfigDlg extends JDialog implements ActionListener {
 
     private void setDescText(Config conf) {
     	desc.setBackground(this.getBackground());
-		desc.setText(String.format("object:\n  %s\nmodel:\n  %s", conf.getRefObjPath(), conf.getUseThinkModel().name()));
+		desc.setText(String.format("Description:\n- object: %s\n"+
+				"- model: %s\n" +
+				"- edge len: %f"
+				, conf.getRefObjPath().replace("file:", ""), conf.getUseThinkModel().getDesc(), conf.getUseEdgeLen()));
     }
     
     public boolean isCanceled() {
@@ -98,9 +108,6 @@ public class SelectConfigDlg extends JDialog implements ActionListener {
 	
 	public static SelectConfigDlg create() {
 		SelectConfigDlg dlg = new SelectConfigDlg();
-		dlg.setLocationRelativeTo(null);
-		dlg.setModal(true);
-		dlg.setVisible(true);
 		return dlg;
 	}
 }
