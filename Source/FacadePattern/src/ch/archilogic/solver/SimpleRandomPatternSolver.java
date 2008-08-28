@@ -60,7 +60,7 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doShowReferenceObj = false;
 	private boolean doShowEdges = false;
 	private boolean doTriangulateEdge = false;
-	private boolean doFixPlanarity = false;
+	private boolean doFixPlanarity = true;
 	
 	private Config conf = new Config(null);
 		

@@ -65,7 +65,7 @@ public class SelectConfigDlg extends JDialog implements ActionListener {
 
         setTitle("Select a configuration..");
         setResizable(false);
-        setPreferredSize(new Dimension(350, 250));
+        setPreferredSize(new Dimension(350, 150));
         
         pack();
 
