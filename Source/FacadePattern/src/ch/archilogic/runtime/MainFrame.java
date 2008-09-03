@@ -45,6 +45,19 @@ public class MainFrame extends JFrame {
     	    else if (keyCode == KeyEvent.VK_A) {
     	    	renderer.setOptionAntialiasing(!renderer.isOptionAntialiasing());
     	    }
+    	    
+    	    /*else if (keyCode == KeyEvent.VK_F9) {
+    	    	solver.initialize(!SimpleRandomPatternSolver.doShowLockedVertices);
+    	    }
+    	    
+    	    else if (keyCode == KeyEvent.VK_F10) {
+    	    	solver.initialize(!SimpleRandomPatternSolver.doShowReferenceObj);
+    	    }
+    	    
+    	    else if (keyCode == KeyEvent.VK_F11) {
+    	    	solver.initialize(!SimpleRandomPatternSolver.doShowEdges);
+    	    }*/
+    	    
         }
 
         public void keyReleased(KeyEvent keyEvent) {}

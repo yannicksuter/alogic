@@ -57,9 +57,9 @@ public class SimpleRandomPatternSolver implements Solver {
 	private boolean doJittering = true;
 	private boolean doShowLockedVertices = true;
 	private boolean doShowCornersOnEdge = false;
-	private boolean doShowReferenceObj = false;
-	private boolean doShowEdges = false;
-	private boolean doTriangulateEdge = false;
+	private boolean doShowReferenceObj = true;
+	private boolean doShowEdges = true;
+	private boolean doTriangulateEdge = true;
 	private boolean doFixPlanarity = true;
 	
 	private Config conf = new Config(null);

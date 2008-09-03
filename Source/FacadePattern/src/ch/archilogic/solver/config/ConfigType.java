@@ -10,7 +10,8 @@ public enum ConfigType {
 	MODEL_F3("Hauptteil Findling 3"),
 	MODEL_DACH_F1_5("Dachstück Findling 1,4,5"),
 	MODEL_DACH_F2("Dachstück Findling 2"),
-	MODEL_DACH_F3("Dachstück Findling 3");
+	MODEL_DACH_F3("Dachstück Findling 3"),
+	MODEL_BAND ("Band");
 
 	private ConfigType(String desc) {
 		this.desc = desc;
@@ -66,6 +67,11 @@ public enum ConfigType {
 			break;
 		case MODEL_DACH_F3:
 			conf.setRefObjPath("file:c:\\tmp\\loadme_f3_dach_voll.obj");
+			conf.setUseThinkModel(ThinkType.FLAT);
+			break;
+		
+		case MODEL_BAND:			
+			conf.setRefObjPath("file:c:\\tmp\\band.obj");
 			conf.setUseThinkModel(ThinkType.FLAT);
 			break;
 		}

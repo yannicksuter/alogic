@@ -1,6 +1,7 @@
 package ch.archilogic.solver.config;
 
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.solver.Solver;
 import ch.archilogic.solver.think.ThinkType;
 
 public class Config {
@@ -85,6 +86,7 @@ public class Config {
 	public ThinkType getUseThinkModel() {
 		return useThinkModel;
 	}
+	
 	public void setUseThinkModel(ThinkType useThinkModel) {
 		this.useThinkModel = useThinkModel;
 	}
