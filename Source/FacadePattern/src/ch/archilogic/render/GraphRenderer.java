@@ -133,7 +133,7 @@ public class GraphRenderer extends Canvas3D {
 
 		// <background and light>
 		BoundingSphere bound = new BoundingSphere();
-		Background background = new Background(0.0f, 0.0f, 0.0f);
+		Background background = new Background(0.1f, 0.15f, 0.11f);
 		background.setApplicationBounds(bound);
 		root.addChild(background);
 		AmbientLight light = new AmbientLight(true, new Color3f(Color.cyan));
