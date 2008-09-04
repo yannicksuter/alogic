@@ -70,7 +70,7 @@ public class MainFrame extends JFrame {
     	graph.setVisible(graphObject, !isVisible);
     	
     	// reinit renderer
-    	renderer.initialize();
+    	renderer.updateSceneGraphObjects();
     }
       
 	public void setSolver(Solver solver) {

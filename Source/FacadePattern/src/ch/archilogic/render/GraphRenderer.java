@@ -1,8 +1,6 @@
 package ch.archilogic.render;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GradientPaint;
 import java.awt.GraphicsConfiguration;
 
 import javax.media.j3d.*;
@@ -22,7 +20,8 @@ public class GraphRenderer extends Canvas3D {
 	private static final long serialVersionUID = 1091353214144552939L;
 	
 	SimpleUniverse universe = null;
-	BranchGroup bg = null;
+	BranchGroup branchGrp = null;
+	TransformGroup objGrp = null;
 	
     private boolean optionAntialiasing = false;
 
@@ -47,27 +46,32 @@ public class GraphRenderer extends Canvas3D {
 	}
 
 	public void initialize() {
+		if (branchGrp != null)
+			return;
+		
 		this.stopRenderer();
 		
 		// set option configurations
 		setOptionAntialiasing(optionAntialiasing);
 
-		if (bg != null) {
-			universe.getLocale().removeBranchGraph(bg);			
+		if (branchGrp != null) {
+			universe.getLocale().removeBranchGraph(branchGrp);			
 		}
 				
-		bg = createSceneGraph(this);
-		bg.setCapability(BranchGroup.ALLOW_DETACH);
-		bg.compile();
+		branchGrp = createSceneGraph(this);
+		addObjectsToGroup();
+		branchGrp.compile();
 		
-		universe.addBranchGraph(bg);
+		universe.addBranchGraph(branchGrp);
 		
 		this.startRenderer();
 	}
 	
-	private BranchGroup createSceneGraph(Canvas3D cv) {
-		ObjectGraph graph = solver.getObjectGraph();
-		
+	public void updateSceneGraphObjects() {
+		addObjectsToGroup();		
+	}	
+	
+	private BranchGroup createSceneGraph(Canvas3D cv) {	
 		BranchGroup root = new BranchGroup();
 				
 		// mouse spin
@@ -77,30 +81,18 @@ public class GraphRenderer extends Canvas3D {
 		root.addChild(spin);
 
 		// set translation
-		Transform3D trans3D = new Transform3D();
-		trans3D.setTranslation(graph.getTranslation().getVector3f());
-		TransformGroup transGrp = new TransformGroup(trans3D);
-		spin.addChild(transGrp);
+		objGrp = new TransformGroup();
+		//BranchGroup.ALLOW_DETACH
+		objGrp.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		objGrp.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
+		objGrp.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
+		objGrp.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
+		spin.addChild(objGrp);
 		
 		// appearance
 		Appearance ap = new Appearance();
 		ap.setMaterial(new Material());
 			
-		try {			
-			// load objects
-			for (ObjectDef obj : graph.getObjects()) {
-				if (obj.isVisible()) 
-				{ // only show visible objects
-					Shape3D shp = obj.getShape(true, false);
-					if (shp != null) {
-						transGrp.addChild(shp);
-					}
-				}
-			}
-		} catch (FaceException e) {
-			e.printStackTrace();
-		}
-
 		// rotation
 		MouseRotate rotator = new MouseRotate(spin);
 		BoundingSphere bounds = new BoundingSphere();
@@ -143,4 +135,39 @@ public class GraphRenderer extends Canvas3D {
 
 		return root;
 	}
+	
+	private void addObjectsToGroup() {
+		ObjectGraph graph = solver.getObjectGraph();
+		if (objGrp != null && graph != null) {
+			
+			Transform3D trans3D = new Transform3D();
+			trans3D.setTranslation(graph.getTranslation().getVector3f());
+			objGrp.setTransform(trans3D);
+			
+			
+			BranchGroup newObjectGrp = new BranchGroup();
+			newObjectGrp.setCapability(BranchGroup.ALLOW_DETACH);
+			try {			
+				// load objects
+				for (ObjectDef obj : graph.getObjects()) {
+					if (obj.isVisible()) 
+					{ // only show visible objects
+						Shape3D shp = obj.getShape(true, false);
+						if (shp != null) {
+							newObjectGrp.addChild(shp);
+						}
+					}
+				}
+			} catch (FaceException e) {
+				e.printStackTrace();
+			}
+	
+			objGrp.removeAllChildren();
+			objGrp.addChild(newObjectGrp);
+//			universe.getLocale().repalceBrachGraph(objGrp, newLandscape);
+
+			
+		}
+	}
+	
 }
