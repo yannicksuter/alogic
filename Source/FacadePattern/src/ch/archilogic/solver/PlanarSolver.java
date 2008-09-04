@@ -1,8 +1,18 @@
 package ch.archilogic.solver;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sun.imageio.plugins.common.PaletteBuilder;
+
 import ch.archilogic.log.Logger;
+import ch.archilogic.math.geom.Line;
+import ch.archilogic.math.geom.Plane;
+import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
+import ch.archilogic.object.ObjectVector;
+import ch.archilogic.solver.intersection.ILine;
 
 public class PlanarSolver {
 	private ObjectDef objRef = null;
@@ -13,6 +23,43 @@ public class PlanarSolver {
 	
 	public void setObjRef(ObjectDef objRef) {
 		this.objRef = objRef;
+	}
+	
+	private ObjectVector prepareVerticeList(List<ObjectVector> l) {
+		for (ObjectVector v : l) {
+			if (!v.isLocked() && !v.isEdge()) {
+				l.remove(v);
+				return v;
+			}
+		}
+		return null;
+	}
+
+	private boolean fixPlanarity(Face face) {
+		List<ObjectVector> l = new ArrayList<ObjectVector>();
+		l.addAll(face.getVertices());
+		ObjectVector v = prepareVerticeList(l);
+		
+		Plane plane = new Plane(l.get(0), l.get(1), l.get(2));
+		double d = plane.getDistanceToPoint(v);
+		if (d > 1) {
+			Line line = new Line(v, plane.getNormal());
+			ILine res = plane.getIntersect(line);
+			
+			double d2 = Vector3D.sub(v, res.p).length();
+		
+//			v.set(res.p);
+			return true;			
+		}
+		return false;
+	}
+	
+	private void lockVertices(Face face) {
+		for (ObjectVector v : face.getVertices()) {
+			if (!v.isEdge()) {
+				v.setLocked(true);
+			}
+		}		
 	}
 	
 	public void fixObject() {
@@ -26,11 +73,16 @@ public class PlanarSolver {
 			{
 				if ( !f.isPlanar() ) 
 				{ // fix planarity
+					if (fixPlanarity(f)) {
+						return;
+					}
 					nbPlanarFixed++;
 				} else 
 				{ // lock vertices
 					nbPlanarOk++;
 				}
+				lockVertices(f);
+				return;
 			}			
 		}
 		Logger.info(String.format("planarity - triangles: %d fixed: %d ok: %d", nbTriangle, nbPlanarFixed, nbPlanarOk));

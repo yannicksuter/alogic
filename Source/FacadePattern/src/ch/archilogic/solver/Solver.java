@@ -1,9 +1,7 @@
 package ch.archilogic.solver;
 
-import com.sun.j3d.loaders.objectfile.ObjectFile;
-
 import ch.archilogic.export.Exporter;
-import ch.archilogic.object.ObjectGraph;
+import ch.archilogic.object.graph.ObjectGraph;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.config.Config;
 
@@ -13,9 +11,6 @@ public interface Solver {
 
 	public double getScale();
 	public ObjectGraph getObjectGraph();
-	
-	// load reference object
-	public void addReference(ObjectFile obj);
 	
 	// solve problem
 	public void initialize(Config conf) throws FaceException;

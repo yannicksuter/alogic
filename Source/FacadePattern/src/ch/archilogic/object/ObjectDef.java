@@ -20,6 +20,8 @@ import ch.archilogic.solver.intersection.IObject;
 
 public class ObjectDef {
 	private ObjectType type;
+	private boolean visible = true;
+	
 	private List<ObjectVector> vertices = new ArrayList<ObjectVector>();
 	private List<Face> faces = new ArrayList<Face>();
 	
@@ -47,6 +49,14 @@ public class ObjectDef {
 	public void setType(ObjectType type) {
 		this.type = type;
 	}
+	
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}	
 	
 	public void create() throws FaceException {
 	}

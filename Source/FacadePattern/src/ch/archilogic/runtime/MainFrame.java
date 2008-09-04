@@ -11,9 +11,11 @@ import ch.archilogic.export.ConsoleExporter;
 import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
 import ch.archilogic.math.Rnd;
+import ch.archilogic.object.graph.GraphObjectType;
+import ch.archilogic.object.graph.ObjectGraph;
 import ch.archilogic.render.GraphRenderer;
 import ch.archilogic.runtime.exception.FaceException;
-import ch.archilogic.solver.SimpleRandomPatternSolver;
+import ch.archilogic.solver.CylindricFlatSolverImpl;
 import ch.archilogic.solver.Solver;
 
 import com.sun.j3d.utils.universe.*;
@@ -45,25 +47,31 @@ public class MainFrame extends JFrame {
     	    else if (keyCode == KeyEvent.VK_A) {
     	    	renderer.setOptionAntialiasing(!renderer.isOptionAntialiasing());
     	    }
-    	    
-    	    /*else if (keyCode == KeyEvent.VK_F9) {
-    	    	solver.initialize(!SimpleRandomPatternSolver.doShowLockedVertices);
-    	    }
-    	    
+    	    // change visibility
+    	    else if (keyCode == KeyEvent.VK_F9) {
+    	    	switchVisibility(GraphObjectType.OBJ_LOCKED_VERTICES);
+    	    }    	    
     	    else if (keyCode == KeyEvent.VK_F10) {
-    	    	solver.initialize(!SimpleRandomPatternSolver.doShowReferenceObj);
-    	    }
-    	    
+    	    	switchVisibility(GraphObjectType.OBJ_REFERENCE);
+    	    }    	    
     	    else if (keyCode == KeyEvent.VK_F11) {
-    	    	solver.initialize(!SimpleRandomPatternSolver.doShowEdges);
-    	    }*/
-    	    
+    	    	switchVisibility(GraphObjectType.OBJ_EDGES);
+    	    }    	    
         }
 
         public void keyReleased(KeyEvent keyEvent) {}
         public void keyTyped(KeyEvent keyEvent) {}
       };
 
+    private void switchVisibility(GraphObjectType graphObject) {
+    	// switch flag
+    	ObjectGraph graph = solver.getObjectGraph();
+    	boolean isVisible = graph.isVisible(graphObject);
+    	graph.setVisible(graphObject, !isVisible);
+    	
+    	// reinit renderer
+    	renderer.initialize();
+    }
       
 	public void setSolver(Solver solver) {
 		this.solver = solver;
@@ -107,7 +115,7 @@ public class MainFrame extends JFrame {
 				SelectConfigDlg dlg = SelectConfigDlg.create();
 				if (!dlg.isCanceled()) {
 					// initialize the solver
-					Solver solver = new SimpleRandomPatternSolver();
+					Solver solver = new CylindricFlatSolverImpl();
 					
 					try {
 						solver.initialize(dlg.getConfig());

@@ -12,7 +12,7 @@ import com.sun.j3d.utils.behaviors.mouse.*;
 import com.sun.j3d.utils.universe.*;
 
 import ch.archilogic.object.ObjectDef;
-import ch.archilogic.object.ObjectGraph;
+import ch.archilogic.object.graph.ObjectGraph;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.Solver;
 
@@ -21,7 +21,8 @@ public class GraphRenderer extends Canvas3D {
 
 	private static final long serialVersionUID = 1091353214144552939L;
 	
-	SimpleUniverse su = null;
+	SimpleUniverse universe = null;
+	BranchGroup bg = null;
 	
     private boolean optionAntialiasing = false;
 
@@ -31,7 +32,7 @@ public class GraphRenderer extends Canvas3D {
 
 	public void setOptionAntialiasing(boolean optionAntialiasing) {
 		this.optionAntialiasing = optionAntialiasing;
-		su.getViewer().getView().setSceneAntialiasingEnable(optionAntialiasing);	
+		universe.getViewer().getView().setSceneAntialiasingEnable(optionAntialiasing);	
 	}
 
 	public void setSolver(Solver solver) {
@@ -40,44 +41,30 @@ public class GraphRenderer extends Canvas3D {
 	
 	public GraphRenderer(GraphicsConfiguration config) {
 		super(config);
+
+		universe = new SimpleUniverse(this);
+		universe.getViewingPlatform().setNominalViewingTransform();		
 	}
 
 	public void initialize() {
-		su = new SimpleUniverse(this);
-		su.getViewingPlatform().setNominalViewingTransform();
+		this.stopRenderer();
 		
 		// set option configurations
 		setOptionAntialiasing(optionAntialiasing);
 
-		BranchGroup bg = createSceneGraph(this);
+		if (bg != null) {
+			universe.getLocale().removeBranchGraph(bg);			
+		}
+				
+		bg = createSceneGraph(this);
+		bg.setCapability(BranchGroup.ALLOW_DETACH);
 		bg.compile();
 		
-		su.addBranchGraph(bg);
+		universe.addBranchGraph(bg);
+		
+		this.startRenderer();
 	}
 	
-	@Override
-	public void preRender() {
-		super.preRender();
-
-		J3DGraphics2D g2D = getGraphics2D();
-		Dimension d = getSize();
-		
-		GradientPaint gp = new GradientPaint(0, 0, new Color(192, 192, 172),
-				d.width, d.height, new Color(113, 113, 100), true);
-		g2D.setPaint(gp);
-		g2D.fillRect(0, 0, d.width, d.height);
-
-		if (solver != null) {
-			g2D.setColor(Color.WHITE);
-			int l = g2D.getFontMetrics().charWidth('-');
-			int h = g2D.getFontMetrics().getHeight();
-			g2D.drawString("ArchLogic::" + solver.getDescription(), l, h);
-			g2D.drawString(solver.getStatus().getDescription(), l, h * 2 - 2);
-		}
-
-//		g2D.flush(true);
-	}
-
 	private BranchGroup createSceneGraph(Canvas3D cv) {
 		ObjectGraph graph = solver.getObjectGraph();
 		
@@ -102,9 +89,12 @@ public class GraphRenderer extends Canvas3D {
 		try {			
 			// load objects
 			for (ObjectDef obj : graph.getObjects()) {
-				Shape3D shp = obj.getShape(true, false);
-				if (shp != null) {
-					transGrp.addChild(shp);
+				if (obj.isVisible()) 
+				{ // only show visible objects
+					Shape3D shp = obj.getShape(true, false);
+					if (shp != null) {
+						transGrp.addChild(shp);
+					}
 				}
 			}
 		} catch (FaceException e) {

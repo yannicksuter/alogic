@@ -22,12 +22,13 @@ import ch.archilogic.object.Edge;
 import ch.archilogic.object.EdgeSegment;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
-import ch.archilogic.object.ObjectGraph;
 import ch.archilogic.object.ObjectVector;
 import ch.archilogic.object.Edge.CornerType;
 import ch.archilogic.object.geom.BBoxObj;
 import ch.archilogic.object.geom.PointShapeObj;
 import ch.archilogic.object.geom.RefModelObj;
+import ch.archilogic.object.graph.GraphObjectType;
+import ch.archilogic.object.graph.ObjectGraph;
 import ch.archilogic.object.helper.BoxHelper;
 import ch.archilogic.object.helper.GridHelper;
 import ch.archilogic.object.helper.ObjHelper;
@@ -38,14 +39,15 @@ import ch.archilogic.solver.intersection.IObject;
 import ch.archilogic.solver.intersection.IEdgeSegment.IType;
 import ch.archilogic.solver.think.ThinkType;
 
-public class SimpleRandomPatternSolver implements Solver {
+public class CylindricFlatSolverImpl implements Solver {
 	private SolverState status = SolverState.INITIALIZING;
 	private ObjectGraph objGraph = null;
 	
 	private ObjectDef objReference;
 	private ObjectDef objBoundingBox;
-	private ObjectDef objEnvelope;
+	private ObjectDef objEnvelop;
 	private ObjectDef objFaceEvaluated;
+	private ObjectDef objEdge;
 	
 	private PointShapeObj objPoints = new PointShapeObj();
 	private PointShapeObj objCornerPoints = new PointShapeObj();
@@ -53,14 +55,17 @@ public class SimpleRandomPatternSolver implements Solver {
 	private BBoxObj box = null;
 	private List<Edge> edges;
 	
+	// solver options
 	private boolean doThinking = true;
 	private boolean doJittering = true;
+	private boolean doTriangulateEdge = true;
+	private boolean doFixPlanarity = true;
+	
+	// graph options
 	private boolean doShowLockedVertices = true;
 	private boolean doShowCornersOnEdge = false;
 	private boolean doShowReferenceObj = true;
 	private boolean doShowEdges = true;
-	private boolean doTriangulateEdge = true;
-	private boolean doFixPlanarity = true;
 	
 	private Config conf = new Config(null);
 		
@@ -83,9 +88,38 @@ public class SimpleRandomPatternSolver implements Solver {
 	public double getScale() {
 		return conf.getScale();
 	}
-	
-	public void addReference(ObjectFile obj) {
-	}	
+
+	public boolean isDoShowLockedVertices() {
+		return doShowLockedVertices;
+	}
+
+	public void setDoShowLockedVertices(boolean doShowLockedVertices) {
+		this.doShowLockedVertices = doShowLockedVertices;
+	}
+
+	public boolean isDoShowCornersOnEdge() {
+		return doShowCornersOnEdge;
+	}
+
+	public void setDoShowCornersOnEdge(boolean doShowCornersOnEdge) {
+		this.doShowCornersOnEdge = doShowCornersOnEdge;
+	}
+
+	public boolean isDoShowReferenceObj() {
+		return doShowReferenceObj;
+	}
+
+	public void setDoShowReferenceObj(boolean doShowReferenceObj) {
+		this.doShowReferenceObj = doShowReferenceObj;
+	}
+
+	public boolean isDoShowEdges() {
+		return doShowEdges;
+	}
+
+	public void setDoShowEdges(boolean doShowEdges) {
+		this.doShowEdges = doShowEdges;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public void initialize(Config conf) throws FaceException {
@@ -145,7 +179,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		// compute & visualize edges
 		Logger.info("object: edges detection");
-		ObjectDef objEdge = new ObjectDef();		
+		objEdge = new ObjectDef();		
 		
 		edges = objReference.computeEdges(conf.getFindMaxNbEdges());		
 		for (Edge edge : edges) {
@@ -164,43 +198,32 @@ public class SimpleRandomPatternSolver implements Solver {
 		
 		// create envelop object
 		Logger.info("creating new envelop");	
-		objEnvelope = new ObjectDef(true, true);
-		objEnvelope.addAppearance(createAppearance(Color.red, 1, LineAttributes.PATTERN_SOLID));		
-	
-		// add to scene graph
-		if (objReference != null) {			
-//			objGraph.addChild(objFaceEvaluated);
-			objGraph.addChild(objEnvelope);
+		objEnvelop = new ObjectDef(true, true);
+		objEnvelop.addAppearance(createAppearance(Color.red, 1, LineAttributes.PATTERN_SOLID));		
 			
-			if (doShowReferenceObj) {
-				objGraph.addChild(objReference);
-			}
-
-			if (doShowEdges) {
-				objGraph.addChild(objEdge);
-			}
-
-			if (doShowCornersOnEdge) {
-				objGraph.addChild(objCornerPoints);
-			}
-			
-			if (doShowLockedVertices) {
-				objGraph.addChild(objPoints);
-			}
-			
-			if (box != null){
-				box.create();
-				objGraph.addChild(box);
-			}
-		}
-		
 		// center the objects
 		if (box != null) {
+			box.create();
 			objGraph.setTranslation(box.getCenter());
 			Logger.info(String.format("translation: %s", objGraph.getTranslation()));
 		} else {
 			objGraph.setTranslation(new Vector3D());
 		}
+		
+		// create dynamic scene graph
+		createSceneGraph();
+	}
+	
+	private void createSceneGraph() {
+		Logger.info("creating object graph...");
+		if (objReference != null) {			
+			objGraph.addChild(GraphObjectType.OBJ_ENVELOP, objEnvelop);
+			objGraph.addChild(GraphObjectType.OBJ_REFERENCE, objReference);
+			objGraph.addChild(GraphObjectType.OBJ_EDGES, objEdge);
+			objGraph.addChild(GraphObjectType.OBJ_CORNERS_ON_EDGE, objCornerPoints);
+			objGraph.addChild(GraphObjectType.OBJ_LOCKED_VERTICES, objPoints);
+			objGraph.addChild(GraphObjectType.OBJ_BOUNDING_BOX, box);
+		}		
 	}
 	
 	private Appearance createAppearance(Color col, int lineWidth, int linePattern) {
@@ -229,7 +252,7 @@ public class SimpleRandomPatternSolver implements Solver {
 			}
 			
 			if (doJittering ) {
-				for (ObjectVector v : objEnvelope.getVertices()) {
+				for (ObjectVector v : objEnvelop.getVertices()) {
 					if (!v.isLocked() && v.getFace() != null) {
 						Vector3D vRnd = Vector3D.random();
 						IObject newPoint = objReference.catwalk(v, vRnd, conf.getUseEdgeLen()*0.2, null, v.getFace());
@@ -241,16 +264,16 @@ public class SimpleRandomPatternSolver implements Solver {
 			
 			if (doTriangulateEdge) {
 				Logger.info("triangulation of edge vertices");
-				objEnvelope.triangulate(true);
+				objEnvelop.triangulate(true);
 			}
 			
 			if (doFixPlanarity) {
-				PlanarSolver planarSolver = new PlanarSolver(objEnvelope);
+				PlanarSolver planarSolver = new PlanarSolver(objEnvelop);
 				planarSolver.fixObject();
 			}
 			
 			if (doShowLockedVertices) {
-				for (ObjectVector v : objEnvelope.getVertices()) {
+				for (ObjectVector v : objEnvelop.getVertices()) {
 					if (v.isLocked()) {
 						objPoints.addPoint(v);
 					}
@@ -285,9 +308,9 @@ public class SimpleRandomPatternSolver implements Solver {
 //		grid.fillEdge(objPoints);
 		
 		for (Face f : grid.getGrid().getFaces()) {
-			objEnvelope.addFace(f);
+			objEnvelop.addFace(f);
 		}
-		Logger.debug(String.format("faces: #%d nb: #%d", objEnvelope.getFaces().size(), objEnvelope.getVertices().size()));
+		Logger.debug(String.format("faces: #%d nb: #%d", objEnvelop.getFaces().size(), objEnvelop.getVertices().size()));
 	}
 	
 	public void thinkCylindric() throws FaceException {
@@ -317,7 +340,7 @@ public class SimpleRandomPatternSolver implements Solver {
 				
 				if (!bCornerBefore && s.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(conf.isEvaluateCorner(), s, dir, false) == CornerType.OPENING) {
 					Logger.debug(String.format("%d corner %s", segNb, s.point));
-					s = createSegmentOnOpeningEdge(objEnvelope, s, segmentLen, dir, edge);
+					s = createSegmentOnOpeningEdge(objEnvelop, s, segmentLen, dir, edge);
 				} else 
 				{
 					bCornerBefore = false;
@@ -326,7 +349,7 @@ public class SimpleRandomPatternSolver implements Solver {
 					{ // create a segment in a closing edge
 						Logger.debug(String.format("%d corner %s : %s", segNb, n.point, CornerType.CLOSING.name()));
 						IObject u0 = new IObject(s.face, s.point, true, true);
-						n = createSegmentOnClosingEdge(objEnvelope, u0, n, segmentLen, dir, edge);
+						n = createSegmentOnClosingEdge(objEnvelop, u0, n, segmentLen, dir, edge);
 						if (n.type == IType.CORNER) {
 							bCornerBefore = true;
 						}
@@ -335,7 +358,7 @@ public class SimpleRandomPatternSolver implements Solver {
 						takeNextPointOnEdgeThreshold(n, edge, segmentLen, dir);												
 						IObject u0 = new IObject(s.face, s.point, true, true);
 						IObject u1 = new IObject(n.face, n.point, true, true);
-						createSegment(objEnvelope, u0, u1, segmentLen, dir);						
+						createSegment(objEnvelop, u0, u1, segmentLen, dir);						
 					}
 					s = n;
 				}
@@ -400,7 +423,7 @@ public class SimpleRandomPatternSolver implements Solver {
 
 			// segment need to be finished
 			IObject i = new IObject(s.face, s.point, true, true);
-			createSegment(objEnvelope, i, point1, edgeLen, dir);														
+			createSegment(objEnvelop, i, point1, edgeLen, dir);														
 		} 
 
 		return secondPointOnEdge;
@@ -444,7 +467,7 @@ public class SimpleRandomPatternSolver implements Solver {
 		if (secondPointOnEdge.type == IEdgeSegment.IType.CORNER && edge.evaluateCorner(conf.isEvaluateCorner(), secondPointOnEdge, dir, false) == CornerType.OPENING) 
 		{ // segment need to be finished
 			IObject i = new IObject(secondPointOnEdge.face, secondPointOnEdge.point, true, true);
-			createSegment(objEnvelope, point4, i, edgeLen, dir);														
+			createSegment(objEnvelop, point4, i, edgeLen, dir);														
 		}
 		
 		return secondPointOnEdge;
@@ -510,10 +533,10 @@ public class SimpleRandomPatternSolver implements Solver {
 	}	
 	
 	public double getQuadSizeAvg() {
-		return objEnvelope.getAvgFaceSize(4);
+		return objEnvelop.getAvgFaceSize(4);
 	}
 	
 	public void export(Exporter exporter, String filename) {
-		exporter.write(filename, objEnvelope);
+		exporter.write(filename, objEnvelop);
 	}
 }
