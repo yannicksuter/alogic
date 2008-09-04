@@ -81,8 +81,8 @@ public class PlanarSolver {
 				{ // lock vertices
 					nbPlanarOk++;
 				}
-				lockVertices(f);
-				return;
+//				lockVertices(f);
+//				return;
 			}			
 		}
 		Logger.info(String.format("planarity - triangles: %d fixed: %d ok: %d", nbTriangle, nbPlanarFixed, nbPlanarOk));
