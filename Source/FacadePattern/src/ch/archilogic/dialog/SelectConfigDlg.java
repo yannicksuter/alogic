@@ -107,7 +107,7 @@ public class SelectConfigDlg extends JDialog implements ActionListener {
 
     private void setDescText(Config conf) {
     	desc.setBackground(this.getBackground());
-		desc.setText(String.format("Description:\n- object: %s\n- model: %s\n" , conf.getRefObjPath().replace("file:", ""), conf.getUseThinkModel().getDesc()));
+		desc.setText(String.format("Description:\n- object: %s\n- model: %s\n" , conf.getRefObjPathShort().replace("file:", ""), conf.getUseThinkModel().getDesc()));
     }
     
     public boolean isCanceled() {

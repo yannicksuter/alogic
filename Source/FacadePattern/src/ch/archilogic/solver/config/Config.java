@@ -1,6 +1,7 @@
 package ch.archilogic.solver.config;
 
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.misc.FileSystem;
 import ch.archilogic.solver.think.ThinkType;
 
 public class Config {
@@ -10,10 +11,14 @@ public class Config {
 	public ConfigType getType() {
 		return type;
 	}	
-	public String getRefObjPath() {
+	public String getRefObjPathShort() {
 		return refObjPath;
 	}
-	public void setRefObjPath(String refObjPath) {
+	public String getRefObjPath() {
+		String fileUrl = "file:" + FileSystem.getApplicationPath("MainFrame")+"data\\"+refObjPath;
+		return fileUrl;
+	}
+	public void setRefObjPath(String refObjPath) {	
 		this.refObjPath = refObjPath;
 	}
 	public double getScale() {
@@ -93,7 +98,8 @@ public class Config {
 	private ConfigType type = null;
 	
 	// these are just the defaults
-	private String refObjPath = "file:c:\\tmp\\loadme.obj";
+//	private String refObjPath = "file:c:\\tmp\\loadme.obj";
+	private String refObjPath = "loadme.obj";
 	private double scale = 1.0;
 	private int useEdgeId = 1;
 	private boolean useEdgeCenterDir = false;

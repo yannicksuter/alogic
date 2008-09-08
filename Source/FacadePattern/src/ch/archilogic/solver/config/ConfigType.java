@@ -31,7 +31,7 @@ public enum ConfigType {
 		
 		switch(type) {
 		case MODEL_F1_5:			
-			conf.setRefObjPath("file:c:\\tmp\\loadme_f1.obj");
+			conf.setRefObjPath("loadme_f1.obj");
 			conf.setUseEdgeId(1);
 			conf.setUseEdgeDir(new Vector3D(0,1,0));
 			conf.setConsiderCorner(false);
@@ -41,7 +41,7 @@ public enum ConfigType {
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_F2:			
-			conf.setRefObjPath("file:c:\\tmp\\loadme_f2.obj");
+			conf.setRefObjPath("loadme_f2.obj");
 			conf.setUseEdgeId(0);
 			conf.setUseEdgeDir(null);
 			conf.setConsiderCorner(true);
@@ -51,7 +51,7 @@ public enum ConfigType {
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_F3:			
-			conf.setRefObjPath("file:c:\\tmp\\loadme_f3.obj");
+			conf.setRefObjPath("loadme_f3.obj");
 			conf.setUseEdgeId(0);
 			conf.setUseEdgeDir(new Vector3D(0,-1,0));
 			conf.setConsiderCorner(false);
@@ -61,22 +61,22 @@ public enum ConfigType {
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_DACH_F1_5:
-			conf.setRefObjPath("file:c:\\tmp\\loadme_f15_dach_voll.obj");
+			conf.setRefObjPath("loadme_f15_dach_voll.obj");
 			conf.setUseThinkModel(ThinkType.FLAT);
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_DACH_F2:
-			conf.setRefObjPath("file:c:\\tmp\\loadme_f2_dach_voll.obj");
+			conf.setRefObjPath("loadme_f2_dach_voll.obj");
 			conf.setUseThinkModel(ThinkType.FLAT);
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_DACH_F3:
-			conf.setRefObjPath("file:c:\\tmp\\loadme_f3_dach_voll.obj");
+			conf.setRefObjPath("loadme_f3_dach_voll.obj");
 			conf.setUseThinkModel(ThinkType.FLAT);
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_BAND:			
-			conf.setRefObjPath("file:c:\\tmp\\band.obj");
+			conf.setRefObjPath("band.obj");
 			conf.setUseThinkModel(ThinkType.FLAT);
 			conf.setUseEdgeLen(0.8);
 			break;
