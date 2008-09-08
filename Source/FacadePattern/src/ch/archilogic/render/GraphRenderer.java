@@ -164,9 +164,6 @@ public class GraphRenderer extends Canvas3D {
 	
 			objGrp.removeAllChildren();
 			objGrp.addChild(newObjectGrp);
-//			universe.getLocale().repalceBrachGraph(objGrp, newLandscape);
-
-			
 		}
 	}
 	

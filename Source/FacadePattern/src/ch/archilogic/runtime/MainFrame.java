@@ -10,7 +10,9 @@ import ch.archilogic.dialog.SelectConfigDlg;
 import ch.archilogic.export.ConsoleExporter;
 import ch.archilogic.export.ObjExporter;
 import ch.archilogic.export.ExtensionFileFilter;
+import ch.archilogic.log.Logger;
 import ch.archilogic.math.Rnd;
+import ch.archilogic.misc.FileSystem;
 import ch.archilogic.object.graph.GraphObjectType;
 import ch.archilogic.object.graph.ObjectGraph;
 import ch.archilogic.render.GraphRenderer;
@@ -110,6 +112,8 @@ public class MainFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				Rnd.init();
+
+				Logger.info("App-Path: "+FileSystem.getApplicationPath("MainFrame"));
 				
 				// select config
 				SelectConfigDlg dlg = SelectConfigDlg.create();
