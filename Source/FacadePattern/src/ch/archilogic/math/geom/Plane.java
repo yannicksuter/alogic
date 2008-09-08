@@ -1,6 +1,5 @@
 package ch.archilogic.math.geom;
 
-import javax.vecmath.Vector3f;
 import ch.archilogic.math.vector.*;
 import ch.archilogic.solver.intersection.ILine;
 

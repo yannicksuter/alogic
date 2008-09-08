@@ -13,7 +13,6 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 
 import com.sun.j3d.loaders.Scene;
-import com.sun.j3d.loaders.objectfile.ObjectFile;
 
 import ch.archilogic.export.Exporter;
 import ch.archilogic.log.Logger;

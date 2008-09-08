@@ -3,8 +3,6 @@ package ch.archilogic.solver;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sun.imageio.plugins.common.PaletteBuilder;
-
 import ch.archilogic.log.Logger;
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.geom.Plane;
@@ -54,13 +52,13 @@ public class PlanarSolver {
 		return false;
 	}
 	
-	private void lockVertices(Face face) {
-		for (ObjectVector v : face.getVertices()) {
-			if (!v.isEdge()) {
-				v.setLocked(true);
-			}
-		}		
-	}
+//	private void lockVertices(Face face) {
+//		for (ObjectVector v : face.getVertices()) {
+//			if (!v.isEdge()) {
+//				v.setLocked(true);
+//			}
+//		}		
+//	}
 	
 	public void fixObject() {
 		int nbPlanarOk = 0;

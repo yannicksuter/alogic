@@ -11,7 +11,6 @@ import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
-import javax.swing.LayoutStyle;
 import javax.swing.SwingConstants;
 
 import ch.archilogic.solver.config.Config;
