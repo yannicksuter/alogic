@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: ch.archilogic.runtime.MainFrame
+Class-Path: . lib/j3dcore.jar lib/j3dutils.jar lib/vecmath.jar
