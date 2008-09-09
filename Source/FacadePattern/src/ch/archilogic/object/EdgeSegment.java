@@ -7,6 +7,12 @@ public class EdgeSegment {
 	private Face face;
 	private int sideIdx;
 	private Line line;
+
+	public EdgeSegment(Line l) {
+		this.face = null;
+		this.sideIdx = -1;
+		this.line = l;
+	}
 	
 	public EdgeSegment(Face face, int sideIdx) {
 		this.face = face;

@@ -8,6 +8,7 @@ import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectVector;
+import ch.archilogic.object.ObjectVectorFlag;
 import ch.archilogic.runtime.exception.FaceException;
 import ch.archilogic.solver.intersection.IEdgeSegment;
 import ch.archilogic.solver.intersection.IObject;
@@ -75,36 +76,36 @@ public class GridHelper {
 			if (res != null) {
 				v.set(res.point);
 				v.setFace(res.face);
-				v.setLocked(true);
+				v.setFlag(ObjectVectorFlag.INSIDE, true);
 			} else
 			{
-				v.setLocked(false);
+				v.setFlag(ObjectVectorFlag.EDGE, false);
 			}
 		}
 	}
 	
-	public void removeUnlockedVertices() throws FaceException {
+	public void removeOutsideVertices() throws FaceException {
 		List<ObjectVector> oldList = new ArrayList<ObjectVector>();
 		oldList.addAll(grid.getVertices());
 		for (ObjectVector v : oldList) {
-			if (!v.isLocked()) {
+			if (!v.getFlag(ObjectVectorFlag.INSIDE)) {
 				grid.deleteVertice(v);
 			}
 		}
 	}
 
-	public void unlockAll() {
-		for (ObjectVector v : grid.getVertices()) {
-			v.setLocked(false);
-		}
-	}
+//	public void unlockAll() {
+//		for (ObjectVector v : grid.getVertices()) {
+//			v.setFlag(ObjectVectorFlag.LOCKED, false);
+//		}
+//	}
 
 	public void createBorderFace(IEdgeSegment s, IEdgeSegment n) throws FaceException {
 		List<ObjectVector> l = new ArrayList<ObjectVector>();
 		ObjectVector p0 = new ObjectVector(s.face, s.point, true);
-		p0.setEdge(true);
+		p0.setFlag(ObjectVectorFlag.EDGE, true);
 		ObjectVector p1 = new ObjectVector(n.face, n.point, true);
-		p1.setEdge(true);
+		p1.setFlag(ObjectVectorFlag.EDGE, true);
 
 		ObjectVector r = getNearestVertice(s.point, n.point);		
 		ObjectVector p2 = new ObjectVector(null, r, true);
@@ -120,7 +121,7 @@ public class GridHelper {
 		ObjectVector res = null;
 		double len = Double.MAX_VALUE;
 		for (ObjectVector v : grid.getVertices()) {
-			if (!v.isEdge()) {
+			if (!v.getFlag(ObjectVectorFlag.EDGE)) {
 				double l1 = v.to(ref1).length();
 				if (l1 > 0 && l1 < len) {
 					len = l1;
@@ -140,7 +141,7 @@ public class GridHelper {
 		ObjectVector res = null;
 		double len = Double.MAX_VALUE;
 		for (ObjectVector v : grid.getVertices()) {
-			if (v.isEdge()) {
+			if (v.getFlag(ObjectVectorFlag.EDGE)) {
 				double l1 = v.to(ref1).length();
 				if (l1 > 0 && l1 < len) {
 					len = l1;
@@ -169,7 +170,7 @@ public class GridHelper {
 					Line l = f.getSideLine(sideId);
 					ObjectVector v0 = grid.containsEqual(l.getPoint(0));
 					ObjectVector v1 = grid.containsEqual(l.getPoint(1));
-					if (!v0.isEdge() && !v1.isEdge() && !f.hasEdgeVerts()) {
+					if (!v0.getFlag(ObjectVectorFlag.EDGE) && !v1.getFlag(ObjectVectorFlag.EDGE) && !f.hasEdgeVerts()) {
 						List<ObjectVector> vList = new ArrayList<ObjectVector>();
 						ObjectVector v2 = getNearestEdge(v0, v1);		
 						vList.add(v0);

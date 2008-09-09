@@ -40,6 +40,18 @@ public class Edge {
 		return segmentListReverse;
 	}
 
+	public void createFromPoints(List<Vector3D> l, EdgeType type) {
+		this.type = type;
+		this.segmentList = new ArrayList<EdgeSegment>();
+		
+		Vector3D refStart = l.get(0);
+		for (int i=1;i<l.size();i++) {			
+			Line line = new Line(refStart, Vector3D.sub(l.get(i), refStart));
+			this.segmentList.add( new EdgeSegment(line) );
+			refStart = l.get(i);
+		}
+	}
+
 	public void createFromObject(ObjectDef obj, Vector3D startPoint) {
 		this.type = EdgeType.LINE;
 		this.segmentList = new ArrayList<EdgeSegment>();
@@ -71,6 +83,8 @@ public class Edge {
 		// create reverse edge
 		createReverse();
 	}
+	
+	
 
 	public double getLength() {
 		if (segmentList != null) {

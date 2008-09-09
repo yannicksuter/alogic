@@ -22,6 +22,7 @@ import ch.archilogic.object.EdgeSegment;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectVector;
+import ch.archilogic.object.ObjectVectorFlag;
 import ch.archilogic.object.Edge.CornerType;
 import ch.archilogic.object.geom.BBoxObj;
 import ch.archilogic.object.geom.PointShapeObj;
@@ -252,7 +253,7 @@ public class CylindricFlatSolverImpl implements Solver {
 			
 			if (doJittering ) {
 				for (ObjectVector v : objEnvelop.getVertices()) {
-					if (!v.isLocked() && v.getFace() != null) {
+					if (!v.getFlag(ObjectVectorFlag.LOCKED) && v.getFace() != null) {
 						Vector3D vRnd = Vector3D.random();
 						IObject newPoint = objReference.catwalk(v, vRnd, conf.getUseEdgeLen()*0.2, null, v.getFace());
 						Logger.debug(String.format("old: %s new: ", v, newPoint.point.toString()));
@@ -273,7 +274,7 @@ public class CylindricFlatSolverImpl implements Solver {
 			
 			if (doShowLockedVertices) {
 				for (ObjectVector v : objEnvelop.getVertices()) {
-					if (v.isLocked()) {
+					if (v.getFlag(ObjectVectorFlag.LOCKED)) {
 						objPoints.addPoint(v);
 					}
 				}
@@ -287,8 +288,7 @@ public class CylindricFlatSolverImpl implements Solver {
 		GridHelper grid = new GridHelper(box.getFace(0), conf.getUseEdgeLen());
 		grid.projection(objReference);		
 
-		grid.removeUnlockedVertices();
-		grid.unlockAll();
+		grid.removeOutsideVertices();
 		
 		if (edges != null && edges.size() > 0) {
 			int segNb = 0;
@@ -303,8 +303,6 @@ public class CylindricFlatSolverImpl implements Solver {
 				} while (s.type != IEdgeSegment.IType.ENDPOINT);
 			}
 		}		
-		
-//		grid.fillEdge(objPoints);
 		
 		for (Face f : grid.getGrid().getFaces()) {
 			objEnvelop.addFace(f);
@@ -404,7 +402,7 @@ public class CylindricFlatSolverImpl implements Solver {
 					ObjectVector oVert = fRefSecond.face.getVertices().get(3);
 					point2 = new IObject(oVert);
 					point2.found = true;
-					point2.edge = oVert.isLocked();
+					point2.edge = oVert.getFlag(ObjectVectorFlag.LOCKED);
 				}				
 
 				l.clear();			
@@ -443,7 +441,7 @@ public class CylindricFlatSolverImpl implements Solver {
 				ObjectVector oVert = fRefFirst.face.getVertices().get(2);
 				point4 = new IObject(oVert);
 				point4.found = true;
-				point4.edge = oVert.isLocked();
+				point4.edge = oVert.getFlag(ObjectVectorFlag.LOCKED);
 			}				
 
 			l.clear();			
@@ -494,7 +492,7 @@ public class CylindricFlatSolverImpl implements Solver {
 				ObjectVector oVert = fRefFirst.face.getVertices().get(2);
 				p0 = new IObject(oVert);
 				p0.found = true;
-				p0.edge = oVert.isLocked();
+				p0.edge = oVert.getFlag(ObjectVectorFlag.LOCKED);
 			}
 	
 			if (fRefSecond == null) {
@@ -504,7 +502,7 @@ public class CylindricFlatSolverImpl implements Solver {
 				ObjectVector oVert = fRefSecond.face.getVertices().get(3);
 				p1 = new IObject(oVert);
 				p1.found = true;
-				p1.edge = oVert.isLocked();
+				p1.edge = oVert.getFlag(ObjectVectorFlag.LOCKED);
 			}
 			
 			// create the face

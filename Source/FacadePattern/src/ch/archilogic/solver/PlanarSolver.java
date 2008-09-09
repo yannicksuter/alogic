@@ -10,6 +10,7 @@ import ch.archilogic.math.vector.Vector3D;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectVector;
+import ch.archilogic.object.ObjectVectorFlag;
 import ch.archilogic.solver.intersection.ILine;
 
 public class PlanarSolver {
@@ -25,7 +26,7 @@ public class PlanarSolver {
 	
 	private ObjectVector prepareVerticeList(List<ObjectVector> l) {
 		for (ObjectVector v : l) {
-			if (!v.isLocked() && !v.isEdge()) {
+			if (!v.getFlag(ObjectVectorFlag.LOCKED) && !v.getFlag(ObjectVectorFlag.EDGE)) {
 				l.remove(v);
 				return v;
 			}
@@ -51,14 +52,6 @@ public class PlanarSolver {
 		}
 		return false;
 	}
-	
-//	private void lockVertices(Face face) {
-//		for (ObjectVector v : face.getVertices()) {
-//			if (!v.isEdge()) {
-//				v.setLocked(true);
-//			}
-//		}		
-//	}
 	
 	public void fixObject() {
 		int nbPlanarOk = 0;

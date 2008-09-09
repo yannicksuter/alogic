@@ -454,7 +454,7 @@ public class Face {
 
 	public boolean hasLockedVerts() {
 		for (ObjectVector v : vertices) {
-			if (v.isLocked()) {
+			if (v.getFlag(ObjectVectorFlag.LOCKED)) {
 				return true;
 			}
 		}
@@ -463,12 +463,24 @@ public class Face {
 
 	public boolean hasEdgeVerts() {
 		for (ObjectVector v : vertices) {
-			if (v.isEdge()) {
+			if (v.getFlag(ObjectVectorFlag.EDGE)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+	public void cutEdge(Edge e) {
+		for (int i=0; i<getSideCount(); i++) {
+			boolean vA_inside = vertices.get(i).getFlag(ObjectVectorFlag.INSIDE);
+			boolean vB_inside = vertices.get((i+1)%getSideCount()).getFlag(ObjectVectorFlag.INSIDE);
+			
+			if ( vA_inside && ! vB_inside ) 
+			{ // A -> B is stepping out
+				Logger.debug("A -> B is stepping out");
+			}
+		}
+	}	
 	
 	public String toString() {
 		String s = String.format("f[%d]:\n", id);

@@ -1,14 +1,16 @@
 package ch.archilogic.object;
 
 import java.awt.Color;
+import java.util.BitSet;
 
 import ch.archilogic.math.vector.Vector3D;
 
 public class ObjectVector extends Vector3D {
 	private Face face = null;
-	private boolean edge = false;
-	private boolean locked = false;
+//	private boolean edge = false;
+//	private boolean locked = false;
 	private Color color = null;
+	private BitSet flags = new BitSet();
 
 	public ObjectVector(Vector3D v) {
 		super(v);
@@ -21,8 +23,7 @@ public class ObjectVector extends Vector3D {
 	public ObjectVector(ObjectVector v) {
 		super(v);
 		this.face = v.getFace();
-		this.locked = v.isLocked();
-		this.edge = v.edge;
+		this.flags = (BitSet) v.getFlags().clone();
 	}
 	
 	public ObjectVector(Face face, Vector3D v) {
@@ -33,7 +34,7 @@ public class ObjectVector extends Vector3D {
 	public ObjectVector(Face face, Vector3D v, boolean locked) {
 		super(v);
 		this.face = face;
-		this.locked = locked;
+		this.setFlag(ObjectVectorFlag.LOCKED, locked);
 	}
 
 	public ObjectVector(Vector3D v, Color c) {
@@ -44,7 +45,7 @@ public class ObjectVector extends Vector3D {
 	public void set(Face face, Vector3D v, boolean locked) {
 		this.set(v);
 		this.face = face;
-		this.locked = locked;
+		this.setFlag(ObjectVectorFlag.LOCKED, locked);
 	}	
 	
 	public Face getFace() {
@@ -54,26 +55,10 @@ public class ObjectVector extends Vector3D {
 	public void setFace(Face face) {
 		this.face = face;
 	}
-	
-	public boolean isLocked() {
-		return locked;
-	}
-	
-	public void setLocked(boolean locked) {
-		this.locked = locked;
-	}
-	
+		
 	public void setVector(Vector3D v) {
 		this.set(v);
 	}	
-
-	public boolean isEdge() {
-		return edge;
-	}
-
-	public void setEdge(boolean edge) {
-		this.edge = edge;
-	}
 
 	public Color getColor() {
 		return color;
@@ -81,5 +66,17 @@ public class ObjectVector extends Vector3D {
 
 	public void setColor(Color color) {
 		this.color = color;
+	}
+	
+	public BitSet getFlags() {
+		return this.flags;
+	}
+	
+	public boolean getFlag(ObjectVectorFlag flag) {
+		return flags.get(flag.getBitIndex());
+	}
+
+	public void setFlag(ObjectVectorFlag flag, boolean value) {
+		flags.set(flag.getBitIndex(), value);
 	}
 }
