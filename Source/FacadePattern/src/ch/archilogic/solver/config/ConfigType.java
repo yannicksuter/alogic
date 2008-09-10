@@ -76,7 +76,7 @@ public enum ConfigType {
 			conf.setUseEdgeLen(1.2);
 			break;
 		case MODEL_BAND:			
-			conf.setRefObjPath("band.obj");
+			conf.setRefObjPath("loadme_band.obj");
 			conf.setUseThinkModel(ThinkType.FLAT);
 			conf.setUseEdgeLen(0.8);
 			break;
