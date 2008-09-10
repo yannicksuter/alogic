@@ -49,6 +49,9 @@ public class FaceEdgeCutTest extends TestCase{
 		Edge e = createEdge();
 		
 		Logger.setDebugVerbose(true);
-		f.cutEdge(e);
+		List<ObjectVector> l = f.cutEdge(e);
+		for (ObjectVector v : l) {
+			Logger.debug(v.toString());			
+		}
 	}
 }

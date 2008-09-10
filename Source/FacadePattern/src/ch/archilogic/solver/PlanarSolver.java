@@ -45,7 +45,7 @@ public class PlanarSolver {
 			Line line = new Line(v, plane.getNormal());
 			ILine res = plane.getIntersect(line);
 			
-			double d2 = Vector3D.sub(v, res.p).length();
+			/*double d2 =*/ Vector3D.sub(v, res.p).length();
 		
 //			v.set(res.p);
 			return true;			

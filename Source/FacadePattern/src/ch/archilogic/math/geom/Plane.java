@@ -61,4 +61,9 @@ public class Plane {
     		return ip;
     	}
     }    
+    
+    @Override
+    public String toString() {
+    	return String.format("p:%s u:%s v:%s", x, u, v);
+    }
 }

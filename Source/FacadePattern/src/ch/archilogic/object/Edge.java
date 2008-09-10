@@ -50,6 +50,11 @@ public class Edge {
 			this.segmentList.add( new EdgeSegment(line) );
 			refStart = l.get(i);
 		}
+		
+		if (type == EdgeType.CIRCULAR) {
+			Line line = new Line(refStart, Vector3D.sub(l.get(0), refStart));
+			this.segmentList.add( new EdgeSegment(line) );			
+		}
 	}
 
 	public void createFromObject(ObjectDef obj, Vector3D startPoint) {

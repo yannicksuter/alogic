@@ -2,15 +2,16 @@ package ch.archilogic.object;
 
 import java.awt.Color;
 import java.util.BitSet;
+import java.util.HashMap;
 
 import ch.archilogic.math.vector.Vector3D;
 
 public class ObjectVector extends Vector3D {
 	private Face face = null;
-//	private boolean edge = false;
-//	private boolean locked = false;
 	private Color color = null;
 	private BitSet flags = new BitSet();
+	
+	private HashMap<String, Vector3D> relatedVec = new HashMap<String, Vector3D>();
 
 	public ObjectVector(Vector3D v) {
 		super(v);
@@ -78,5 +79,13 @@ public class ObjectVector extends Vector3D {
 
 	public void setFlag(ObjectVectorFlag flag, boolean value) {
 		flags.set(flag.getBitIndex(), value);
+	}
+	
+	public Vector3D getRelatedVec(String key) {
+		return relatedVec.get(key);
+	}
+
+	public void setRelatedVec(String key, Vector3D value) {
+		relatedVec.put(key, value);
 	}
 }

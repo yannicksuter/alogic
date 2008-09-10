@@ -58,7 +58,7 @@ public class CylindricFlatSolverImpl implements Solver {
 	// solver options
 	private boolean doThinking = true;
 	private boolean doJittering = true;
-	private boolean doTriangulateEdge = true;
+	private boolean doTriangulateEdge = false;
 	private boolean doFixPlanarity = true;
 	
 	// graph options
@@ -286,10 +286,8 @@ public class CylindricFlatSolverImpl implements Solver {
 
 	public void thinkFlat() throws FaceException {
 		GridHelper grid = new GridHelper(box.getFace(0), conf.getUseEdgeLen());
-		grid.projection(objReference);		
-
-		grid.removeOutsideVertices();
-		
+		grid.projection(objReference, edges.get(0));		
+/*		
 		if (edges != null && edges.size() > 0) {
 			int segNb = 0;
 			for (Edge edge : edges) {
@@ -303,7 +301,7 @@ public class CylindricFlatSolverImpl implements Solver {
 				} while (s.type != IEdgeSegment.IType.ENDPOINT);
 			}
 		}		
-		
+*/		
 		for (Face f : grid.getGrid().getFaces()) {
 			objEnvelop.addFace(f);
 		}

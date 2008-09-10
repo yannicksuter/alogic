@@ -32,6 +32,12 @@ public class Face {
 		addVertice(new ObjectVector(p3));
 	}
 
+	public Face(List<ObjectVector> verticeList) {
+		for (ObjectVector v : verticeList) {
+			addVertice(v);			
+		}
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -58,6 +64,10 @@ public class Face {
 
 	public List<ObjectVector> getVertices() {
 		return vertices;
+	}
+
+	public ObjectVector getVertices(int i) {
+		return vertices.get((i)%vertices.size());
 	}
 
 	public void setVertices(List<ObjectVector> vertices) {
@@ -102,6 +112,9 @@ public class Face {
 	}
 
 	public Vector3D getFaceNormal() {
+		if (faceNormal == null) {
+			createFaceNormal();
+		}
 		return faceNormal;
 	}
 
@@ -253,9 +266,6 @@ public class Face {
 	}
 	
 	public double getAreaTriangle(Vector3D A, Vector3D B, Vector3D C) {
-//		Vector3f vA = new Vector3f(B.x - A.x, B.y - A.y, B.z - A.z);
-//		Vector3f vB = new Vector3f(C.x - B.x, C.y - B.y, C.z - B.z);
-//		Vector3f vC = new Vector3f(A.x - C.x, A.y - C.y, A.z - C.z);
 		Vector3D vA = Vector3D.sub(B, A);
 		Vector3D vB = Vector3D.sub(C, B); 
 		Vector3D vC = Vector3D.sub(A, C); 
@@ -470,16 +480,41 @@ public class Face {
 		return false;
 	}
 
-	public void cutEdge(Edge e) {
-		for (int i=0; i<getSideCount(); i++) {
-			boolean vA_inside = vertices.get(i).getFlag(ObjectVectorFlag.INSIDE);
-			boolean vB_inside = vertices.get((i+1)%getSideCount()).getFlag(ObjectVectorFlag.INSIDE);
-			
-			if ( vA_inside && ! vB_inside ) 
-			{ // A -> B is stepping out
-				Logger.debug("A -> B is stepping out");
+	private ILine getSegmentIntersection(Line line, Edge edge, Vector3D normal) {
+		for (EdgeSegment s : edge.getSegmentList()) {
+			Plane p = new Plane(line.getStart(), line.getDir(), normal);
+			Logger.debug("line: " + s.getLine().toString() + " plane: " + p.toString());
+			ILine iLine = p.getIntersect(s.getLine());			
+			if (iLine != null && iLine.t >= 0 && iLine.t <= 1 && line.getT(iLine.p) >= 0 && line.getT(iLine.p) <= 1) {
+				Logger.debug(String.format("segment/intersection found: %s", iLine.p));
+				iLine.ref = s;
+				return iLine;
 			}
-		}
+		}		
+		return null;
+	}
+	
+	public List<ObjectVector> cutEdge(Edge edge) {
+		List<ObjectVector> newVertices = new ArrayList<ObjectVector>();		
+		for (int i=0; i<getSideCount(); i++) {
+			boolean vA_inside = getVertices(i).getFlag(ObjectVectorFlag.INSIDE);
+			boolean vB_inside = getVertices(i+1).getFlag(ObjectVectorFlag.INSIDE);
+			
+			if (vA_inside) {
+				newVertices.add(vertices.get(i));
+			}
+			
+			if (vA_inside != vB_inside) {
+				Logger.debug(String.format("A:%s -> B:%s inside/out switch", getVertices(i), getVertices(i+1)));			
+				ILine res = getSegmentIntersection(getSideLine(i), edge, getFaceNormal());
+				ObjectVector objVect = new ObjectVector(this, res.p);
+				objVect.setFlag(ObjectVectorFlag.EDGE, true);
+				objVect.setFlag(ObjectVectorFlag.INSIDE, true);
+				objVect.setFlag(ObjectVectorFlag.LOCKED, true);
+				newVertices.add(objVect);
+			}
+		}	
+		return newVertices;
 	}	
 	
 	public String toString() {
@@ -488,5 +523,14 @@ public class Face {
 			s = String.format("%s %s\n", s, v.toString());
 		}
 		return s;
+	}
+
+	public boolean hasObjectVectorFlag(ObjectVectorFlag flag, boolean value) {
+		for (ObjectVector v : vertices) {
+			if (v.getFlag(flag) == value) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

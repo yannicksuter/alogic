@@ -5,6 +5,7 @@ import java.util.List;
 
 import ch.archilogic.math.geom.Line;
 import ch.archilogic.math.vector.Vector3D;
+import ch.archilogic.object.Edge;
 import ch.archilogic.object.Face;
 import ch.archilogic.object.ObjectDef;
 import ch.archilogic.object.ObjectVector;
@@ -37,10 +38,10 @@ public class GridHelper {
 		grid = new ObjectDef(false, true);
 		
 		Line side0 = face.getSideLine(0);
-		int numSegX = (int)((side0.getLength() / len) + 0.5);
+		int numSegX = (int)((side0.getLength() / len) + 0.5)+1;
 			
 		Line side1 = face.getSideLine(1);
-		int numSegY = (int)((side1.getLength() / len) + 0.5);
+		int numSegY = (int)((side1.getLength() / len) + 0.5)+1;
 		
 		Vector3D d0 = side0.getDir();
 		Vector3D d1 = side1.getDir();
@@ -69,37 +70,46 @@ public class GridHelper {
 		normal = face.getFaceNormal();
 	}
 
-	public void projection(ObjectDef objReference) {
+	public void projection(ObjectDef objReference, Edge edge) throws FaceException {
+		String key = "objvect";
 		for (ObjectVector v : grid.getVertices()) {
 			Line line = new Line(v, normal.neg());
 			IObject res = objReference.raycast(line);
 			if (res != null) {
-				v.set(res.point);
+				v.setRelatedVec(key, res.point);
 				v.setFace(res.face);
 				v.setFlag(ObjectVectorFlag.INSIDE, true);
-			} else
-			{
-				v.setFlag(ObjectVectorFlag.EDGE, false);
+			} else {
+				v.setFlag(ObjectVectorFlag.INSIDE, false);
 			}
 		}
-	}
-	
-	public void removeOutsideVertices() throws FaceException {
+		
+		List<Face> oldFaces = new ArrayList<Face>();
+		oldFaces.addAll(grid.getFaces());
+			
+		for (Face f : oldFaces) {
+			if ( f.hasObjectVectorFlag(ObjectVectorFlag.INSIDE, true) &&  f.hasObjectVectorFlag(ObjectVectorFlag.INSIDE, false) ) 
+			{ // has vertices inside && outside
+				List<ObjectVector> l = f.cutEdge(edge);
+				grid.createFaceOV(l);				
+				grid.deleteFace(f);
+			}
+		}
+		
 		List<ObjectVector> oldList = new ArrayList<ObjectVector>();
 		oldList.addAll(grid.getVertices());
 		for (ObjectVector v : oldList) {
 			if (!v.getFlag(ObjectVectorFlag.INSIDE)) {
 				grid.deleteVertice(v);
+			} else {
+				Vector3D relVec = v.getRelatedVec(key);
+				if (relVec != null) {
+					v.set(relVec);
+				} 
 			}
-		}
+		}		
 	}
-
-//	public void unlockAll() {
-//		for (ObjectVector v : grid.getVertices()) {
-//			v.setFlag(ObjectVectorFlag.LOCKED, false);
-//		}
-//	}
-
+	
 	public void createBorderFace(IEdgeSegment s, IEdgeSegment n) throws FaceException {
 		List<ObjectVector> l = new ArrayList<ObjectVector>();
 		ObjectVector p0 = new ObjectVector(s.face, s.point, true);
