@@ -13,6 +13,12 @@ public class ObjectVector extends Vector3D {
 	
 	private HashMap<String, Vector3D> relatedVec = new HashMap<String, Vector3D>();
 
+	@Override
+	public ObjectVector clone() {
+		ObjectVector v = new ObjectVector(this);
+		return v;
+	}
+	
 	public ObjectVector(Vector3D v) {
 		super(v);
 	}

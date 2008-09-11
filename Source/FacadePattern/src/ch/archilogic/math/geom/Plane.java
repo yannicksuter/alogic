@@ -10,18 +10,18 @@ public class Plane {
     Vector3D normal;
     
 	public Plane (Vector3D x, Vector3D u, Vector3D v) {
-		createFromPointUV(x, u, v);
-	}
-
-	public void createFromPointUV(Vector3D x, Vector3D u, Vector3D v) {
 		this.x = new Vector3D(x);
 		this.u = new Vector3D(u);
 		this.v = new Vector3D(v);
 		this.normal = Vector3D.cross(this.u, this.v).normalize();
 	}
+
+	public static Plane createFromPointUV(Vector3D x, Vector3D u, Vector3D v) {
+		return new Plane(x, u, v);
+	}
 	
-	public void createFromPoints(Vector3D a, Vector3D b, Vector3D c) {
-		createFromPointUV(a, Vector3D.sub(b, a), Vector3D.sub(c, a));
+	public static Plane createFromPoints(Vector3D a, Vector3D b, Vector3D c) {
+		return new Plane(a, Vector3D.sub(b, a), Vector3D.sub(c, a));
 	}
 	
 	public Vector3D getNormal() {

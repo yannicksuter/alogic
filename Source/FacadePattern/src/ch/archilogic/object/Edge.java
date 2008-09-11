@@ -160,7 +160,7 @@ public class Edge {
 		
 		Logger.debug(String.format("Rev Seg: id=%d, s=%s e=%s", segmentId, s.getStartPoint(), s.getEndPoint()));
 		if (objCornerPoints != null) {
-			objCornerPoints.addPoint(new ObjectVector(s.getStartPoint(), Color.GREEN));
+			objCornerPoints.addPoint(new ObjectVector(s.getStartPoint()), Color.GREEN);
 		}
 		
 		if ((withCornerDetection && checkAngleBetweenSegments(list, segmentId-1, segmentId)) || !withCornerDetection) 

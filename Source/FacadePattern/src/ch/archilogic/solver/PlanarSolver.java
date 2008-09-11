@@ -16,6 +16,11 @@ import ch.archilogic.solver.intersection.ILine;
 public class PlanarSolver {
 	private ObjectDef objRef = null;
 
+	private int nbPlanarOk = 0;
+	private int nbPlanarFixed = 0;
+	private int nbTriangle = 0;
+	private double maxDiv = 0;
+
 	public PlanarSolver(ObjectDef objRef) {
 		this.objRef = objRef;
 	}
@@ -25,57 +30,62 @@ public class PlanarSolver {
 	}
 	
 	private ObjectVector prepareVerticeList(List<ObjectVector> l) {
+		ObjectVector res = null;
 		for (ObjectVector v : l) {
-			if (!v.getFlag(ObjectVectorFlag.LOCKED) && !v.getFlag(ObjectVectorFlag.EDGE)) {
-				l.remove(v);
-				return v;
+			if (!v.getFlag(ObjectVectorFlag.LOCKED) && !v.getFlag(ObjectVectorFlag.EDGE) && !v.getFlag(ObjectVectorFlag.PLANAR)) {
+				res = v;
 			}
 		}
-		return null;
+		if (res != null) {
+			l.remove(res);
+		}
+		return res;
 	}
-
+	
 	private boolean fixPlanarity(Face face) {
 		List<ObjectVector> l = new ArrayList<ObjectVector>();
 		l.addAll(face.getVertices());
 		ObjectVector v = prepareVerticeList(l);
 		
-		Plane plane = new Plane(l.get(0), l.get(1), l.get(2));
-		double d = plane.getDistanceToPoint(v);
-		if (d > 1) {
-			Line line = new Line(v, plane.getNormal());
-			ILine res = plane.getIntersect(line);
+		if (v != null && l != null && l.size() >= 3) {
+			Plane plane = Plane.createFromPoints(l.get(0), l.get(1), l.get(2));
+			double d = plane.getDistanceToPoint(v);
+			if (d > 0) {
+				Line line = new Line(v, plane.getNormal());
+				ILine res = plane.getIntersect(line);
+				
+				double d2 = Vector3D.sub(v, res.p).length();
+				maxDiv = Math.max(maxDiv, d2);
+				
+				v.set(res.p);
+				
+				face.setObjectVectorFlag(ObjectVectorFlag.PLANAR, true);
 			
-			/*double d2 =*/ Vector3D.sub(v, res.p).length();
-		
-//			v.set(res.p);
-			return true;			
+				return true;			
+			}
 		}
 		return false;
 	}
 	
 	public void fixObject() {
-		int nbPlanarOk = 0;
-		int nbPlanarFixed = 0;
-		int nbTriangle = 0;
 		for (Face f : objRef.getFaces()) {
 			if (f.getVertices().size() <= 3) {
+				f.setObjectVectorFlag(ObjectVectorFlag.PLANAR, true);
 				nbTriangle++;
 			} else
 			{
 				if ( !f.isPlanar() ) 
 				{ // fix planarity
-					if (fixPlanarity(f)) {
-						return;
-					}
+					fixPlanarity(f);
 					nbPlanarFixed++;
 				} else 
 				{ // lock vertices
+					f.setObjectVectorFlag(ObjectVectorFlag.PLANAR, true);
 					nbPlanarOk++;
 				}
-//				lockVertices(f);
-//				return;
 			}			
 		}
-		Logger.info(String.format("planarity - triangles: %d fixed: %d ok: %d", nbTriangle, nbPlanarFixed, nbPlanarOk));
+		
+		Logger.info(String.format("planarity - triangles: %d ok: %d fixed: %d (max div=%f)", nbTriangle, nbPlanarFixed, nbPlanarOk, maxDiv));
 	}
 }

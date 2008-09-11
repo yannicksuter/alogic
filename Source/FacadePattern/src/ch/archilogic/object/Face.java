@@ -524,7 +524,13 @@ public class Face {
 		}
 		return s;
 	}
-
+	
+	public void setObjectVectorFlag(ObjectVectorFlag flag, boolean value) {
+		for (ObjectVector v : vertices) {
+			v.setFlag(flag, value);
+		}
+	}
+	
 	public boolean hasObjectVectorFlag(ObjectVectorFlag flag, boolean value) {
 		for (ObjectVector v : vertices) {
 			if (v.getFlag(flag) == value) {

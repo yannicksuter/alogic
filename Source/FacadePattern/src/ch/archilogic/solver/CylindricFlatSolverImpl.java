@@ -58,11 +58,12 @@ public class CylindricFlatSolverImpl implements Solver {
 	// solver options
 	private boolean doThinking = true;
 	private boolean doJittering = true;
-	private boolean doTriangulateEdge = false;
+	private boolean doTriangulateEdge = true;
 	private boolean doFixPlanarity = true;
 	
 	// graph options
 	private boolean doShowLockedVertices = true;
+	private boolean doShowPlanarVertices = false;
 	private boolean doShowCornersOnEdge = false;
 	private boolean doShowReferenceObj = true;
 	private boolean doShowEdges = true;
@@ -270,12 +271,23 @@ public class CylindricFlatSolverImpl implements Solver {
 			if (doFixPlanarity) {
 				PlanarSolver planarSolver = new PlanarSolver(objEnvelop);
 				planarSolver.fixObject();
+
+				PlanarSolver planarSolver2 = new PlanarSolver(objEnvelop);
+				planarSolver2.fixObject();
+
+				if (doShowPlanarVertices) {
+					for (ObjectVector v : objEnvelop.getVertices()) {
+						if (v.getFlag(ObjectVectorFlag.PLANAR)) {
+							objPoints.addPoint(v, Color.ORANGE);
+						}
+					}
+				}				
 			}
 			
 			if (doShowLockedVertices) {
 				for (ObjectVector v : objEnvelop.getVertices()) {
 					if (v.getFlag(ObjectVectorFlag.LOCKED)) {
-						objPoints.addPoint(v);
+						objPoints.addPoint(v, Color.CYAN);
 					}
 				}
 			}

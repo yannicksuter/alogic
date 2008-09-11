@@ -3,7 +3,8 @@ package ch.archilogic.object;
 public enum ObjectVectorFlag {
 	EDGE(1),
 	LOCKED(2),
-	INSIDE(3);
+	INSIDE(3),
+	PLANAR(4);
 	
 	private ObjectVectorFlag(int bitIndex) {
 		this.bitIndex = bitIndex;

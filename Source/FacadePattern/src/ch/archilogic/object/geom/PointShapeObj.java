@@ -25,8 +25,10 @@ public class PointShapeObj extends ObjectDef {
 		this.pointColor = col;
 	}
 	
-	public void addPoint(ObjectVector v) {
-		verts.add(v);
+	public void addPoint(ObjectVector v, Color c) {
+		ObjectVector newV = (ObjectVector) v.clone();
+		newV.setColor(c);
+		verts.add(newV);
 	}
 
 	private Color4f convertColor(Color c) {
